@@ -11,7 +11,6 @@ export const PersonalInfoWrapper = styled.section`
   margin: 0 auto;
   margin-top: -1.65rem;
 
-
   @media (max-width: 48rem) {
     min-height: auto;
     padding: 1.5rem 1.4rem 1.75rem;
@@ -52,7 +51,7 @@ export const InfoRow = styled.div`
 
 export const Label = styled.span`
   color: #4c91f3;
-font-size: clamp(1.05rem, 1.9vw, 1.4rem);
+  font-size: clamp(1.05rem, 1.9vw, 1.4rem);
   font-weight: 600;
   line-height: 1;
 `;
@@ -63,6 +62,36 @@ export const Value = styled.span`
   font-weight: 700;
   line-height: 1.35;
   word-break: break-all;
+`;
+
+export const EditInput = styled.input`
+  width: 100%;
+  max-width: 20rem;
+  height: 2.4rem;
+  padding: 0 0.75rem;
+  border: 0.0625rem solid #c8d6f0;
+  border-radius: 0.5rem;
+  outline: none;
+  color: #33415c;
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  font-weight: 600;
+  background-color: #ffffff;
+
+  &:focus {
+    border-color: #1976e8;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+`;
+
+export const ErrorText = styled.p`
+  margin: 0.4rem 0 0 2.25rem;
+  color: #e14d4d;
+  font-size: 0.85rem;
+  font-weight: 600;
 `;
 
 export const EditButton = styled.button`
@@ -92,6 +121,12 @@ export const EditButton = styled.button`
   &:hover {
     background-color: #0f67d6;
     transform: translateY(-0.0625rem);
+  }
+
+  &:disabled {
+    background-color: #9db8e3;
+    cursor: not-allowed;
+    transform: none;
   }
 
   @media (max-width: 48rem) {

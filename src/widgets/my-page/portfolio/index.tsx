@@ -8,24 +8,36 @@ import * as S from "./style";
 interface PortfolioProps {
   fileError: string;
   fileInputRef: RefObject<HTMLInputElement | null>;
-  gitLink: string;
+  gitLinks: string[];
+  isDirty: boolean;
+  isSaving: boolean;
   jobRole: string;
-  onGitLinkChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onAddGitLink: () => void;
+  onGitLinkChange: (index: number, value: string) => void;
   onJobRoleChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   onPortfolioFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onPortfolioUploadClick: () => void;
+  onSave: () => void;
+  saveErrorMessage: string;
+  saveSuccessMessage: string;
   selectedPortfolioFile: File | null;
 }
 
 const Portfolio = ({
   fileError,
   fileInputRef,
-  gitLink,
+  gitLinks,
+  isDirty,
+  isSaving,
   jobRole,
+  onAddGitLink,
   onGitLinkChange,
   onJobRoleChange,
   onPortfolioFileChange,
   onPortfolioUploadClick,
+  onSave,
+  saveErrorMessage,
+  saveSuccessMessage,
   selectedPortfolioFile,
 }: PortfolioProps) => {
   return (
@@ -67,12 +79,28 @@ const Portfolio = ({
       <S.InputSection>
         <S.Label>git</S.Label>
 
-        <S.Input
-          type="text"
-          value={gitLink}
-          placeholder="깃허브 주소를 링크 또는 아이디로 입력해주세요."
-          onChange={onGitLinkChange}
-        />
+        {gitLinks.map((gitLink, index) => (
+          <S.GitLinkRow key={`git-link-${index}`}>
+            <S.Input
+              type="text"
+              value={gitLink}
+              placeholder="깃허브 주소를 링크 또는 아이디로 입력해주세요."
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                onGitLinkChange(index, event.target.value)
+              }
+            />
+
+            {index === gitLinks.length - 1 && gitLink.trim().length > 0 && (
+              <S.AddGitLinkButton
+                type="button"
+                aria-label="git 링크 추가"
+                onClick={onAddGitLink}
+              >
+                +
+              </S.AddGitLinkButton>
+            )}
+          </S.GitLinkRow>
+        ))}
       </S.InputSection>
 
       <S.InputSection>
@@ -95,13 +123,18 @@ const Portfolio = ({
         </S.SelectWrapper>
       </S.InputSection>
 
-      <S.ButtonWrapper>
-        <S.BackButton type="button">
-          돌아가기
-        </S.BackButton>
+      {saveErrorMessage && (
+        <S.FileErrorText role="alert">{saveErrorMessage}</S.FileErrorText>
+      )}
+      {!saveErrorMessage && saveSuccessMessage && (
+        <S.SaveSuccessText role="status">{saveSuccessMessage}</S.SaveSuccessText>
+      )}
 
-        <S.SaveButton type="button">
-          저장
+      <S.ButtonWrapper>
+        <S.BackButton type="button">돌아가기</S.BackButton>
+
+        <S.SaveButton type="button" onClick={onSave} disabled={!isDirty || isSaving}>
+          {isSaving ? "저장 중..." : "저장"}
         </S.SaveButton>
       </S.ButtonWrapper>
     </S.PortfolioWrapper>

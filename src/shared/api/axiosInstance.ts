@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import type {
   AxiosError,
   AxiosHeaders,
@@ -14,9 +13,7 @@ import {
 
 const resolveServerUrl = (url?: string) => {
   if (!url) return "";
-
   const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-
   return normalizedUrl.replace(/\/+$/, "");
 };
 
@@ -27,25 +24,27 @@ export const CHAT_URL = resolveServerUrl(import.meta.env.VITE_CHAT_URL);
 export const authInstance = axios.create({
   baseURL: AUTH_URL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
 export const apiInstance = axios.create({
-  baseURL: API_URL,
+  // 개발 환경일 때는 프록시 서버를 거치도록 빈 값을 할당합니다.
+  baseURL: import.meta.env.MODE === "development" ? "" : API_URL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
 export const chatInstance = axios.create({
   baseURL: CHAT_URL,
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
+});
+
+// 토큰 재발급(Refresh) 전용 순수 인스턴스 (인터셉터 무한 루프 방지)
+const refreshInstance = axios.create({
+  baseURL: AUTH_URL,
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
 });
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
@@ -58,7 +57,7 @@ const goToLoginPage = () => {
 
 const tryRefreshSession = async () => {
   try {
-    const response = await authInstance.post("/api/v1/auth/refresh");
+    const response = await refreshInstance.post("/api/v1/auth/refresh");
     syncAccessTokenFromResponse({
       data: response.data,
       headers: response.headers as Record<string, unknown>,
@@ -72,21 +71,13 @@ const tryRefreshSession = async () => {
 const addAuthorizationInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.request.use((config) => {
     const authorizationHeader = getAccessToken();
+    if (!authorizationHeader) return config;
 
-    if (!authorizationHeader) {
-      return config;
-    }
-
-    const nextHeaders = axios.AxiosHeaders.from(
-      config.headers,
-    ) as AxiosHeaders;
-
+    const nextHeaders = axios.AxiosHeaders.from(config.headers) as AxiosHeaders;
     if (!nextHeaders.has("Authorization")) {
       nextHeaders.set("Authorization", authorizationHeader);
     }
-
     config.headers = nextHeaders;
-
     return config;
   });
 };
@@ -97,7 +88,6 @@ const addAccessTokenSyncInterceptor = (instance: AxiosInstance) => {
       data: response.data,
       headers: response.headers as Record<string, unknown>,
     });
-
     return response;
   });
 };
@@ -106,29 +96,18 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      const originalRequest = error.config as
-        | RetryableRequestConfig
-        | undefined;
+      const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-      if (
-        error.response?.status === 401 &&
-        originalRequest &&
-        !originalRequest._retry
-      ) {
+      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
         originalRequest._retry = true;
-
         const refreshed = await tryRefreshSession();
-
-        if (refreshed) {
-          return instance(originalRequest);
-        }
+        if (refreshed) return instance(originalRequest);
       }
 
       if (error.response?.status === 401) {
         clearAccessToken();
         goToLoginPage();
       }
-
       return Promise.reject(error);
     },
   );
@@ -137,7 +116,9 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
 addAccessTokenSyncInterceptor(authInstance);
 addAccessTokenSyncInterceptor(apiInstance);
 addAccessTokenSyncInterceptor(chatInstance);
+addRefreshInterceptor(authInstance);
 addRefreshInterceptor(apiInstance);
 addRefreshInterceptor(chatInstance);
+addAuthorizationInterceptor(authInstance);
 addAuthorizationInterceptor(apiInstance);
 addAuthorizationInterceptor(chatInstance);

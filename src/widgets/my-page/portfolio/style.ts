@@ -145,6 +145,8 @@ export const Input = styled.input`
   color: #47516a;
   font-size: 1rem;
   background-color: #f7f9fd;
+  flex: 1;
+  min-width: 0;
 
   &::placeholder {
     color: #9ea6b9;
@@ -215,6 +217,43 @@ export const BackButton = styled.button`
   }
 `;
 
+export const GitLinkRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  & + & {
+    margin-top: 0.75rem;
+  }
+`;
+
+export const AddGitLinkButton = styled.button`
+  flex-shrink: 0;
+  width: 3.45rem;
+  height: 3.45rem;
+  border: none;
+  border-radius: 0.7rem;
+  background-color: #1976e8;
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #0f67d6;
+    transform: translateY(-0.0625rem);
+  }
+`;
+
+export const SaveSuccessText = styled.p`
+  color: #1976e8;
+  font-size: 0.92rem;
+  font-weight: 600;
+`;
+
+// 기존 SaveButton 교체
 export const SaveButton = styled.button`
   width: min(100%, 18rem);
   min-width: 13rem;
@@ -228,9 +267,14 @@ export const SaveButton = styled.button`
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
 
-
   &:hover {
     background-color: #0f67d6;
     transform: translateY(-0.0625rem);
+  }
+
+  &:disabled {
+    background-color: #b7c6e6;
+    cursor: not-allowed;
+    transform: none;
   }
 `;

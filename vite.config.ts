@@ -29,6 +29,18 @@ export default defineConfig(({ mode }) => {
             });
           },
         },
+        
+        "/api": {
+          target: "https://wildcat-startle-rope.ngrok-free.dev",
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+          configure: (proxy) => {
+            proxy.on("proxyReq", (proxyReq) => {
+              proxyReq.setHeader("ngrok-skip-browser-warning", "true");
+            });
+          },
+        },
       },
     },
   };

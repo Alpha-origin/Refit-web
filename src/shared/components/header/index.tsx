@@ -4,6 +4,9 @@ import {
   getActiveInterviewSessionId,
   quitInterview,
 } from "@/features/interview-page/interview/api";
+import { clearAccessToken } from "@/shared/api/accessToken";
+import { useEnsureCurrentUser } from "@/shared/model/useEnsureCurrentUser";
+import { useUserStore } from "@/shared/store/userStore";
 import Repit from "@/shared/img/logo/Repit-logo.svg?url";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as S from "./style";
@@ -12,6 +15,12 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+
+  useEnsureCurrentUser();
+  const nickname = useUserStore((state) => state.nickname);
+  const name = useUserStore((state) => state.name);
+  const resetUser = useUserStore((state) => state.reset);
+  const displayName = nickname || name || "회원";
 
   const isInterviewPage =
     pathname === "/main" ||
@@ -44,6 +53,13 @@ const Header = () => {
     navigate(path);
   };
 
+  const handleLogout = () => {
+    quitActiveInterviewSession();
+    clearAccessToken();
+    resetUser();
+    navigate("/login");
+  };
+
   return (
     <S.Header>
       <S.LogoImage src={Repit} alt="Repit" onClick={() => handleNavigate("/main")} />
@@ -70,8 +86,8 @@ const Header = () => {
       </S.TopButtons>
 
       <S.StatusButtons>
-        <S.LogoutButton>로그아웃</S.LogoutButton>
-        <S.StatusButton>한석주님</S.StatusButton>
+        <S.LogoutButton onClick={handleLogout}>로그아웃</S.LogoutButton>
+        <S.StatusButton>{displayName}님</S.StatusButton>
       </S.StatusButtons>
     </S.Header>
   );
