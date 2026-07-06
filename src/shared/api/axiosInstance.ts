@@ -28,10 +28,12 @@ export const authInstance = axios.create({
 });
 
 export const apiInstance = axios.create({
-  // 개발 환경일 때는 프록시 서버를 거치도록 빈 값을 할당합니다.
   baseURL: import.meta.env.MODE === "development" ? "" : API_URL,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
+  },
 });
 
 export const chatInstance = axios.create({
@@ -40,7 +42,6 @@ export const chatInstance = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// 토큰 재발급(Refresh) 전용 순수 인스턴스 (인터셉터 무한 루프 방지)
 const refreshInstance = axios.create({
   baseURL: AUTH_URL,
   withCredentials: true,
@@ -82,6 +83,22 @@ const addAuthorizationInterceptor = (instance: AxiosInstance) => {
   });
 };
 
+const addFormDataInterceptor = (instance: AxiosInstance) => {
+  instance.interceptors.request.use((config) => {
+    if (!(config.data instanceof FormData)) {
+      return config;
+    }
+
+    const nextHeaders = axios.AxiosHeaders.from(
+      config.headers,
+    ) as AxiosHeaders;
+    nextHeaders.delete("Content-Type");
+    config.headers = nextHeaders;
+
+    return config;
+  });
+};
+
 const addAccessTokenSyncInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.response.use((response) => {
     syncAccessTokenFromResponse({
@@ -96,9 +113,18 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-      const originalRequest = error.config as RetryableRequestConfig | undefined;
+      const originalRequest = error.config as
+        | RetryableRequestConfig
+        | undefined;
+      const isRefreshRequest =
+        originalRequest?.url?.includes("/api/v1/auth/refresh") ?? false;
 
-      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      if (
+        error.response?.status === 401 &&
+        originalRequest &&
+        !originalRequest._retry &&
+        !isRefreshRequest
+      ) {
         originalRequest._retry = true;
         const refreshed = await tryRefreshSession();
         if (refreshed) return instance(originalRequest);
@@ -119,6 +145,7 @@ addAccessTokenSyncInterceptor(chatInstance);
 addRefreshInterceptor(authInstance);
 addRefreshInterceptor(apiInstance);
 addRefreshInterceptor(chatInstance);
+addFormDataInterceptor(apiInstance);
 addAuthorizationInterceptor(authInstance);
 addAuthorizationInterceptor(apiInstance);
 addAuthorizationInterceptor(chatInstance);
