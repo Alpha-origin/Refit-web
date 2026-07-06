@@ -2,7 +2,6 @@ import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
 import { useInterviewSession } from "@/features/interview-page/interview/model/useInterviewSession";
-import { INTERVIEW_DEFAULT_QUESTION } from "@/shared/constants/interview-page/interview";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
 import * as S from "@/widgets/interview-page/interview/style";
@@ -29,15 +28,12 @@ const InterviewPage = () => {
   const isTextMode = interviewSession.mode === "text";
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const currentQuestion = {
-    id: String(
-      interviewSession.displayQuestionNumber ||
-        (isQuestionLoading ? "준비중" : INTERVIEW_DEFAULT_QUESTION.id),
-    ),
+    id: isQuestionLoading
+      ? "준비중"
+      : String(interviewSession.currentQuestion?.questionId),
     text:
       interviewSession.currentQuestion?.content ??
-      (isQuestionLoading
-        ? "질문을 불러오는 중입니다. 잠시만 기다려주세요."
-        : INTERVIEW_DEFAULT_QUESTION.text),
+      "질문을 불러오는 중입니다. 잠시만 기다려주세요.",
   };
   const answerStatus = isQuestionLoading
     ? "질문을 준비하고 있어요."
@@ -63,6 +59,7 @@ const InterviewPage = () => {
           onClearAnswer={interviewSession.onClearAnswer}
           onCompleteVoice={interviewSession.onCompleteVoice}
           onModeChange={interviewSession.onModeChange}
+          onQuitInterview={interviewSession.onQuitInterview}
           onStartVoice={interviewSession.onStartVoice}
           onSubmitText={interviewSession.onSubmitText}
           onToggleQuestionAudio={interviewSession.onToggleQuestionAudio}

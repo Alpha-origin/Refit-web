@@ -1,4 +1,8 @@
-import { authInstance, apiInstance } from "@/shared/api/axiosInstance";
+import {
+  authInstance,
+  apiInstance,
+  ensureAccessToken,
+} from "@/shared/api/axiosInstance";
 
 export interface MyPageUser {
   id: number;
@@ -62,6 +66,7 @@ export const uploadMyPageMetaData = async ({
   file,
   gitUrls,
 }: UploadMyPageMetaDataParams) => {
+  const authorizationHeader = await ensureAccessToken();
   const formData = new FormData();
   formData.append("file", file);
   gitUrls.forEach((gitUrl) => {
@@ -71,6 +76,11 @@ export const uploadMyPageMetaData = async ({
   const response = await apiInstance.post<MyPageMetaData | MetaDataResponse>(
     META_DATA_UPLOAD_URL,
     formData,
+    {
+      headers: {
+        Authorization: authorizationHeader,
+      },
+    },
   );
   const payload = response.data;
 

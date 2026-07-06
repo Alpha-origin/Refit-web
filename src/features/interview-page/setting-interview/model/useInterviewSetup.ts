@@ -6,6 +6,7 @@ import {
   generateMockInterview,
   savePersona,
   setActiveInterviewSessionId,
+  waitForGeneratedInterview,
   type CreateInterviewPersonaType,
   type InterviewPersonaGender,
   type InterviewPersonaMajor,
@@ -130,6 +131,17 @@ export const useInterviewSetup = () => {
       return;
     }
 
+    console.log("[GET /api/v1/ai/subscribe/{jobId}] jobId", generateMockData.jobId);
+
+    const { errorMessage: subscribeErrorMessage } =
+      await waitForGeneratedInterview(generateMockData.jobId);
+
+    if (subscribeErrorMessage) {
+      setIsSubmitting(false);
+      setErrorMessage(subscribeErrorMessage);
+      return;
+    }
+
     setIsSubmitting(false);
 
     console.log("[interviews/create] response data", data);
@@ -152,7 +164,7 @@ export const useInterviewSetup = () => {
           jobId: generateMockData.jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: data.questions,
+          questions: [],
         },
         interviewSetting: {
           style: selectedStyle,

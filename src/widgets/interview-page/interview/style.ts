@@ -285,14 +285,42 @@ export const QuestionLabel = styled.span`
   }
 `;
 
-export const Timer = styled.time`
-  color: #050505;
-  font-size: clamp(2.35rem, 3.3vw, 3.1rem);
+export const QuitButton = styled.button`
+  min-width: 8.7rem;
+  min-height: 2.8rem;
+  padding: 0.55rem 1.05rem;
+  border: 0.0625rem solid #d8e6fb;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #111111;
+  font-size: 1rem;
   font-weight: 800;
-  letter-spacing: -0.08rem;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    background: #f7fbff;
+    border-color: #b8d5ff;
+    color: #256fdb;
+    transform: translateY(-0.04rem);
+  }
 
   @media (max-height: 56rem) {
-    font-size: 2.35rem;
+    min-width: 8rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 40rem) {
+    min-width: 7.6rem;
+    font-size: 0.88rem;
   }
 `;
 

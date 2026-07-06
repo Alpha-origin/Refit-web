@@ -16,6 +16,7 @@ export {
 export { prepareInterview } from "./prepare-interview";
 export { quitInterview } from "./quit-interview";
 export { savePersona } from "./save-persona";
+export { waitForGeneratedInterview } from "./subscribe-generated-interview";
 export { submitInterviewAnswer } from "./submit-answer";
 
 export type {
