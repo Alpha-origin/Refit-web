@@ -7,7 +7,7 @@ import {
 } from "../shared";
 import type { GenerateMockResponse } from "../type";
 
-const GENERATE_MOCK_URL = "/api/v1/ai/generate-mock";
+const GENERATE_MOCK_URL = "/api/v1/ai/generate";
 
 const normalizeGenerateMockResponse = (
   payload: unknown,
@@ -28,7 +28,7 @@ export const generateMockInterview = async () => {
     const response = await apiInstance.post(GENERATE_MOCK_URL);
     const data = normalizeGenerateMockResponse(response.data);
 
-    console.log("[POST /api/v1/ai/generate-mock] jobId", data.jobId);
+    console.log("[POST /api/v1/ai/generate] jobId", data.jobId);
 
     return {
       data,
