@@ -5,7 +5,9 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const supertoneApiKey = env.VITE_TTS_API_KEY?.trim();
+  const supertoneApiKey = (
+    env.SUPERTONE_API_KEY ?? env.VITE_TTS_API_KEY
+  )?.trim();
 
   return {
     plugins: [react(), svgr()],
@@ -26,6 +28,18 @@ export default defineConfig(({ mode }) => {
               if (supertoneApiKey) {
                 proxyReq.setHeader("x-sup-api-key", supertoneApiKey);
               }
+            });
+          },
+        },
+        
+        "/api": {
+          target: "https://wildcat-startle-rope.ngrok-free.dev",
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+          configure: (proxy) => {
+            proxy.on("proxyReq", (proxyReq) => {
+              proxyReq.setHeader("ngrok-skip-browser-warning", "true");
             });
           },
         },
