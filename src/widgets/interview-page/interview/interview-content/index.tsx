@@ -13,6 +13,7 @@ const InterviewContentView = ({
   onClearAnswer,
   onCompleteVoice,
   onModeChange,
+  onQuitInterview,
   onStartVoice,
   onSubmitText,
   onToggleQuestionAudio,
@@ -95,7 +96,14 @@ const InterviewContentView = ({
       >
         <S.QuestionMeta>
           <S.QuestionLabel>{question.id}</S.QuestionLabel>
-          <S.Timer>00:00</S.Timer>
+          <S.QuitButton
+            type="button"
+            onClick={() => {
+              void onQuitInterview();
+            }}
+          >
+            면접 종료하기
+          </S.QuitButton>
         </S.QuestionMeta>
 
         <S.QuestionBody>

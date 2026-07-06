@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 interface SelectButtonProps {
   $selected: boolean;
@@ -11,6 +11,12 @@ interface InterviewerCardProps {
 interface ActionButtonProps {
   $disabled?: boolean;
 }
+
+const spin = keyframes`
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const Container = styled.div`
   --page-inline-padding: clamp(0.75rem, 4.4vw, 4.5rem);
@@ -325,4 +331,33 @@ export const NextButton = styled(baseButton)`
     box-shadow: ${({ $disabled }) =>
       $disabled ? 'none' : '0 1rem 2rem rgba(47, 128, 237, 0.28)'};
   }
+`;
+
+export const LoadingOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+`;
+
+export const LoadingSpinner = styled.div`
+  width: 4rem;
+  height: 4rem;
+  border: 0.25rem solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: ${spin} 0.85s linear infinite;
+`;
+
+export const LoadingMessage = styled.p`
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
 `;

@@ -1,5 +1,4 @@
 import { chatInstance } from "@/shared/api/axiosInstance";
-import { INTERVIEW_DEFAULT_QUESTION } from "@/shared/constants/interview-page/interview";
 
 import {
   getCurrentUserId,
@@ -17,11 +16,6 @@ import type {
 } from "../type";
 
 const PREPARE_INTERVIEW_URL = "/chat/interviews";
-const FALLBACK_PREPARE_QUESTION: PrepareInterviewQuestion = {
-  questionId: 1,
-  intention: "기본 질문",
-  content: INTERVIEW_DEFAULT_QUESTION.text,
-};
 
 interface PrepareInterviewRequestData extends PreparedInterviewData {
   jobId: string;
@@ -29,23 +23,25 @@ interface PrepareInterviewRequestData extends PreparedInterviewData {
 
 const normalizeQuestion = (
   value: unknown,
-  fallbackQuestion: PrepareInterviewQuestion,
   index: number,
-): PrepareInterviewQuestion => {
+): PrepareInterviewQuestion | null => {
   const questionRecord = getRecord(value);
+  const content = getTrimmedString(
+    questionRecord?.content ?? questionRecord?.question ?? questionRecord?.text,
+  );
+
+  if (!content) {
+    return null;
+  }
 
   return {
     questionId:
       getNumericValue(questionRecord?.questionId ?? questionRecord?.id) ??
-      fallbackQuestion.questionId ??
       index + 1,
     intention:
       getTrimmedString(questionRecord?.intention ?? questionRecord?.purpose) ??
-      fallbackQuestion.intention,
-    content:
-      getTrimmedString(
-        questionRecord?.content ?? questionRecord?.question ?? questionRecord?.text,
-      ) ?? fallbackQuestion.content,
+      "",
+    content,
   };
 };
 
@@ -54,9 +50,7 @@ const buildPrepareInterviewRequest = (
   sessionId: string,
   jobId: string,
 ): PrepareInterviewRequestData => {
-  const sourceQuestions =
-    params.questions.length > 0 ? params.questions : [FALLBACK_PREPARE_QUESTION];
-  const normalizedQuestions = sourceQuestions.map((question, index) => ({
+  const normalizedQuestions = params.questions.map((question, index) => ({
     questionId: getNumericValue(question.questionId) ?? index + 1,
     intention: question.intention.trim(),
     content: question.content.trim(),
@@ -93,14 +87,16 @@ const normalizePreparedInterview = (
   const responseQuestions =
     sourceRecord?.questions ?? sourceRecord?.interviewQuestions;
   const normalizedQuestions = Array.isArray(responseQuestions)
-    ? responseQuestions.map((question, index) =>
-        normalizeQuestion(question, fallbackData.questions[index] ?? {
-          questionId: index + 1,
-          intention: "",
-          content: "",
-        }, index),
-      )
-    : fallbackData.questions;
+    ? responseQuestions.reduce<PrepareInterviewQuestion[]>((accumulator, question, index) => {
+        const normalizedQuestion = normalizeQuestion(question, index);
+
+        if (normalizedQuestion) {
+          accumulator.push(normalizedQuestion);
+        }
+
+        return accumulator;
+      }, [])
+    : [];
   const totalQuestionCount =
     normalizedQuestions.length > 0
       ? normalizedQuestions.length
@@ -127,8 +123,7 @@ const normalizePreparedInterview = (
       ? sourceRecord.status
       : fallbackData.status,
     currentQuestionIndex,
-    questions:
-      normalizedQuestions.length > 0 ? normalizedQuestions : fallbackData.questions,
+    questions: normalizedQuestions,
   };
 };
 

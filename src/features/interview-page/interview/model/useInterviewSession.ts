@@ -28,8 +28,6 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
-const PREPARE_INTERVIEW_DELAY_MS = 40_000;
-const CHAT_SOCKET_DELAY_MS = 30_000;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -47,7 +45,12 @@ const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
 
 const buildInitialQuestion = (
   preparedInterview?: PreparedInterviewData | null,
+  options: { allowGeneratedQuestions?: boolean } = {},
 ): CurrentInterviewQuestion | null => {
+  if (preparedInterview?.jobId && !options.allowGeneratedQuestions) {
+    return null;
+  }
+
   if (!preparedInterview || preparedInterview.questions.length === 0) {
     return null;
   }
@@ -95,8 +98,6 @@ export const useInterviewSession = (
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
-  const prepareInterviewTimeoutRef = useRef<number | null>(null);
-  const chatSessionReadyTimeoutRef = useRef<number | null>(null);
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
   const autoPlayedQuestionKeyRef = useRef<string | null>(null);
@@ -121,16 +122,6 @@ export const useInterviewSession = (
 
   useEffect(() => {
     const nextInitialQuestion = buildInitialQuestion(preparedInterview);
-
-    if (prepareInterviewTimeoutRef.current !== null) {
-      window.clearTimeout(prepareInterviewTimeoutRef.current);
-      prepareInterviewTimeoutRef.current = null;
-    }
-
-    if (chatSessionReadyTimeoutRef.current !== null) {
-      window.clearTimeout(chatSessionReadyTimeoutRef.current);
-      chatSessionReadyTimeoutRef.current = null;
-    }
 
     currentQuestionKeyRef.current = buildQuestionKey(nextInitialQuestion);
     setCurrentQuestion(nextInitialQuestion);
@@ -304,7 +295,9 @@ export const useInterviewSession = (
         setInterviewStatus(data.status);
       }
 
-      const firstQuestion = buildInitialQuestion(data);
+      const firstQuestion = buildInitialQuestion(data, {
+        allowGeneratedQuestions: true,
+      });
 
       if (firstQuestion) {
         applyCurrentQuestion(firstQuestion);
@@ -322,39 +315,22 @@ export const useInterviewSession = (
         }
       }
 
-      chatSessionReadyTimeoutRef.current = window.setTimeout(() => {
-        setIsChatSessionReady(true);
-        chatSessionReadyTimeoutRef.current = null;
-      }, CHAT_SOCKET_DELAY_MS);
+      setIsChatSessionReady(true);
     };
 
-    prepareInterviewTimeoutRef.current = window.setTimeout(() => {
-      prepareInterviewTimeoutRef.current = null;
-      void startInterviewSession();
-    }, PREPARE_INTERVIEW_DELAY_MS);
+    void startInterviewSession();
 
     return () => {
       isCancelled = true;
 
-      if (prepareInterviewTimeoutRef.current !== null) {
-        window.clearTimeout(prepareInterviewTimeoutRef.current);
-        prepareInterviewTimeoutRef.current = null;
+      if (preparedChatSessionIdRef.current === sessionId) {
+        preparedChatSessionIdRef.current = null;
       }
     };
   }, [applyCurrentQuestion, preparedInterview, sessionId]);
 
   useEffect(() => {
     return () => {
-      if (prepareInterviewTimeoutRef.current !== null) {
-        window.clearTimeout(prepareInterviewTimeoutRef.current);
-        prepareInterviewTimeoutRef.current = null;
-      }
-
-      if (chatSessionReadyTimeoutRef.current !== null) {
-        window.clearTimeout(chatSessionReadyTimeoutRef.current);
-        chatSessionReadyTimeoutRef.current = null;
-      }
-
       const activeSessionId = getActiveInterviewSessionId();
       const latestSessionId = sessionIdRef.current;
 
@@ -467,6 +443,12 @@ export const useInterviewSession = (
     await submitAnswer(voiceAnswer.answerText);
   };
 
+  const handleQuitInterview = async () => {
+    questionTts.onStop();
+    voiceAnswer.onExitVoiceMode();
+    await endInterviewSession(true, "quit");
+  };
+
   return {
     answerStatus: isVoiceMode ? voiceAnswer.voiceStatus : INTERVIEW_STATUS_MESSAGES.text,
     answerText: voiceAnswer.answerText,
@@ -480,6 +462,7 @@ export const useInterviewSession = (
     onClearAnswer: voiceAnswer.onClearAnswer,
     onCompleteVoice: handleCompleteVoice,
     onModeChange: handleModeChange,
+    onQuitInterview: handleQuitInterview,
     onStartVoice: handleStartVoice,
     onSubmitText: handleSubmitText,
     onToggleQuestionAudio: questionTts.onToggle,

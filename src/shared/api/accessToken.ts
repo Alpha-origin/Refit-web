@@ -1,5 +1,12 @@
-const TOKEN_RECORD_KEYS = ["accessToken", "token", "authorization"] as const;
+const TOKEN_RECORD_KEYS = new Set([
+  "accesstoken",
+  "access_token",
+  "token",
+  "authorization",
+]);
 let accessToken: string | null = null;
+
+const normalizeTokenKey = (key: string) => key.toLowerCase().replace(/-/g, "_");
 
 export const normalizeAccessToken = (value?: string | null) => {
   const trimmedValue = value?.trim();
@@ -13,6 +20,33 @@ export const normalizeAccessToken = (value?: string | null) => {
     : `Bearer ${trimmedValue}`;
 };
 
+const getHeaderToken = (headers?: unknown) => {
+  if (!headers || typeof headers !== "object") {
+    return null;
+  }
+
+  const headerRecord = headers as Record<string, unknown> & {
+    get?: (key: string) => unknown;
+  };
+  const authorizationByGetter =
+    typeof headerRecord.get === "function"
+      ? headerRecord.get("authorization")
+      : null;
+
+  if (typeof authorizationByGetter === "string") {
+    return normalizeAccessToken(authorizationByGetter);
+  }
+
+  const headerAuthorization =
+    typeof headerRecord.authorization === "string"
+      ? headerRecord.authorization
+      : typeof headerRecord.Authorization === "string"
+        ? headerRecord.Authorization
+        : null;
+
+  return normalizeAccessToken(headerAuthorization);
+};
+
 const getTokenFromRecord = (value: unknown): string | null => {
   if (!value || typeof value !== "object") {
     return null;
@@ -20,16 +54,27 @@ const getTokenFromRecord = (value: unknown): string | null => {
 
   const record = value as Record<string, unknown>;
 
-  for (const key of TOKEN_RECORD_KEYS) {
-    const tokenValue = record[key];
+  for (const [key, tokenValue] of Object.entries(record)) {
+    const normalizedKey = normalizeTokenKey(key);
+    if (normalizedKey.includes("refresh")) {
+      continue;
+    }
 
-    if (typeof tokenValue === "string") {
+    if (TOKEN_RECORD_KEYS.has(normalizedKey) && typeof tokenValue === "string") {
       return normalizeAccessToken(tokenValue);
     }
   }
 
-  if ("data" in record) {
-    return getTokenFromRecord(record.data);
+  for (const [key, nestedValue] of Object.entries(record)) {
+    const normalizedKey = normalizeTokenKey(key);
+    if (normalizedKey.includes("refresh")) {
+      continue;
+    }
+
+    const nestedToken = getTokenFromRecord(nestedValue);
+    if (nestedToken) {
+      return nestedToken;
+    }
   }
 
   return null;
@@ -47,16 +92,9 @@ export const clearAccessToken = () => {
 
 export const syncAccessTokenFromResponse = (params: {
   data?: unknown;
-  headers?: Record<string, unknown> | null;
+  headers?: unknown;
 }) => {
-  const headerAuthorization =
-    typeof params.headers?.authorization === "string"
-      ? params.headers.authorization
-      : typeof params.headers?.Authorization === "string"
-        ? params.headers.Authorization
-        : null;
-  const nextToken =
-    normalizeAccessToken(headerAuthorization) ?? getTokenFromRecord(params.data);
+  const nextToken = getHeaderToken(params.headers) ?? getTokenFromRecord(params.data);
 
   if (!nextToken) {
     return null;

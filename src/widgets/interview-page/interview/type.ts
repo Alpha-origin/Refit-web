@@ -26,6 +26,7 @@ export interface InterviewContentViewProps {
   onClearAnswer: () => void;
   onCompleteVoice: () => void;
   onModeChange: (mode: InterviewMode) => void;
+  onQuitInterview: () => void | Promise<void>;
   onStartVoice: () => void;
   onSubmitText: () => void;
   onToggleQuestionAudio: () => void;

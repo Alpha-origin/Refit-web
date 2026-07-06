@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => {
   const supertoneApiKey = (
     env.SUPERTONE_API_KEY ?? env.VITE_TTS_API_KEY
   )?.trim();
+  const apiUrl = env.VITE_API_URL?.trim();
 
   return {
     plugins: [react(), svgr()],
@@ -33,7 +34,7 @@ export default defineConfig(({ mode }) => {
         },
         
         "/api": {
-          target: "https://wildcat-startle-rope.ngrok-free.dev",
+          target: apiUrl,
           changeOrigin: true,
           secure: false,
           ws: true,

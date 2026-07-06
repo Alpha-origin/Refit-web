@@ -59,19 +59,44 @@ const goToLoginPage = () => {
 const tryRefreshSession = async () => {
   try {
     const response = await refreshInstance.post("/api/v1/auth/refresh");
-    syncAccessTokenFromResponse({
+    const refreshedAccessToken = syncAccessTokenFromResponse({
       data: response.data,
       headers: response.headers as Record<string, unknown>,
     });
-    return true;
+    return Boolean(refreshedAccessToken);
   } catch {
     return false;
   }
 };
 
-const addAuthorizationInterceptor = (instance: AxiosInstance) => {
-  instance.interceptors.request.use((config) => {
-    const authorizationHeader = getAccessToken();
+const getReadyAccessToken = async (shouldRefreshBeforeRequest: boolean) => {
+  const currentAccessToken = getAccessToken();
+  if (currentAccessToken || !shouldRefreshBeforeRequest) {
+    return currentAccessToken;
+  }
+
+  const refreshed = await tryRefreshSession();
+  return refreshed ? getAccessToken() : null;
+};
+
+export const ensureAccessToken = async () => {
+  const authorizationHeader = await getReadyAccessToken(true);
+
+  if (!authorizationHeader) {
+    throw new Error("로그인 토큰을 찾지 못했습니다. 다시 로그인해 주세요.");
+  }
+
+  return authorizationHeader;
+};
+
+const addAuthorizationInterceptor = (
+  instance: AxiosInstance,
+  options: { refreshBeforeRequest?: boolean } = {},
+) => {
+  instance.interceptors.request.use(async (config) => {
+    const authorizationHeader = await getReadyAccessToken(
+      options.refreshBeforeRequest ?? false,
+    );
     if (!authorizationHeader) return config;
 
     const nextHeaders = axios.AxiosHeaders.from(config.headers) as AxiosHeaders;
@@ -147,5 +172,5 @@ addRefreshInterceptor(apiInstance);
 addRefreshInterceptor(chatInstance);
 addFormDataInterceptor(apiInstance);
 addAuthorizationInterceptor(authInstance);
-addAuthorizationInterceptor(apiInstance);
-addAuthorizationInterceptor(chatInstance);
+addAuthorizationInterceptor(apiInstance, { refreshBeforeRequest: true });
+addAuthorizationInterceptor(chatInstance, { refreshBeforeRequest: true });

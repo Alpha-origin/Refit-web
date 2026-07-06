@@ -28,6 +28,12 @@ const SettingInterviewScreen = () => {
           onNext={setup.onNext}
         />
       </S.ContentWrapper>
+      {setup.isSubmitting ? (
+        <S.LoadingOverlay role="status" aria-live="polite">
+          <S.LoadingSpinner aria-hidden="true" />
+          <S.LoadingMessage>질문 생성중입니다</S.LoadingMessage>
+        </S.LoadingOverlay>
+      ) : null}
     </S.Container>
   );
 };

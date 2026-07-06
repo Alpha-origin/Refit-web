@@ -1,8 +1,7 @@
-    import axios from "axios";
+    import { apiInstance } from "@/shared/api/axiosInstance";
     import { extractErrorMessage } from "@/shared/api/errorMessage";
 
-    const BACKEND_REAL_URL = "https://wildcat-startle-rope.ngrok-free.dev"; 
-    const SAVE_PORTFOLIO_URL = `${BACKEND_REAL_URL}/api/v1/metaData/dataUpload`;
+    const SAVE_PORTFOLIO_URL = "/api/v1/metaData/dataUpload";
 
     export interface SavePortfolioParams {
     portfolioFile: File | null;
@@ -33,12 +32,9 @@
         formData.append("jobRole", jobRole);
         }
 
-        const myToken = "Bearer eyJraWQiOiJhdXRoLXNlcnZlci1rZXktMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI1Iiwicm9sZSI6IlJPTEVfVVNFUiIsImlzcyI6Imh0dHA6Ly9hdXRoLnRlYW0tYWxwaGEuY29tIiwiZXhwIjoxNzgzMTQ0MzI3LCJpYXQiOjE3ODMxNDM0MjcsImVtYWlsIjoia0BnbWFpbC5jb20iLCJqdGkiOiIwYjI3OTBiZC04YzY2LTQzYzItODNkNy0xZGVlMTM2ZjRkYTAifQ.QwvryruabXqu3xGWcl0cRbsp3UaTorR9mit4I2rAgGZKSXFaEbbPvjOLA6rvDiW_npko0fIGsSKIjKMMQZ2WowMBocPo_ecYY74VKpi0y-OQ_3vdMukiiqCZr67WU1pQvCxPI1qwDMeJpM-fY6FnMLUDAjLw6AUh2DAqB4tY0_2DiwiJ8jooygZLgYLMmtTBRQf6Plxob77lm140XNCwv-j7DcAODeEkcyfX40KN9UnwP1cd2BB2WGx4POL6JJCqJk_z5_VzFLnisbnRhYXpGd_oO-rFXpMyOV0Rt4j1WZaUZ0oXvsIHQZdaGNRnHjO5LO-rudpxbLT6upVTZNjI8w";
-
-        await axios.post(SAVE_PORTFOLIO_URL, formData, {
+        await apiInstance.post(SAVE_PORTFOLIO_URL, formData, {
         headers: { 
             "Content-Type": "multipart/form-data",
-            Authorization: myToken
         },
         });
 
