@@ -1,61 +1,48 @@
-import { useMemo, useRef, useState, useEffect } from "react";
-import type { ChangeEvent } from "react";
-import axios from "axios"; 
-import { savePortfolio } from "../api/savePortfolio"; 
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
 
-const INITIAL_GIT_LINKS = [""];
-const BACKEND_REAL_URL = "https://wildcat-startle-rope.ngrok-free.dev"; 
+import {
+  uploadMyPageMetaData,
+  type MyPageMetaData,
+} from "@/features/my-page/api/getMyPageData";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 
-export const usePortfolioForm = () => {
+interface UsePortfolioFormOptions {
+  initialGitUrls?: string[];
+  onUploadSuccess?: (metaData: MyPageMetaData) => void;
+}
+
+const normalizeGitUrl = (value: string) => value.trim();
+
+export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [portfolioFileError, setPortfolioFileError] = useState("");
-  const [gitLinks, setGitLinks] = useState<string[]>(INITIAL_GIT_LINKS);
+  const [gitInput, setGitInput] = useState("");
+  const [gitUrls, setGitUrls] = useState<string[]>([]);
   const [jobRole, setJobRole] = useState("");
+  const [jobRoleError, setJobRoleError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [saveErrorMessage, setSaveErrorMessage] = useState("");
-  const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const isGitListEditedRef = useRef(false);
 
   useEffect(() => {
-    const fetchExistingData = async () => {
-      try {
-        const myToken = "Bearer eyJraWQiOiJhdXRoLXNlcnZlci1rZXktMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI1Iiwicm9sZSI6IlJPTEVfVVNFUiIsImlzcyI6Imh0dHA6Ly9hdXRoLnRlYW0tYWxwaGEuY29tIiwiZXhwIjoxNzgzMTQ0MzI3LCJpYXQiOjE3ODMxNDM0MjcsImVtYWlsIjoia0BnbWFpbC5jb20iLCJqdGkiOiIwYjI3OTBiZC04YzY2LTQzYzItODNkNy0xZGVlMTM2ZjRkYTAifQ.QwvryruabXqu3xGWcl0cRbsp3UaTorR9mit4I2rAgGZKSXFaEbbPvjOLA6rvDiW_npko0fIGsSKIjKMMQZ2WowMBocPo_ecYY74VKpi0y-OQ_3vdMukiiqCZr67WU1pQvCxPI1qwDMeJpM-fY6FnMLUDAjLw6AUh2DAqB4tY0_2DiwiJ8jooygZLgYLMmtTBRQf6Plxob77lm140XNCwv-j7DcAODeEkcyfX40KN9UnwP1cd2BB2WGx4POL6JJCqJk_z5_VzFLnisbnRhYXpGd_oO-rFXpMyOV0Rt4j1WZaUZ0oXvsIHQZdaGNRnHjO5LO-rudpxbLT6upVTZNjI8w";
+    if (!options.initialGitUrls?.length || isGitListEditedRef.current) {
+      return;
+    }
 
-        const response = await axios.get(`${BACKEND_REAL_URL}/api/v1/metaData/getMetaData`, {
-          headers: { 
-            Authorization: myToken,
-          },
-        });
+    const nextGitUrls = options.initialGitUrls
+      .map(normalizeGitUrl)
+      .filter((url, index, urls) => url && urls.indexOf(url) === index);
 
-        console.log("🔥 [조회 대성공] 포트폴리오 데이터:", response.data);
+    setGitUrls(nextGitUrls);
+  }, [options.initialGitUrls]);
 
-        if (response.data) {
-          const fetchedUrls = response.data.gitUrls || response.data.gitLinks;
-          if (fetchedUrls && fetchedUrls.length > 0) {
-            setGitLinks(fetchedUrls);
-          } else {
-            setGitLinks(INITIAL_GIT_LINKS);
-          }
-          if (response.data.jobRole) {
-            setJobRole(response.data.jobRole);
-          }
-        }
-      } catch (error) {
-        console.error("❌ ngrok 주소 조회 실패:", error);
-        setGitLinks(INITIAL_GIT_LINKS);
-      }
-    };
-
-    fetchExistingData();
-  }, []);
-
-  const isDirty = useMemo(
-    () =>
-      portfolioFile !== null ||
-      gitLinks.some((link) => link.trim().length > 0) ||
-      jobRole.trim().length > 0,
-    [portfolioFile, gitLinks, jobRole],
-  );
+  const clearSaveStatus = () => {
+    setSaveMessage("");
+    setSaveError("");
+  };
 
   const handlePortfolioUploadClick = () => {
     const input = fileInputRef.current;
@@ -66,6 +53,7 @@ export const usePortfolioForm = () => {
 
   const handlePortfolioFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    clearSaveStatus();
 
     if (!file) {
       setPortfolioFile(null);
@@ -88,60 +76,118 @@ export const usePortfolioForm = () => {
     setPortfolioFileError("");
   };
 
-  const handleGitLinkChange = (index: number, value: string) => {
-    setGitLinks((previousLinks) =>
-      previousLinks.map((link, linkIndex) => (linkIndex === index ? value : link)),
-    );
+  const handleGitInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setGitInput(event.target.value);
+    clearSaveStatus();
   };
 
-  const handleAddGitLink = () => {
-    setGitLinks((previousLinks) => [...previousLinks, ""]);
+  const handleGitAdd = () => {
+    const nextGitUrl = normalizeGitUrl(gitInput);
+
+    if (!nextGitUrl) {
+      return;
+    }
+
+    isGitListEditedRef.current = true;
+    setGitUrls((prevGitUrls) =>
+      prevGitUrls.includes(nextGitUrl)
+        ? prevGitUrls
+        : [...prevGitUrls, nextGitUrl],
+    );
+    setGitInput("");
+    clearSaveStatus();
+  };
+
+  const handleGitInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    handleGitAdd();
+  };
+
+  const handleGitRemove = (gitUrl: string) => {
+    isGitListEditedRef.current = true;
+    setGitUrls((prevGitUrls) => prevGitUrls.filter((url) => url !== gitUrl));
+    clearSaveStatus();
   };
 
   const handleJobRoleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setJobRole(event.target.value);
+    setJobRoleError("");
+    clearSaveStatus();
   };
 
-  const handleSave = async () => {
-    if (!isDirty || isSaving) {
+  const validateBeforeSave = () => {
+    let isValid = true;
+
+    if (!portfolioFile) {
+      setPortfolioFileError("업로드할 PDF 파일을 첨부해주세요.");
+      isValid = false;
+    }
+
+    if (gitUrls.length === 0) {
+      setSaveError("Git 주소를 하나 이상 추가해주세요.");
+      isValid = false;
+    }
+
+    if (!jobRole) {
+      setJobRoleError("직무를 선택해주세요.");
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+  const handlePortfolioSave = async () => {
+    if (isSaving) {
+      return;
+    }
+
+    clearSaveStatus();
+
+    if (!validateBeforeSave() || !portfolioFile) {
       return;
     }
 
     setIsSaving(true);
-    setSaveErrorMessage("");
-    setSaveSuccessMessage("");
 
-    const { errorMessage } = await savePortfolio({
-      portfolioFile,
-      gitLinks,
-      jobRole,
-    });
+    try {
+      const nextMetaData = await uploadMyPageMetaData({
+        file: portfolioFile,
+        gitUrls,
+      });
 
-    setIsSaving(false);
-
-    if (errorMessage) {
-      setSaveErrorMessage(errorMessage);
-      return;
+      options.onUploadSuccess?.(nextMetaData);
+      setSaveMessage("포트폴리오가 저장되었습니다.");
+    } catch (error) {
+      setSaveError(
+        extractErrorMessage(error, "포트폴리오 저장에 실패했습니다."),
+      );
+    } finally {
+      setIsSaving(false);
     }
-
-    setSaveSuccessMessage("저장되었습니다.");
   };
 
   return {
     fileError: portfolioFileError,
     fileInputRef,
-    gitLinks,
-    isDirty,
+    gitInput,
+    gitUrls,
     isSaving,
     jobRole,
-    onAddGitLink: handleAddGitLink,
-    onGitLinkChange: handleGitLinkChange,
+    jobRoleError,
+    onGitAdd: handleGitAdd,
+    onGitInputChange: handleGitInputChange,
+    onGitInputKeyDown: handleGitInputKeyDown,
+    onGitRemove: handleGitRemove,
     onJobRoleChange: handleJobRoleChange,
     onPortfolioFileChange: handlePortfolioFileChange,
+    onPortfolioSave: handlePortfolioSave,
     onPortfolioUploadClick: handlePortfolioUploadClick,
-    onSave: handleSave,
-    saveErrorMessage,
-    saveSuccessMessage,
+    saveError,
+    saveMessage,
     selectedPortfolioFile: portfolioFile,
   };
 };

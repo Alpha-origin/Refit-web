@@ -38,6 +38,18 @@ export const InfoList = styled.div`
   }
 `;
 
+export const StatusText = styled.p`
+  margin: -0.5rem 0 0 2.25rem;
+  color: #55607b;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+
+  @media (max-width: 48rem) {
+    margin-left: 0;
+  }
+`;
+
 export const InfoRow = styled.div`
   display: grid;
   grid-template-columns: 7.5rem minmax(0, 1fr);

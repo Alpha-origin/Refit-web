@@ -1,62 +1,55 @@
-import type { ChangeEvent } from "react";
-
-import { useMyInfo } from "@/features/my-page/personal-info/model/useMyInfo";
+import type { MyPageUser } from "@/features/my-page/api/getMyPageData";
 
 import * as S from "./style";
 
-const PERSONAL_INFO_FIELDS = [
-  { key: "name", label: "이름" },
-  { key: "nickname", label: "닉네임" },
-  { key: "email", label: "이메일" },
-] as const;
+interface PersonalInfoProps {
+  errorMessage: string | null;
+  isLoading: boolean;
+  user: MyPageUser | null;
+}
 
-const PersonalInfo = () => {
-  const {
-    draft,
-    errorMessage,
-    isEditing,
-    isLoading,
-    isSaving,
-    onFieldChange,
-    onToggleEdit,
-  } = useMyInfo();
+const getInfoFields = (user: MyPageUser) => [
+  {
+    label: "이름",
+    value: user.username,
+  },
+  {
+    label: "닉네임",
+    value: user.nickname,
+  },
+  {
+    label: "이메일",
+    value: user.email,
+  },
+  {
+    label: "전공",
+    value: user.major,
+  },
+];
+
+const PersonalInfo = ({ errorMessage, isLoading, user }: PersonalInfoProps) => {
+  const fields = user ? getInfoFields(user) : [];
 
   return (
     <S.PersonalInfoWrapper>
       <S.Title>개인정보</S.Title>
 
-      <S.InfoList>
-        {PERSONAL_INFO_FIELDS.map((field) => (
-          <S.InfoRow key={field.key}>
-            <S.Label>{field.label}</S.Label>
+      {isLoading ? (
+        <S.StatusText>유저 정보를 불러오는 중입니다.</S.StatusText>
+      ) : errorMessage ? (
+        <S.StatusText role="alert">{errorMessage}</S.StatusText>
+      ) : (
+        <S.InfoList>
+          {fields.map((field) => (
+            <S.InfoRow key={field.label}>
+              <S.Label>{field.label}</S.Label>
+              <S.Value>{field.value || "-"}</S.Value>
+            </S.InfoRow>
+          ))}
+        </S.InfoList>
+      )}
 
-            {isEditing ? (
-              <S.EditInput
-                type={field.key === "email" ? "email" : "text"}
-                value={draft[field.key]}
-                disabled={isSaving}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  onFieldChange(field.key, event.target.value)
-                }
-              />
-            ) : (
-              <S.Value>
-                {isLoading ? "불러오는 중..." : draft[field.key] || "-"}
-              </S.Value>
-            )}
-          </S.InfoRow>
-        ))}
-      </S.InfoList>
-
-      {errorMessage && <S.ErrorText role="alert">{errorMessage}</S.ErrorText>}
-
-      <S.EditButton
-        type="button"
-        disabled={isLoading || isSaving}
-        onClick={onToggleEdit}
-      >
-        {isSaving ? "저장 중..." : isEditing ? "완료" : "회원정보 수정"}
-      </S.EditButton>
+      <S.EditButton type="button">회원정보 수정</S.EditButton>
     </S.PersonalInfoWrapper>
   );
 };

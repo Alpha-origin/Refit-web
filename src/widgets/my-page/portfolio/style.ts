@@ -135,25 +135,111 @@ export const Label = styled.h3`
   line-height: 1.2;
 `;
 
-export const Input = styled.input`
+export const GitInputWrapper = styled.div`
   width: 100%;
   height: 3.45rem;
-  padding: 0 1.15rem;
+  display: flex;
+  align-items: center;
   border: 0.0625rem solid #d9dde5;
   border-radius: 0.7rem;
+  background-color: #f7f9fd;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #3b82f6;
+  }
+`;
+
+export const Input = styled.input`
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 1.15rem;
+  border: none;
   outline: none;
   color: #47516a;
   font-size: 1rem;
-  background-color: #f7f9fd;
-  flex: 1;
-  min-width: 0;
+  background-color: transparent;
 
   &::placeholder {
     color: #9ea6b9;
   }
+`;
 
-  &:focus {
-    border-color: #3b82f6;
+export const GitAddButton = styled.button`
+  width: 3.25rem;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  color: #46506a;
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    color: #1976e8;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+`;
+
+export const GitUrlList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
+`;
+
+export const GitUrlRow = styled.div`
+  width: 100%;
+  min-height: 3.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.9rem 0 1.15rem;
+  border: 0.0625rem solid #d9dde5;
+  border-radius: 0.7rem;
+  background-color: #ffffff;
+`;
+
+export const GitUrlText = styled.span`
+  flex: 1;
+  min-width: 0;
+  color: #6b748a;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const GitRemoveButton = styled.button`
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 0.4rem;
+  background-color: transparent;
+  color: #596076;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background-color: #eef4ff;
+    color: #1976e8;
   }
 `;
 
@@ -190,12 +276,21 @@ export const ButtonWrapper = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   gap: 2rem;
-  margin-top: 4.6rem;
+  margin-top: 3.5rem;
 
   @media (max-width: 40rem) {
     gap: 1rem;
     margin-top: 3rem;
   }
+`;
+
+export const SaveStatus = styled.p<{ $isError: boolean }>`
+  margin: 1.6rem 0 0;
+  color: ${({ $isError }) => ($isError ? "#e14d4d" : "#1976e8")};
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
 `;
 
 export const BackButton = styled.button`
@@ -217,43 +312,6 @@ export const BackButton = styled.button`
   }
 `;
 
-export const GitLinkRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-
-  & + & {
-    margin-top: 0.75rem;
-  }
-`;
-
-export const AddGitLinkButton = styled.button`
-  flex-shrink: 0;
-  width: 3.45rem;
-  height: 3.45rem;
-  border: none;
-  border-radius: 0.7rem;
-  background-color: #1976e8;
-  color: #ffffff;
-  font-size: 1.4rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: #0f67d6;
-    transform: translateY(-0.0625rem);
-  }
-`;
-
-export const SaveSuccessText = styled.p`
-  color: #1976e8;
-  font-size: 0.92rem;
-  font-weight: 600;
-`;
-
-// 기존 SaveButton 교체
 export const SaveButton = styled.button`
   width: min(100%, 18rem);
   min-width: 13rem;
@@ -273,8 +331,8 @@ export const SaveButton = styled.button`
   }
 
   &:disabled {
-    background-color: #b7c6e6;
-    cursor: not-allowed;
+    cursor: default;
+    opacity: 0.65;
     transform: none;
   }
 `;
