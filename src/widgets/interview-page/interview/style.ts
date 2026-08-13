@@ -20,6 +20,10 @@ interface VoiceLevelProps {
   $voiceLevel?: number;
 }
 
+interface ActionIconImageProps {
+  $iconType: "camera" | "mic";
+}
+
 export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
   width: 100%;
   max-width: 100%;
@@ -27,8 +31,8 @@ export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
   min-height: 0;
   align-self: stretch;
   overflow: hidden;
-  padding: clamp(1rem, 2.1vh, 1.45rem) clamp(1rem, 6.9vw, 5.5rem)
-    clamp(0.9rem, 2vh, 1.4rem);
+  padding: clamp(1rem, 2vh, 1.35rem) clamp(1rem, 4.8vw, 4.5rem)
+    clamp(0.85rem, 1.8vh, 1.25rem);
   box-sizing: border-box;
 
   ${({ $voiceMode, $textMode }) =>
@@ -52,14 +56,16 @@ export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
 `;
 
 export const Content = styled.div<VoiceLayoutProps & TextLayoutProps>`
-  width: min(100%, 64.5rem);
+  width: ${({ $textMode }) => ($textMode ? "min(100%, 70.75rem)" : "min(100%, 76rem)")};
   height: 100%;
   min-height: 0;
   margin: 0 auto;
   display: grid;
-  grid-template-rows: auto minmax(0, auto) auto;
+  grid-template-rows: ${({ $textMode }) =>
+    $textMode ? "auto" : "auto minmax(0, auto) auto"};
   align-content: center;
-  gap: clamp(0.9rem, 2.5vh, 1.55rem);
+  gap: ${({ $textMode }) =>
+    $textMode ? "clamp(1.15rem, 2.7vh, 1.45rem)" : "clamp(1rem, 2.7vh, 1.8rem)"};
   box-sizing: border-box;
 
   @media (max-width: 54rem) {
@@ -115,10 +121,11 @@ export const InterviewStage = styled.div<VoiceLayoutProps & TextLayoutProps>`
   display: grid;
   grid-template-columns: ${({ $voiceMode }) =>
     $voiceMode ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)"};
-  gap: clamp(0.9rem, 1.5vw, 1rem);
+  gap: ${({ $textMode }) =>
+    $textMode ? "clamp(1.1rem, 2.7vh, 1.45rem)" : "clamp(0.9rem, 1.5vw, 1rem)"};
   align-items: stretch;
   justify-items: stretch;
-  height: ${({ $voiceMode }) => ($voiceMode ? "clamp(22rem, 49vh, 25.6rem)" : "auto")};
+  height: ${({ $voiceMode }) => ($voiceMode ? "clamp(25.5rem, 58vh, 34rem)" : "auto")};
 
   @media (max-width: 54rem) {
     height: auto;
@@ -126,7 +133,7 @@ export const InterviewStage = styled.div<VoiceLayoutProps & TextLayoutProps>`
   }
 
   @media (max-height: 42rem) {
-    height: ${({ $voiceMode }) => ($voiceMode ? "clamp(17.5rem, 54vh, 20.5rem)" : "auto")};
+    height: ${({ $voiceMode }) => ($voiceMode ? "clamp(21rem, 57vh, 24rem)" : "auto")};
   }
 `;
 
@@ -135,7 +142,8 @@ export const InterviewBody = styled.div<VoiceLayoutProps & TextLayoutProps>`
   height: 100%;
   min-height: 0;
   display: grid;
-  gap: clamp(0.9rem, 1.8vh, 1.2rem);
+  gap: ${({ $textMode }) =>
+    $textMode ? "clamp(1.1rem, 2.7vh, 1.45rem)" : "clamp(0.9rem, 1.8vh, 1.2rem)"};
   align-content: stretch;
   justify-items: stretch;
 
@@ -174,11 +182,11 @@ export const PreviewFrame = styled.div`
   box-shadow: none;
 
   @media (max-width: 54rem) {
-    height: clamp(18rem, 48vh, 24rem);
+    height: clamp(21rem, 52vh, 28rem);
   }
 
   @media (max-width: 34rem) {
-    height: 16rem;
+    height: 18rem;
   }
 `;
 
@@ -242,16 +250,33 @@ export const QuestionCard = styled.article<VoiceLayoutProps & TextLayoutProps>`
   ${({ $textMode }) =>
     $textMode &&
     css`
-      min-height: clamp(18rem, 36vh, 22rem);
+      height: auto;
+      min-height: clamp(8.8rem, 17vh, 9.5rem);
+      padding: clamp(2rem, 3.5vh, 2.35rem) clamp(1.4rem, 4vw, 2.8rem);
     `}
 
   @media (max-width: 54rem) {
-    height: clamp(18rem, 48vh, 24rem);
+    ${({ $textMode }) =>
+      $textMode
+        ? css`
+            min-height: 10rem;
+          `
+        : css`
+            height: clamp(21rem, 52vh, 28rem);
+          `}
   }
 
   @media (max-width: 34rem) {
-    height: 16rem;
-    padding: 1.6rem 1.25rem;
+    ${({ $textMode }) =>
+      $textMode
+        ? css`
+            min-height: 10.8rem;
+            padding: 1.45rem 1rem;
+          `
+        : css`
+            height: 18rem;
+            padding: 1.6rem 1.25rem;
+          `}
   }
 
   @media (max-height: 42rem) {
@@ -432,56 +457,12 @@ export const IconActionButton = styled.button`
   }
 `;
 
-export const CameraGlyph = styled.span`
-  position: relative;
-  width: 1.2rem;
-  height: 0.82rem;
-  border-radius: 0.16rem;
-  background: currentColor;
-
-  &::after {
-    content: "";
-    position: absolute;
-    right: -0.45rem;
-    top: 0.17rem;
-    width: 0;
-    height: 0;
-    border-top: 0.23rem solid transparent;
-    border-bottom: 0.23rem solid transparent;
-    border-left: 0.45rem solid currentColor;
-  }
-`;
-
-export const MicGlyph = styled.span`
-  position: relative;
-  width: 0.68rem;
-  height: 1.1rem;
-  border: 0.16rem solid currentColor;
-  border-radius: 999rem;
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -0.42rem;
-    width: 0.16rem;
-    height: 0.42rem;
-    border-radius: 999rem;
-    background: currentColor;
-    transform: translateX(-50%);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -0.58rem;
-    width: 0.8rem;
-    height: 0.16rem;
-    border-radius: 999rem;
-    background: currentColor;
-    transform: translateX(-50%);
-  }
+export const ActionIconImage = styled.img<ActionIconImageProps>`
+  width: ${({ $iconType }) => ($iconType === "camera" ? "1.45rem" : "1.05rem")};
+  height: ${({ $iconType }) => ($iconType === "camera" ? "1.45rem" : "1.35rem")};
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
 `;
 
 export const InlineVisualizerWrap = styled.div<VoiceLevelProps>`
@@ -536,67 +517,130 @@ export const InlineVisualizerIcon = styled.img<VoiceLevelProps>`
 
 export const TextAnswerCard = styled.div`
   width: 100%;
-  min-height: clamp(8rem, 18vh, 11rem);
-  padding: 1rem 1.2rem;
+  min-height: clamp(17rem, 34vh, 19.2rem);
+  padding: 0;
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.97);
   border: 0.0625rem solid #dce3ee;
   box-shadow: none;
   min-width: 0;
   box-sizing: border-box;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
 
   @media (max-height: 42rem) {
-    min-height: 6.2rem;
-    padding: 0.8rem 1rem;
+    min-height: 14.5rem;
   }
+`;
+
+export const TextAnswerHeader = styled.div`
+  width: 100%;
+  min-height: 4.55rem;
+  padding: 0 0.9rem 0 1rem;
+  border-bottom: 0.0625rem solid #e1e4ec;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-sizing: border-box;
+
+  @media (max-width: 34rem) {
+    min-height: auto;
+    padding: 0.8rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+export const TextModeControl = styled.div`
+  width: min(100%, 10.8rem);
+  height: 2.9rem;
+  padding: 0.2rem;
+  border-radius: 0.35rem;
+  background: #e9eaf3;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.15rem;
+  box-sizing: border-box;
+`;
+
+export const TextModeButton = styled.button<ModeButtonProps>`
+  min-width: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: ${({ $active }) => ($active ? "#ffffff" : "transparent")};
+  color: ${({ $active }) => ($active ? "#006cff" : "#4b4b4b")};
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+`;
+
+export const TextSubmitButton = styled.button`
+  width: 8.7rem;
+  min-height: 2.6rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #1f7aef;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0.35rem 0.75rem rgba(37, 126, 232, 0.16);
+
+  @media (max-width: 34rem) {
+    width: 100%;
+  }
+`;
+
+export const TextAnswerBody = styled.div`
+  position: relative;
+  min-height: 0;
 `;
 
 export const TextAnswerField = styled.textarea`
   width: 100%;
-  height: auto;
-  min-height: clamp(4.4rem, 7vh, 5.1rem);
+  height: 100%;
+  padding: clamp(2rem, 5vh, 3rem) clamp(1.6rem, 8vw, 10.9rem)
+    clamp(3.2rem, 7vh, 4.4rem);
   border: none;
   outline: none;
   resize: none;
   background: transparent;
   color: #111111;
-  font-size: clamp(1.15rem, 1.45vw, 1.32rem);
-  line-height: 1.7;
+  font-size: clamp(0.95rem, 1.25vw, 1rem);
+  font-weight: 500;
+  line-height: 1.6;
+  box-sizing: border-box;
 
   &::placeholder {
-    color: #98a2b3;
+    color: #7d7d7d;
   }
 
-  @media (max-height: 56rem) {
-    min-height: 3.9rem;
-    font-size: 1rem;
-    line-height: 1.55;
+  @media (max-width: 54rem) {
+    padding-right: 1.6rem;
+  }
+
+  @media (max-width: 34rem) {
+    padding: 1.35rem 1rem 3rem;
   }
 `;
 
-export const TextActionRow = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin: 0 auto;
+export const TextAnswerCount = styled.p`
+  position: absolute;
+  left: clamp(1.6rem, 3.4vw, 2.7rem);
+  bottom: 1.55rem;
+  margin: 0;
+  color: #333333;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
   box-sizing: border-box;
 
-  & > button {
-    flex: 0 0 auto;
-  }
-
-  @media (max-width: 40rem) {
-    gap: 0.75rem;
-
-    & > button {
-      width: clamp(7.6rem, 42vw, 9.6rem);
-    }
-  }
-
-  @media (max-height: 42rem) {
-    gap: 0.85rem;
+  @media (max-width: 34rem) {
+    left: 1rem;
+    bottom: 1.2rem;
+    font-size: 0.9rem;
   }
 `;

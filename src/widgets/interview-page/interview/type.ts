@@ -21,6 +21,7 @@ export interface InterviewContentViewProps {
   isVoiceStarted: boolean;
   mode: InterviewMode;
   onAnswerTextChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onModeChange: (mode: InterviewMode) => void;
   onSubmitText: () => void;
   question: InterviewQuestion;
   voiceLevel: number;

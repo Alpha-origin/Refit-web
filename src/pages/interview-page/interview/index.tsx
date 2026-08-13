@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
 import { useInterviewSession } from "@/features/interview-page/interview/model/useInterviewSession";
+import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
+import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
 import * as S from "@/widgets/interview-page/interview/style";
@@ -53,6 +55,7 @@ const InterviewPage = () => {
   const preparedInterview = getPreparedInterviewFromState(location.state);
   const interviewSession = useInterviewSession(preparedInterview);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
   const isQuestionLoading = interviewSession.currentQuestion === null;
@@ -71,6 +74,10 @@ const InterviewPage = () => {
   };
 
   useEffect(() => {
+    if (!isTimerRunning) {
+      return;
+    }
+
     const intervalId = window.setInterval(() => {
       setElapsedSeconds((previousSeconds) => previousSeconds + 1);
     }, 1000);
@@ -78,38 +85,45 @@ const InterviewPage = () => {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [isTimerRunning]);
+
+  const handleStartVoice = () => {
+    setIsTimerRunning(true);
+    interviewSession.onStartVoice();
+  };
 
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
       <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
-        <S.TopControlBar>
-          <S.TopControls>
-            <S.TimerPill aria-label={`경과 시간 ${formatElapsedTime(elapsedSeconds)}`}>
-              <S.TimerDot aria-hidden="true" />
-              {formatElapsedTime(elapsedSeconds)}
-            </S.TimerPill>
+        {isVoiceMode ? (
+          <S.TopControlBar>
+            <S.TopControls>
+              <S.TimerPill aria-label={`경과 시간 ${formatElapsedTime(elapsedSeconds)}`}>
+                <S.TimerDot aria-hidden="true" />
+                {formatElapsedTime(elapsedSeconds)}
+              </S.TimerPill>
 
-            <S.ModeControl>
-              <S.ModeButton
-                type="button"
-                $active={interviewSession.mode === "text"}
-                aria-pressed={interviewSession.mode === "text"}
-                onClick={() => interviewSession.onModeChange("text")}
-              >
-                텍스트
-              </S.ModeButton>
-              <S.ModeButton
-                type="button"
-                $active={interviewSession.mode === "voice"}
-                aria-pressed={interviewSession.mode === "voice"}
-                onClick={() => interviewSession.onModeChange("voice")}
-              >
-                음성
-              </S.ModeButton>
-            </S.ModeControl>
-          </S.TopControls>
-        </S.TopControlBar>
+              <S.ModeControl>
+                <S.ModeButton
+                  type="button"
+                  $active={interviewSession.mode === "text"}
+                  aria-pressed={interviewSession.mode === "text"}
+                  onClick={() => interviewSession.onModeChange("text")}
+                >
+                  텍스트
+                </S.ModeButton>
+                <S.ModeButton
+                  type="button"
+                  $active={interviewSession.mode === "voice"}
+                  aria-pressed={interviewSession.mode === "voice"}
+                  onClick={() => interviewSession.onModeChange("voice")}
+                >
+                  음성
+                </S.ModeButton>
+              </S.ModeControl>
+            </S.TopControls>
+          </S.TopControlBar>
+        ) : null}
 
         <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
           <InterviewContentView
@@ -117,6 +131,7 @@ const InterviewPage = () => {
             isVoiceStarted={interviewSession.isVoiceStarted}
             mode={interviewSession.mode}
             onAnswerTextChange={interviewSession.onAnswerTextChange}
+            onModeChange={interviewSession.onModeChange}
             onSubmitText={interviewSession.onSubmitText}
             question={currentQuestion}
             voiceLevel={interviewSession.voiceLevel}
@@ -130,35 +145,35 @@ const InterviewPage = () => {
           )}
         </S.InterviewStage>
 
-        {isTextMode ? (
-          <S.TextActionRow>
-            <S.SecondaryAction type="button" onClick={interviewSession.onClearAnswer}>
-              모두삭제
-            </S.SecondaryAction>
-
-            <S.PrimaryAction type="button" onClick={interviewSession.onSubmitText}>
-              완료
-            </S.PrimaryAction>
-          </S.TextActionRow>
-        ) : (
+        {isVoiceMode ? (
           <S.ActionRow>
             <S.IconActionButton type="button" aria-label="카메라 상태">
-              <S.CameraGlyph aria-hidden="true" />
+              <S.ActionIconImage
+                src={CameraIcon}
+                alt=""
+                aria-hidden="true"
+                $iconType="camera"
+              />
             </S.IconActionButton>
             <S.IconActionButton type="button" aria-label="마이크 상태">
-              <S.MicGlyph aria-hidden="true" />
+              <S.ActionIconImage
+                src={MicIcon}
+                alt=""
+                aria-hidden="true"
+                $iconType="mic"
+              />
             </S.IconActionButton>
             {interviewSession.isVoiceStarted ? (
               <S.PrimaryAction type="button" onClick={interviewSession.onCompleteVoice}>
                 완료하기
               </S.PrimaryAction>
             ) : (
-              <S.PrimaryAction type="button" onClick={interviewSession.onStartVoice}>
+              <S.PrimaryAction type="button" onClick={handleStartVoice}>
                 시작하기
               </S.PrimaryAction>
             )}
           </S.ActionRow>
-        )}
+        ) : null}
       </S.Content>
     </S.Container>
   );
