@@ -56,8 +56,10 @@ const InterviewPage = () => {
   const interviewSession = useInterviewSession(preparedInterview);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
+  const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const totalQuestionCount =
     preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
@@ -88,8 +90,25 @@ const InterviewPage = () => {
   }, [isTimerRunning]);
 
   const handleStartVoice = () => {
+    setIsVoiceAnswering(true);
     setIsTimerRunning(true);
     interviewSession.onStartVoice();
+  };
+
+  const handleCompleteVoice = async () => {
+    try {
+      await interviewSession.onCompleteVoice();
+    } finally {
+      setIsVoiceAnswering(false);
+    }
+  };
+
+  const handleModeChange = (nextMode: typeof interviewSession.mode) => {
+    if (nextMode === "text") {
+      setIsVoiceAnswering(false);
+    }
+
+    interviewSession.onModeChange(nextMode);
   };
 
   return (
@@ -108,7 +127,7 @@ const InterviewPage = () => {
                   type="button"
                   $active={interviewSession.mode === "text"}
                   aria-pressed={interviewSession.mode === "text"}
-                  onClick={() => interviewSession.onModeChange("text")}
+                  onClick={() => handleModeChange("text")}
                 >
                   텍스트
                 </S.ModeButton>
@@ -116,7 +135,7 @@ const InterviewPage = () => {
                   type="button"
                   $active={interviewSession.mode === "voice"}
                   aria-pressed={interviewSession.mode === "voice"}
-                  onClick={() => interviewSession.onModeChange("voice")}
+                  onClick={() => handleModeChange("voice")}
                 >
                   음성
                 </S.ModeButton>
@@ -128,10 +147,10 @@ const InterviewPage = () => {
         <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
           <InterviewContentView
             answerText={interviewSession.answerText}
-            isVoiceStarted={interviewSession.isVoiceStarted}
+            isVoiceStarted={isVoiceActionStarted}
             mode={interviewSession.mode}
             onAnswerTextChange={interviewSession.onAnswerTextChange}
-            onModeChange={interviewSession.onModeChange}
+            onModeChange={handleModeChange}
             onSubmitText={interviewSession.onSubmitText}
             question={currentQuestion}
             voiceLevel={interviewSession.voiceLevel}
@@ -163,9 +182,9 @@ const InterviewPage = () => {
                 $iconType="mic"
               />
             </S.IconActionButton>
-            {interviewSession.isVoiceStarted ? (
-              <S.PrimaryAction type="button" onClick={interviewSession.onCompleteVoice}>
-                완료하기
+            {isVoiceActionStarted ? (
+              <S.PrimaryAction type="button" onClick={handleCompleteVoice}>
+                끝내기
               </S.PrimaryAction>
             ) : (
               <S.PrimaryAction type="button" onClick={handleStartVoice}>
