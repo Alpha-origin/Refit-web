@@ -27,35 +27,48 @@ const focusRing = css`
 
 export const Container = styled.div`
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  overflow: visible;
-  padding: clamp(1.75rem, 4vh, 2.7rem) clamp(1.25rem, 6.8vw, 6.125rem)
-    clamp(2rem, 4.6vh, 3.6rem);
+  align-items: stretch;
+  overflow: hidden;
+  padding: clamp(0.9rem, 2.8vh, 2.2rem) clamp(1.25rem, 6.8vw, 6.125rem)
+    clamp(0.9rem, 3vh, 2.4rem);
   box-sizing: border-box;
 
   @media (max-width: 48rem) {
-    padding: 1.25rem 1rem 2rem;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  @media (max-height: 44rem) {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
   }
 `;
 
 export const ContentWrapper = styled.div`
   width: min(100%, 76.5rem);
-  min-height: min(100%, 42.5rem);
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2.4vh, 1.6rem);
+  gap: clamp(0.7rem, 1.8vh, 1.35rem);
   box-sizing: border-box;
+
+  @media (max-height: 44rem) {
+    gap: 0.55rem;
+  }
 `;
 
 export const Sections = styled.div`
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(20rem, 26.5rem) minmax(0, 1fr);
-  gap: clamp(2rem, 4.6vw, 3.75rem);
-  align-items: start;
+  gap: clamp(1.4rem, 4vw, 3.75rem);
+  align-items: stretch;
 
   @media (max-width: 64rem) {
     grid-template-columns: minmax(18rem, 23rem) minmax(0, 1fr);
@@ -65,22 +78,36 @@ export const Sections = styled.div`
   @media (max-width: 52rem) {
     grid-template-columns: 1fr;
   }
+
+  @media (max-height: 44rem) {
+    gap: 1rem;
+  }
 `;
 
 export const ControlColumn = styled.div`
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(3.2rem, 8vh, 5rem);
+  justify-content: space-between;
+  gap: clamp(1.2rem, 4.6vh, 4rem);
 
   @media (max-width: 52rem) {
     gap: 2rem;
+  }
+
+  @media (max-height: 44rem) {
+    gap: 0.75rem;
   }
 `;
 
 export const Section = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: clamp(0.55rem, 1.5vh, 0.9rem);
+
+  @media (max-height: 44rem) {
+    gap: 0.45rem;
+  }
 `;
 
 export const Title = styled.h2`
@@ -89,21 +116,30 @@ export const Title = styled.h2`
   font-size: clamp(1.35rem, 1.2rem + 0.24vw, 1.5rem);
   font-weight: 800;
   line-height: 1.25;
+
+  @media (max-height: 44rem) {
+    font-size: 1.12rem;
+  }
 `;
 
 export const StyleOptionGroup = styled.div`
   display: grid;
-  gap: 0.95rem;
+  gap: clamp(0.55rem, 1.45vh, 0.95rem);
+
+  @media (max-height: 44rem) {
+    gap: 0.45rem;
+  }
 `;
 
 export const StyleOptionButton = styled.button<SelectedProps>`
   width: 100%;
-  min-height: 5.35rem;
+  min-height: clamp(4.05rem, 9vh, 5.35rem);
   display: grid;
   grid-template-columns: 2.25rem minmax(0, 1fr) 1.5rem;
   align-items: center;
   gap: 1rem;
-  padding: 0.95rem 1.85rem 0.95rem 1.25rem;
+  padding: clamp(0.6rem, 1.5vh, 0.95rem) 1.85rem
+    clamp(0.6rem, 1.5vh, 0.95rem) 1.25rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -128,6 +164,13 @@ export const StyleOptionButton = styled.button<SelectedProps>`
   @media (max-width: 30rem) {
     grid-template-columns: 2.1rem minmax(0, 1fr) 1.35rem;
     padding-inline: 1rem;
+  }
+
+  @media (max-height: 44rem) {
+    min-height: 3.45rem;
+    grid-template-columns: 2rem minmax(0, 1fr) 1.35rem;
+    gap: 0.65rem;
+    padding: 0.45rem 0.8rem;
   }
 `;
 
@@ -181,6 +224,10 @@ export const OptionLabel = styled.span`
   font-size: 1rem;
   font-weight: 800;
   line-height: 1.2;
+
+  @media (max-height: 44rem) {
+    font-size: 0.9rem;
+  }
 `;
 
 export const OptionDescription = styled.span`
@@ -188,6 +235,10 @@ export const OptionDescription = styled.span`
   font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.35;
+
+  @media (max-height: 44rem) {
+    font-size: 0.76rem;
+  }
 `;
 
 export const SelectionCircle = styled.span<SelectedProps>`
@@ -218,13 +269,17 @@ export const DifficultyGroup = styled.div`
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
 
+  @media (max-height: 44rem) {
+    gap: 0.55rem;
+  }
+
   @media (max-width: 30rem) {
     grid-template-columns: 1fr;
   }
 `;
 
 export const DifficultyButton = styled.button<SelectedProps>`
-  min-height: 4rem;
+  min-height: clamp(3.1rem, 7vh, 4rem);
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -247,15 +302,27 @@ export const DifficultyButton = styled.button<SelectedProps>`
   }
 
   ${focusRing}
+
+  @media (max-height: 44rem) {
+    min-height: 2.7rem;
+    font-size: 0.92rem;
+  }
 `;
 
 export const InterviewerGrid = styled.div`
+  height: 100%;
+  min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(1.4rem, 2.6vw, 1.85rem);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.8rem, 2.3vh, 1.85rem) clamp(1rem, 2.6vw, 1.85rem);
 
   @media (max-width: 34rem) {
     grid-template-columns: 1fr;
+  }
+
+  @media (max-height: 44rem) {
+    gap: 0.6rem 0.9rem;
   }
 `;
 
@@ -263,7 +330,7 @@ export const InterviewerCard = styled.button<SelectedProps>`
   position: relative;
   overflow: hidden;
   min-width: 0;
-  min-height: clamp(16.75rem, 31vh, 18.4rem);
+  min-height: 0;
   padding: 0;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
@@ -271,6 +338,8 @@ export const InterviewerCard = styled.button<SelectedProps>`
   background: #ffffff;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  flex-direction: column;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -287,18 +356,31 @@ export const InterviewerCard = styled.button<SelectedProps>`
 
 export const InterviewerImage = styled.img`
   width: 100%;
-  height: clamp(8.6rem, 15vw, 10rem);
+  height: clamp(6.7rem, 17vh, 10rem);
+  flex: 0 0 auto;
   display: block;
   object-fit: cover;
+
+  @media (max-height: 44rem) {
+    height: 5.7rem;
+  }
 `;
 
 export const InterviewerBody = styled.div<SelectedProps>`
-  min-height: 8.25rem;
+  min-height: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  padding: 1rem clamp(1.1rem, 2.8vw, 2.65rem) 1.25rem;
+  gap: clamp(0.3rem, 0.9vh, 0.6rem);
+  padding: clamp(0.65rem, 1.6vh, 1rem) clamp(1rem, 2.8vw, 2.65rem)
+    clamp(0.75rem, 1.9vh, 1.25rem);
+  overflow: hidden;
   background: ${({ $selected }) => ($selected ? '#eef6ff' : '#ffffff')};
+
+  @media (max-height: 44rem) {
+    gap: 0.28rem;
+    padding: 0.5rem 0.9rem 0.6rem;
+  }
 `;
 
 export const InterviewerSelectedBadge = styled.span`
@@ -330,12 +412,20 @@ export const InterviewerTitle = styled.h3`
   font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.2;
+
+  @media (max-height: 44rem) {
+    font-size: 0.95rem;
+  }
 `;
 
 export const TagList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+
+  @media (max-height: 44rem) {
+    gap: 0.25rem;
+  }
 `;
 
 export const Tag = styled.span`
@@ -350,6 +440,12 @@ export const Tag = styled.span`
   font-size: 0.68rem;
   font-weight: 700;
   line-height: 1.2;
+
+  @media (max-height: 44rem) {
+    min-height: 0.85rem;
+    padding: 0.04rem 0.25rem;
+    font-size: 0.6rem;
+  }
 `;
 
 export const InterviewerDescription = styled.p`
@@ -358,10 +454,20 @@ export const InterviewerDescription = styled.p`
   font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.35;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  @media (max-height: 44rem) {
+    font-size: 0.68rem;
+    -webkit-line-clamp: 1;
+  }
 `;
 
 export const BottomButtonWrapper = styled.div`
   width: 100%;
+  flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -384,9 +490,14 @@ export const ErrorMessage = styled.p`
 `;
 
 const baseButton = styled.button<ActionButtonProps>`
-  width: min(100%, 10.25rem);
-  min-height: 3.5rem;
+  width: min(100%, 9rem);
+  height: clamp(2.85rem, 6vh, 3.2rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border-radius: 0.5rem;
+  box-sizing: border-box;
   font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.2;
@@ -410,6 +521,11 @@ const baseButton = styled.button<ActionButtonProps>`
 
   @media (max-width: 34rem) {
     width: 100%;
+  }
+
+  @media (max-height: 44rem) {
+    height: 2.65rem;
+    font-size: 1rem;
   }
 `;
 
