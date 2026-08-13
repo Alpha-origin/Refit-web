@@ -292,13 +292,13 @@ export const InterviewerImage = styled.img`
   object-fit: cover;
 `;
 
-export const InterviewerBody = styled.div`
+export const InterviewerBody = styled.div<SelectedProps>`
   min-height: 8.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
   padding: 1rem clamp(1.1rem, 2.8vw, 2.65rem) 1.25rem;
-  background: #ffffff;
+  background: ${({ $selected }) => ($selected ? '#eef6ff' : '#ffffff')};
 `;
 
 export const InterviewerSelectedBadge = styled.span`

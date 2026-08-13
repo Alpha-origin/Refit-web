@@ -114,7 +114,7 @@ const SettingContent = ({
               type="button"
             >
               <S.InterviewerImage src={INTERVIEWER_IMAGES[item.id]} alt="" />
-              <S.InterviewerBody>
+              <S.InterviewerBody $selected={isSelected}>
                 {isSelected ? (
                   <S.InterviewerSelectedBadge aria-hidden="true" />
                 ) : null}
