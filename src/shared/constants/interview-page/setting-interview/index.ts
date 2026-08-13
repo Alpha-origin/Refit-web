@@ -63,3 +63,29 @@ export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
   next: '다음',
 } as const;
+
+export type InterviewStyleOption =
+  (typeof INTERVIEW_SETTING_OPTION_SECTIONS)[0]['options'][number];
+
+export type InterviewDifficultyOption =
+  (typeof INTERVIEW_SETTING_OPTION_SECTIONS)[1]['options'][number];
+
+export type InterviewerId = (typeof INTERVIEW_SETTING_INTERVIEWERS)[number]['id'];
+
+export interface InterviewSettingSelection {
+  difficulty: InterviewDifficultyOption;
+  interviewerId: InterviewerId;
+  style: InterviewStyleOption;
+}
+
+export interface InterviewSettingSelectHandlers {
+  difficulty: (value: InterviewDifficultyOption) => void;
+  interviewer: (value: InterviewerId) => void;
+  style: (value: InterviewStyleOption) => void;
+}
+
+export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
+  difficulty: '쉬움',
+  interviewerId: 1,
+  style: '편함',
+};

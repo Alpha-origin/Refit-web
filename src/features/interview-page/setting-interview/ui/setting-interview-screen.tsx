@@ -1,5 +1,5 @@
 import { useInterviewSetup } from "@/features/interview-page/setting-interview/model/useInterviewSetup";
-import SettingActions from "@/widgets/interview-page/setting-interview/setting-actions";
+import { INTERVIEW_SETTING_ACTION_LABELS } from "@/shared/constants/interview-page/setting-interview";
 import SettingContent from "@/widgets/interview-page/setting-interview/setting-content";
 import * as S from "@/widgets/interview-page/setting-interview/style";
 
@@ -10,23 +10,30 @@ const SettingInterviewScreen = () => {
     <S.Container>
       <S.ContentWrapper>
         <SettingContent
-          onDifficultySelect={setup.onDifficultySelect}
-          onInterviewerSelect={setup.onInterviewerSelect}
-          onStyleSelect={setup.onStyleSelect}
-          selectedDifficulty={setup.selectedDifficulty}
-          selectedInterviewerId={setup.selectedInterviewerId}
-          selectedStyle={setup.selectedStyle}
+          onSelect={setup.select}
+          selection={setup.selection}
         />
         {setup.errorMessage ? (
           <S.ErrorMessage role="alert">{setup.errorMessage}</S.ErrorMessage>
         ) : null}
-        <SettingActions
-          isBusy={setup.isSubmitting}
-          isNextDisabled={!setup.isSelectionComplete || setup.isSubmitting}
-          nextLabel={setup.isSubmitting ? "시작 중..." : undefined}
-          onBack={setup.onBack}
-          onNext={setup.onNext}
-        />
+        <S.BottomButtonWrapper>
+          <S.BackButton
+            $disabled={setup.isSubmitting}
+            disabled={setup.isSubmitting}
+            type="button"
+            onClick={setup.onBack}
+          >
+            {INTERVIEW_SETTING_ACTION_LABELS.back}
+          </S.BackButton>
+          <S.NextButton
+            $disabled={setup.isNextDisabled}
+            disabled={setup.isNextDisabled}
+            type="button"
+            onClick={setup.onNext}
+          >
+            {setup.isSubmitting ? "시작 중..." : INTERVIEW_SETTING_ACTION_LABELS.next}
+          </S.NextButton>
+        </S.BottomButtonWrapper>
       </S.ContentWrapper>
       {setup.isSubmitting ? (
         <S.LoadingOverlay role="status" aria-live="polite">
