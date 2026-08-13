@@ -35,7 +35,7 @@ export const OutletArea = styled.div<RouteLayoutProps>`
   align-items: ${({ $isInterviewRoute }) => ($isInterviewRoute ? "stretch" : "start")};
   justify-items: stretch;
   min-height: 0;
-  padding-bottom: ${({ $isInterviewRoute }) => ($isInterviewRoute ? 0 : "1.5rem")};
+  padding-bottom: ${({ $isInterviewRoute }) => ($isInterviewRoute ? 0 : "0.5rem")};
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: ${({ $isInterviewRoute }) => ($isInterviewRoute ? "hidden" : "auto")};
