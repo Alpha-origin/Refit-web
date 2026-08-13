@@ -51,11 +51,11 @@ const buildUniquePersonaName = (personaName: string) =>
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
   const [selectedStyle, setSelectedStyle] =
-    useState<InterviewStyleOption | null>(null);
+    useState<InterviewStyleOption | null>("편함");
   const [selectedDifficulty, setSelectedDifficulty] =
-    useState<InterviewDifficultyOption | null>(null);
+    useState<InterviewDifficultyOption | null>("쉬움");
   const [selectedInterviewerId, setSelectedInterviewerId] =
-    useState<InterviewerId | null>(null);
+    useState<InterviewerId | null>(1);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 

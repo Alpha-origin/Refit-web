@@ -11,36 +11,55 @@ export const INTERVIEW_SETTING_OPTION_SECTIONS = [
   },
 ] as const;
 
+export const INTERVIEW_SETTING_STYLE_META = {
+  편함: {
+    description: '친절하고 편안한 분위기',
+    icon: 'smile',
+  },
+  일반: {
+    description: '실전과 비슷한 일반 면접 수준',
+    icon: 'neutral',
+  },
+  압박: {
+    description: '긴장감 넘치는 압박 면접',
+    icon: 'pressure',
+  },
+} as const;
+
 export const INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE = '면접관';
 
 export const INTERVIEW_SETTING_INTERVIEWERS = [
   {
     id: 1,
-    name: '한지우',
-    personaName: '한지우',
-    tags: ['차분함', '분석형', '백엔드'],
+    name: '면접관1',
+    personaName: '면접관1',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.',
   },
   {
     id: 2,
-    name: '강민서',
-    personaName: '강민서',
-    tags: ['친절함', '대화형', '프론트엔드'],
+    name: '면접관2',
+    personaName: '면접관2',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '문제 해결 프로세스와 데이터 기반의 의사결정 능력을 평가합니다.',
   },
   {
     id: 3,
-    name: '오태현',
-    personaName: '오태현',
-    tags: ['압박형', '직설적', '시스템 설계'],
+    name: '면접관3',
+    personaName: '면접관3',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.',
   },
   {
     id: 4,
-    name: '서가은',
-    personaName: '서가은',
-    tags: ['꼼꼼함', '실무형', '협업 질문'],
+    name: '면접관4',
+    personaName: '면접관4',
+    tags: ['성격', '말투', '전문 분야'],
+    description: '협업 능력과 가치관이 팀의 문화와 얼마나 잘 부합하는지 확인합니다.',
   },
 ] as const;
 
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
-  next: '면접 시작하기',
+  next: '다음',
 } as const;
