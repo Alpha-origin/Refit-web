@@ -1,37 +1,26 @@
-import * as S from '../style';
 import {
   SETTING_DIFFICULTY_SECTION,
-  SETTING_INTERVIEWER_CARDS,
   SETTING_STYLE_SECTION,
-} from './data';
+} from '../data';
+import * as S from '../style';
 import type {
   DifficultyOptionsProps,
-  InterviewerOptionsProps,
-  SettingContentProps,
+  SettingOptionsProps,
   StyleOptionsProps,
 } from './type';
 
-const SettingContent = ({ onSelect, selection }: SettingContentProps) => {
-  return (
-    <S.Sections>
-      <S.ControlColumn>
-        <StyleOptions
-          onSelect={onSelect.style}
-          selectedValue={selection.style}
-        />
-        <DifficultyOptions
-          onSelect={onSelect.difficulty}
-          selectedValue={selection.difficulty}
-        />
-      </S.ControlColumn>
-
-      <InterviewerOptions
-        onSelect={onSelect.interviewer}
-        selectedValue={selection.interviewerId}
-      />
-    </S.Sections>
-  );
-};
+const SettingOptions = ({ onSelect, selection }: SettingOptionsProps) => (
+  <S.ControlColumn>
+    <StyleOptions
+      onSelect={onSelect.style}
+      selectedValue={selection.style}
+    />
+    <DifficultyOptions
+      onSelect={onSelect.difficulty}
+      selectedValue={selection.difficulty}
+    />
+  </S.ControlColumn>
+);
 
 const StyleOptions = ({ onSelect, selectedValue }: StyleOptionsProps) => (
   <S.Section>
@@ -99,40 +88,4 @@ const DifficultyOptions = ({
   </S.Section>
 );
 
-const InterviewerOptions = ({
-  onSelect,
-  selectedValue,
-}: InterviewerOptionsProps) => (
-  <S.InterviewerGrid role="radiogroup" aria-label="면접관 선택">
-    {SETTING_INTERVIEWER_CARDS.map((interviewer) => {
-      const isSelected = selectedValue === interviewer.id;
-
-      return (
-        <S.InterviewerCard
-          key={interviewer.id}
-          $selected={isSelected}
-          aria-checked={isSelected}
-          onClick={() => onSelect(interviewer.id)}
-          role="radio"
-          type="button"
-        >
-          <S.InterviewerImage src={interviewer.image} alt="" />
-          <S.InterviewerBody $selected={isSelected}>
-            {isSelected ? <S.InterviewerSelectedBadge aria-hidden="true" /> : null}
-            <S.InterviewerTitle>{interviewer.name}</S.InterviewerTitle>
-            <S.TagList>
-              {interviewer.tags.map((tag) => (
-                <S.Tag key={tag}>{tag}</S.Tag>
-              ))}
-            </S.TagList>
-            <S.InterviewerDescription>
-              {interviewer.description}
-            </S.InterviewerDescription>
-          </S.InterviewerBody>
-        </S.InterviewerCard>
-      );
-    })}
-  </S.InterviewerGrid>
-);
-
-export default SettingContent;
+export default SettingOptions;

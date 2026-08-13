@@ -37,3 +37,5 @@ export const SETTING_INTERVIEWER_CARDS = INTERVIEW_SETTING_INTERVIEWERS.map(
     image: INTERVIEWER_IMAGES[interviewer.id],
   }),
 );
+
+export type SettingInterviewerCard = (typeof SETTING_INTERVIEWER_CARDS)[number];

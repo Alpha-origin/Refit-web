@@ -1,14 +1,13 @@
 import type {
   InterviewDifficultyOption,
-  InterviewerId,
   InterviewSettingSelectHandlers,
   InterviewSettingSelection,
   InterviewStyleOption,
 } from '@/shared/constants/interview-page/setting-interview';
 
-export interface SettingContentProps {
-  onSelect: InterviewSettingSelectHandlers;
-  selection: InterviewSettingSelection;
+export interface SettingOptionsProps {
+  onSelect: Pick<InterviewSettingSelectHandlers, 'difficulty' | 'style'>;
+  selection: Pick<InterviewSettingSelection, 'difficulty' | 'style'>;
 }
 
 export interface StyleOptionsProps {
@@ -19,9 +18,4 @@ export interface StyleOptionsProps {
 export interface DifficultyOptionsProps {
   onSelect: (value: InterviewDifficultyOption) => void;
   selectedValue: InterviewDifficultyOption;
-}
-
-export interface InterviewerOptionsProps {
-  onSelect: (value: InterviewerId) => void;
-  selectedValue: InterviewerId;
 }
