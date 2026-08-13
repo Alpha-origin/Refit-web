@@ -1,16 +1,9 @@
 import styled, { css, keyframes } from 'styled-components';
-
-interface SelectedProps {
-  $selected: boolean;
-}
-
-interface ActionButtonProps {
-  $disabled?: boolean;
-}
-
-interface StyleIconProps {
-  $variant: 'smile' | 'neutral' | 'pressure';
-}
+import type {
+  ActionButtonProps,
+  SelectedProps,
+  StyleIconProps,
+} from './type';
 
 const spin = keyframes`
   to {

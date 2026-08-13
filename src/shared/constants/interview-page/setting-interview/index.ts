@@ -1,3 +1,11 @@
+import type {
+  InterviewSettingInterviewer,
+  InterviewSettingOptionSection,
+  InterviewSettingSelection,
+  InterviewSettingStyleMeta,
+  InterviewStyleOption,
+} from './type';
+
 export const INTERVIEW_SETTING_OPTION_SECTIONS = [
   {
     key: 'style',
@@ -9,7 +17,7 @@ export const INTERVIEW_SETTING_OPTION_SECTIONS = [
     title: '면접 난이도',
     options: ['쉬움', '보통', '어려움'],
   },
-] as const;
+] as const satisfies readonly InterviewSettingOptionSection[];
 
 export const INTERVIEW_SETTING_STYLE_META = {
   편함: {
@@ -24,7 +32,7 @@ export const INTERVIEW_SETTING_STYLE_META = {
     description: '긴장감 넘치는 압박 면접',
     icon: 'pressure',
   },
-} as const;
+} as const satisfies Record<InterviewStyleOption, InterviewSettingStyleMeta>;
 
 export const INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE = '면접관';
 
@@ -57,35 +65,24 @@ export const INTERVIEW_SETTING_INTERVIEWERS = [
     tags: ['성격', '말투', '전문 분야'],
     description: '협업 능력과 가치관이 팀의 문화와 얼마나 잘 부합하는지 확인합니다.',
   },
-] as const;
+] as const satisfies readonly InterviewSettingInterviewer[];
 
 export const INTERVIEW_SETTING_ACTION_LABELS = {
   back: '돌아가기',
   next: '다음',
 } as const;
 
-export type InterviewStyleOption =
-  (typeof INTERVIEW_SETTING_OPTION_SECTIONS)[0]['options'][number];
-
-export type InterviewDifficultyOption =
-  (typeof INTERVIEW_SETTING_OPTION_SECTIONS)[1]['options'][number];
-
-export type InterviewerId = (typeof INTERVIEW_SETTING_INTERVIEWERS)[number]['id'];
-
-export interface InterviewSettingSelection {
-  difficulty: InterviewDifficultyOption;
-  interviewerId: InterviewerId;
-  style: InterviewStyleOption;
-}
-
-export interface InterviewSettingSelectHandlers {
-  difficulty: (value: InterviewDifficultyOption) => void;
-  interviewer: (value: InterviewerId) => void;
-  style: (value: InterviewStyleOption) => void;
-}
-
 export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
   difficulty: '쉬움',
   interviewerId: 1,
   style: '편함',
 };
+
+export type {
+  InterviewDifficultyOption,
+  InterviewerId,
+  InterviewSettingSelectHandlers,
+  InterviewSettingSelection,
+  InterviewSettingStyleIcon,
+  InterviewStyleOption,
+} from './type';

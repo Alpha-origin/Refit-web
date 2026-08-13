@@ -1,36 +1,15 @@
-import type {
-  InterviewDifficultyOption,
-  InterviewerId,
-  InterviewSettingSelectHandlers,
-  InterviewSettingSelection,
-  InterviewStyleOption,
-} from '@/shared/constants/interview-page/setting-interview';
 import * as S from '../style';
 import {
   SETTING_DIFFICULTY_SECTION,
   SETTING_INTERVIEWER_CARDS,
   SETTING_STYLE_SECTION,
 } from './data';
-
-interface SettingContentProps {
-  onSelect: InterviewSettingSelectHandlers;
-  selection: InterviewSettingSelection;
-}
-
-interface StyleOptionsProps {
-  onSelect: (value: InterviewStyleOption) => void;
-  selectedValue: InterviewStyleOption;
-}
-
-interface DifficultyOptionsProps {
-  onSelect: (value: InterviewDifficultyOption) => void;
-  selectedValue: InterviewDifficultyOption;
-}
-
-interface InterviewerOptionsProps {
-  onSelect: (value: InterviewerId) => void;
-  selectedValue: InterviewerId;
-}
+import type {
+  DifficultyOptionsProps,
+  InterviewerOptionsProps,
+  SettingContentProps,
+  StyleOptionsProps,
+} from './type';
 
 const SettingContent = ({ onSelect, selection }: SettingContentProps) => {
   return (
