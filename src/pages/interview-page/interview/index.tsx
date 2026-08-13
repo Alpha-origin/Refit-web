@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
@@ -20,52 +21,144 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
+const FALLBACK_TOTAL_QUESTION_COUNT = 10;
+
+const formatElapsedTime = (elapsedSeconds: number) => {
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const seconds = elapsedSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+};
+
+const formatQuestionLabel = ({
+  currentQuestionNumber,
+  isLoading,
+  totalQuestionCount,
+}: {
+  currentQuestionNumber: number;
+  isLoading: boolean;
+  totalQuestionCount: number;
+}) => {
+  if (isLoading) {
+    return "Question -- / --";
+  }
+
+  return `Question ${String(currentQuestionNumber).padStart(2, "0")} / ${String(
+    totalQuestionCount,
+  ).padStart(2, "0")}`;
+};
+
 const InterviewPage = () => {
   const location = useLocation();
   const preparedInterview = getPreparedInterviewFromState(location.state);
   const interviewSession = useInterviewSession(preparedInterview);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
   const isQuestionLoading = interviewSession.currentQuestion === null;
+  const totalQuestionCount =
+    preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
+  const currentQuestionNumber = Math.max(interviewSession.displayQuestionNumber, 1);
   const currentQuestion = {
-    id: isQuestionLoading
-      ? "준비중"
-      : String(interviewSession.currentQuestion?.questionId),
+    id: formatQuestionLabel({
+      currentQuestionNumber,
+      isLoading: isQuestionLoading,
+      totalQuestionCount,
+    }),
     text:
       interviewSession.currentQuestion?.content ??
       "질문을 불러오는 중입니다. 잠시만 기다려주세요.",
   };
-  const answerStatus = isQuestionLoading
-    ? "질문을 준비하고 있어요."
-    : interviewSession.answerStatus;
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setElapsedSeconds((previousSeconds) => previousSeconds + 1);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
       <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
-        {isVoiceMode && (
-          <InterviewCameraView
-            cameraState={interviewSession.cameraState}
-            videoRef={interviewSession.videoRef}
-          />
-        )}
+        <S.TopControlBar>
+          <S.TopControls>
+            <S.TimerPill aria-label={`경과 시간 ${formatElapsedTime(elapsedSeconds)}`}>
+              <S.TimerDot aria-hidden="true" />
+              {formatElapsedTime(elapsedSeconds)}
+            </S.TimerPill>
 
-        <InterviewContentView
-          answerStatus={answerStatus}
-          answerText={interviewSession.answerText}
-          isVoiceStarted={interviewSession.isVoiceStarted}
-          mode={interviewSession.mode}
-          questionAudioStatus={interviewSession.questionAudioStatus}
-          onAnswerTextChange={interviewSession.onAnswerTextChange}
-          onClearAnswer={interviewSession.onClearAnswer}
-          onCompleteVoice={interviewSession.onCompleteVoice}
-          onModeChange={interviewSession.onModeChange}
-          onQuitInterview={interviewSession.onQuitInterview}
-          onStartVoice={interviewSession.onStartVoice}
-          onSubmitText={interviewSession.onSubmitText}
-          onToggleQuestionAudio={interviewSession.onToggleQuestionAudio}
-          question={currentQuestion}
-          voiceLevel={interviewSession.voiceLevel}
-        />
+            <S.ModeControl>
+              <S.ModeButton
+                type="button"
+                $active={interviewSession.mode === "text"}
+                aria-pressed={interviewSession.mode === "text"}
+                onClick={() => interviewSession.onModeChange("text")}
+              >
+                텍스트
+              </S.ModeButton>
+              <S.ModeButton
+                type="button"
+                $active={interviewSession.mode === "voice"}
+                aria-pressed={interviewSession.mode === "voice"}
+                onClick={() => interviewSession.onModeChange("voice")}
+              >
+                음성
+              </S.ModeButton>
+            </S.ModeControl>
+          </S.TopControls>
+        </S.TopControlBar>
+
+        <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
+          <InterviewContentView
+            answerText={interviewSession.answerText}
+            isVoiceStarted={interviewSession.isVoiceStarted}
+            mode={interviewSession.mode}
+            onAnswerTextChange={interviewSession.onAnswerTextChange}
+            onSubmitText={interviewSession.onSubmitText}
+            question={currentQuestion}
+            voiceLevel={interviewSession.voiceLevel}
+          />
+
+          {isVoiceMode && (
+            <InterviewCameraView
+              cameraState={interviewSession.cameraState}
+              videoRef={interviewSession.videoRef}
+            />
+          )}
+        </S.InterviewStage>
+
+        {isTextMode ? (
+          <S.TextActionRow>
+            <S.SecondaryAction type="button" onClick={interviewSession.onClearAnswer}>
+              모두삭제
+            </S.SecondaryAction>
+
+            <S.PrimaryAction type="button" onClick={interviewSession.onSubmitText}>
+              완료
+            </S.PrimaryAction>
+          </S.TextActionRow>
+        ) : (
+          <S.ActionRow>
+            <S.IconActionButton type="button" aria-label="카메라 상태">
+              <S.CameraGlyph aria-hidden="true" />
+            </S.IconActionButton>
+            <S.IconActionButton type="button" aria-label="마이크 상태">
+              <S.MicGlyph aria-hidden="true" />
+            </S.IconActionButton>
+            {interviewSession.isVoiceStarted ? (
+              <S.PrimaryAction type="button" onClick={interviewSession.onCompleteVoice}>
+                완료하기
+              </S.PrimaryAction>
+            ) : (
+              <S.PrimaryAction type="button" onClick={interviewSession.onStartVoice}>
+                시작하기
+              </S.PrimaryAction>
+            )}
+          </S.ActionRow>
+        )}
       </S.Content>
     </S.Container>
   );

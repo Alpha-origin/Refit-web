@@ -17,19 +17,11 @@ export interface InterviewCameraViewProps {
 }
 
 export interface InterviewContentViewProps {
-  answerStatus: string;
   answerText: string;
   isVoiceStarted: boolean;
   mode: InterviewMode;
-  questionAudioStatus: QuestionAudioStatus;
   onAnswerTextChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
-  onClearAnswer: () => void;
-  onCompleteVoice: () => void;
-  onModeChange: (mode: InterviewMode) => void;
-  onQuitInterview: () => void | Promise<void>;
-  onStartVoice: () => void;
   onSubmitText: () => void;
-  onToggleQuestionAudio: () => void;
   question: InterviewQuestion;
   voiceLevel: number;
 }

@@ -21,162 +21,164 @@ interface VoiceLevelProps {
 }
 
 export const Container = styled.section<VoiceLayoutProps & TextLayoutProps>`
-  width: 100vw;
-  max-width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100%;
-  min-height: 100%;
+  min-height: 0;
   align-self: stretch;
-  margin-left: calc(50% - 50vw);
   overflow: hidden;
-  padding: clamp(0.4rem, 1vh, 0.9rem) clamp(1rem, 2.4vw, 1.9rem)
-    clamp(1.4rem, 2.8vh, 2.15rem);
+  padding: clamp(1rem, 2.1vh, 1.45rem) clamp(1rem, 6.9vw, 5.5rem)
+    clamp(0.9rem, 2vh, 1.4rem);
   box-sizing: border-box;
 
   ${({ $voiceMode, $textMode }) =>
     ($voiceMode || $textMode) &&
     css`
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
     `}
 
-  @media (max-width: 48rem) {
-    width: 100%;
-    max-width: 100%;
-    margin-left: 0;
+  @media (max-width: 54rem) {
     overflow: auto;
-    padding: 0.5rem 1rem 1rem;
+    padding: 0.9rem 1rem 1rem;
   }
 
-  @media (max-height: 56rem) {
+  @media (max-height: 42rem) {
     overflow-y: auto;
-    padding: 0.35rem 1rem 0.9rem;
+    padding-top: 0.55rem;
+    padding-bottom: 0.75rem;
   }
 `;
 
 export const Content = styled.div<VoiceLayoutProps & TextLayoutProps>`
-  width: ${({ $voiceMode, $textMode }) =>
-    $voiceMode ? "min(100%, 88rem)" : $textMode ? "min(100%, 80rem)" : "100%"};
-  height: ${({ $voiceMode, $textMode }) => ($voiceMode || $textMode ? "auto" : "100%")};
-  min-height: ${({ $voiceMode, $textMode }) =>
-    $voiceMode || $textMode ? "0" : "100%"};
+  width: min(100%, 64.5rem);
+  height: 100%;
+  min-height: 0;
   margin: 0 auto;
-  padding-top: clamp(0.65rem, 1.4vh, 1rem);
-  gap: clamp(2.2rem, 4.2vh, 3rem);
+  display: grid;
+  grid-template-rows: auto minmax(0, auto) auto;
+  align-content: center;
+  gap: clamp(0.9rem, 2.5vh, 1.55rem);
   box-sizing: border-box;
 
-  ${({ $voiceMode, $textMode }) =>
-    $voiceMode
-      ? css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          flex: 0 0 auto;
-        `
-      : $textMode
-        ? css`
-            height: auto;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            flex: 0 0 auto;
-          `
-      : css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: flex-start;
-        `}
+  @media (max-width: 54rem) {
+    height: auto;
+    min-height: 100%;
+    align-content: start;
+  }
 
-  @media (max-height: 56rem) {
-    padding-top: 0.25rem;
-    gap: 1.25rem;
+  @media (max-height: 42rem) {
+    gap: 0.8rem;
+  }
+`;
 
-    ${({ $voiceMode, $textMode }) =>
-      $voiceMode
-        ? css`
-            align-items: center;
-            justify-content: center;
-          `
-        : $textMode &&
-          css`
-            align-items: stretch;
-          `}
+export const TopControlBar = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+`;
+
+export const TopControls = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+`;
+
+export const TimerPill = styled.div`
+  min-width: 6.8rem;
+  height: 2.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0 1rem;
+  border-radius: 999rem;
+  background: #eceef2;
+  color: #3f3f46;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+`;
+
+export const TimerDot = styled.span`
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #db4545;
+`;
+
+export const InterviewStage = styled.div<VoiceLayoutProps & TextLayoutProps>`
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: ${({ $voiceMode }) =>
+    $voiceMode ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)"};
+  gap: clamp(0.9rem, 1.5vw, 1rem);
+  align-items: stretch;
+  justify-items: stretch;
+  height: ${({ $voiceMode }) => ($voiceMode ? "clamp(22rem, 49vh, 25.6rem)" : "auto")};
+
+  @media (max-width: 54rem) {
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-height: 42rem) {
+    height: ${({ $voiceMode }) => ($voiceMode ? "clamp(17.5rem, 54vh, 20.5rem)" : "auto")};
   }
 `;
 
 export const InterviewBody = styled.div<VoiceLayoutProps & TextLayoutProps>`
-  width: min(100%, 78rem);
-  gap: clamp(1.5rem, 2.2vh, 1.95rem);
+  width: 100%;
+  height: 100%;
   min-height: 0;
+  display: grid;
+  gap: clamp(0.9rem, 1.8vh, 1.2rem);
+  align-content: stretch;
+  justify-items: stretch;
 
   ${({ $voiceMode, $textMode }) =>
     $voiceMode
       ? css`
-          height: auto;
-          display: grid;
-          grid-template-rows: auto auto;
-          align-content: center;
-          align-items: center;
-          justify-items: center;
+          grid-template-rows: minmax(0, 1fr);
         `
       : $textMode
         ? css`
-            height: clamp(29rem, 56vh, 34rem);
-            display: grid;
-            grid-template-rows: minmax(0, 1fr) auto auto;
-            align-content: stretch;
-            justify-items: center;
+            height: auto;
+            grid-template-rows: auto auto;
           `
-      : css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+        : css`
+            grid-template-rows: auto;
         `}
-
-  @media (max-height: 56rem) {
-    gap: 0.9rem;
-
-    ${({ $textMode }) =>
-      $textMode &&
-      css`
-        height: auto;
-        grid-template-rows: auto auto auto;
-        align-content: start;
-      `}
-  }
 `;
 
 export const PreviewSection = styled.div`
   width: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   justify-content: center;
 `;
 
 export const PreviewFrame = styled.div`
   position: relative;
-  width: min(100%, clamp(30rem, 33vw, 34rem));
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: #f6faff;
-  border: none;
-  box-shadow: 0 0.75rem 2rem rgba(69, 100, 167, 0.12);
+  border: 0.0625rem solid #d6dce6;
+  box-shadow: none;
 
-  @media (max-width: 40rem) {
-    width: 100%;
-    border-radius: 0.85rem;
+  @media (max-width: 54rem) {
+    height: clamp(18rem, 48vh, 24rem);
   }
 
-  @media (max-height: 56rem) {
-    width: min(100%, clamp(24rem, 29vw, 28rem));
-  }
-
-  @media (max-height: 46rem) {
-    width: min(100%, clamp(21rem, 26vw, 24rem));
+  @media (max-width: 34rem) {
+    height: 16rem;
   }
 `;
 
@@ -225,102 +227,46 @@ export const CameraFallbackText = styled.p`
 
 export const QuestionCard = styled.article<VoiceLayoutProps & TextLayoutProps>`
   width: 100%;
-  min-height: clamp(18.5rem, 29vh, 20.75rem);
-  padding: clamp(1.55rem, 2vw, 1.95rem) clamp(2rem, 2.6vw, 2.45rem)
-    clamp(1.35rem, 1.8vw, 1.65rem);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.98);
-  border: 0.0625rem solid rgba(220, 232, 251, 0.76);
-  box-shadow: 0 1rem 2.5rem rgba(112, 143, 206, 0.12);
+  height: 100%;
+  min-height: 0;
+  padding: clamp(2.5rem, 5vh, 3.6rem) clamp(2rem, 4vw, 4rem);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.96);
+  border: 0.0625rem solid #d8dde7;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
-  gap: 0.95rem;
+  justify-content: center;
   min-width: 0;
 
-  ${({ $voiceMode, $textMode }) =>
-    $voiceMode
-      ? css`
-          min-height: clamp(16.5rem, 25vh, 18.5rem);
-          padding: clamp(1.4rem, 1.85vw, 1.7rem) clamp(1.85rem, 2.4vw, 2.25rem)
-            clamp(1.2rem, 1.55vw, 1.4rem);
-          align-self: start;
-        `
-      : $textMode &&
-        css`
-          height: 100%;
-          min-height: 0;
-        `}
+  ${({ $textMode }) =>
+    $textMode &&
+    css`
+      min-height: clamp(18rem, 36vh, 22rem);
+    `}
 
-  @media (max-width: 40rem) {
-    border-radius: 0.9rem;
+  @media (max-width: 54rem) {
+    height: clamp(18rem, 48vh, 24rem);
   }
 
-  @media (max-height: 56rem) {
-    min-height: clamp(14.75rem, 23vh, 16.5rem);
-    padding: 1.15rem 1.5rem 1.05rem;
-    gap: 0.7rem;
+  @media (max-width: 34rem) {
+    height: 16rem;
+    padding: 1.6rem 1.25rem;
   }
 
-  @media (max-height: 46rem) {
-    min-height: clamp(13.25rem, 21vh, 14.75rem);
-    padding: 1rem 1.35rem 0.95rem;
+  @media (max-height: 42rem) {
+    padding: 1.55rem 1.6rem;
   }
-`;
-
-export const QuestionMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
 `;
 
 export const QuestionLabel = styled.span`
-  color: #6b7a95;
-  font-size: clamp(1.7rem, 2.1vw, 2.1rem);
+  color: #006cff;
+  font-size: clamp(0.78rem, 0.9vw, 0.9rem);
   font-weight: 800;
-  letter-spacing: -0.05rem;
+  line-height: 1.2;
 
-  @media (max-height: 56rem) {
-    font-size: 1.45rem;
-  }
-`;
-
-export const QuitButton = styled.button`
-  min-width: 8.7rem;
-  min-height: 2.8rem;
-  padding: 0.55rem 1.05rem;
-  border: 0.0625rem solid #d8e6fb;
-  border-radius: 0.75rem;
-  background: #ffffff;
-  color: #111111;
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-
-  &:hover {
-    background: #f7fbff;
-    border-color: #b8d5ff;
-    color: #256fdb;
-    transform: translateY(-0.04rem);
-  }
-
-  @media (max-height: 56rem) {
-    min-width: 8rem;
-    min-height: 2.5rem;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.92rem;
-  }
-
-  @media (max-width: 40rem) {
-    min-width: 7.6rem;
-    font-size: 0.88rem;
+  @media (max-height: 42rem) {
+    font-size: 0.74rem;
   }
 `;
 
@@ -330,23 +276,18 @@ export const QuestionBody = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(0.45rem, 0.9vw, 0.85rem) 0 clamp(0.2rem, 0.5vw, 0.45rem);
-
-  @media (max-height: 56rem) {
-    padding: 0.15rem 0;
-  }
+  padding: 0;
 `;
 
 export const QuestionContentStack = styled.div`
-  width: min(100%, 58rem);
+  width: min(100%, 30rem);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(1.2rem, 2vh, 1.8rem);
+  gap: clamp(1.35rem, 3.2vh, 2.25rem);
 
-  @media (max-height: 56rem) {
-    width: min(100%, 52rem);
+  @media (max-height: 42rem) {
     gap: 1rem;
   }
 `;
@@ -356,92 +297,15 @@ export const QuestionText = styled.p`
   margin: 0;
   text-align: center;
   color: #111111;
-  font-size: clamp(1.75rem, 2.05vw, 2.15rem);
+  font-size: clamp(1.28rem, 1.6vw, 1.58rem);
   font-weight: 500;
-  line-height: 1.46;
-  letter-spacing: -0.05rem;
+  line-height: 1.34;
 
-  @media (max-height: 56rem) {
-    font-size: 1.5rem;
-    line-height: 1.38;
+  @media (max-width: 34rem) {
+    font-size: 1.12rem;
   }
 
-  @media (max-height: 46rem) {
-    font-size: 1.28rem;
-  }
-`;
-
-export const QuestionFooter = styled.div`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: end;
-  gap: 1rem;
-
-  @media (max-width: 40rem) {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 0.85rem;
-  }
-`;
-
-export const FooterSpacer = styled.div`
-  min-width: 0;
-
-  @media (max-width: 40rem) {
-    display: none;
-  }
-`;
-
-export const QuestionAudioButton = styled.button`
-  justify-self: start;
-  min-width: 6.8rem;
-  min-height: 2.8rem;
-  padding: 0.55rem 1rem;
-  border: 0.0625rem solid #d8e6fb;
-  border-radius: 999rem;
-  background: rgba(255, 255, 255, 0.96);
-  color: #256fdb;
-  font-size: 0.95rem;
-  font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background: #f4f9ff;
-    border-color: #b8d5ff;
-    transform: translateY(-0.04rem);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: default;
-  }
-
-  @media (max-width: 40rem) {
-    justify-self: center;
-  }
-
-  @media (max-height: 56rem) {
-    min-height: 2.5rem;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.88rem;
-  }
-`;
-
-export const AnswerStatus = styled.p`
-  margin: 0;
-  text-align: center;
-  justify-self: center;
-  color: #5b6ce1;
-  font-size: clamp(1.2rem, 1.45vw, 1.55rem);
-  font-weight: 700;
-
-  @media (max-height: 56rem) {
+  @media (max-height: 42rem) {
     font-size: 1.08rem;
   }
 `;
@@ -450,30 +314,24 @@ export const ModeControl = styled.div`
   justify-self: end;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem;
-  border-radius: 0.7rem;
-  border: 0.0625rem solid #d8e6fb;
-  background: #ffffff;
-  box-shadow: 0 0.35rem 1rem rgba(107, 122, 149, 0.08);
-
-  @media (max-width: 40rem) {
-    justify-self: center;
-  }
-
-  @media (max-height: 56rem) {
-    padding: 0.2rem;
-  }
+  gap: 0.15rem;
+  height: 2.05rem;
+  padding: 0.18rem;
+  border-radius: 0.35rem;
+  border: 0.0625rem solid #dde2eb;
+  background: #eef0f4;
+  box-shadow: 0 0.25rem 0.8rem rgba(15, 23, 42, 0.08);
 `;
 
 export const ModeButton = styled.button<ModeButtonProps>`
-  min-width: 4.3rem;
-  padding: 0.42rem 0.9rem;
+  min-width: 3.65rem;
+  height: 1.65rem;
+  padding: 0 0.65rem;
   border: none;
-  border-radius: 0.64rem;
-  background: ${({ $active }) => ($active ? "#2f6df6" : "transparent")};
-  color: ${({ $active }) => ($active ? "#ffffff" : "#111827")};
-  font-size: 0.98rem;
+  border-radius: 0.25rem;
+  background: ${({ $active }) => ($active ? "#ffffff" : "transparent")};
+  color: ${({ $active }) => ($active ? "#006cff" : "#111111")};
+  font-size: 0.88rem;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -482,43 +340,32 @@ export const ModeButton = styled.button<ModeButtonProps>`
     color 0.2s ease;
 
   &:hover {
-    background: ${({ $active }) => ($active ? "#2f6df6" : "#f3f6fb")};
-  }
-
-  @media (max-height: 56rem) {
-    min-width: 3.85rem;
-    padding: 0.36rem 0.75rem;
-    font-size: 0.88rem;
+    background: ${({ $active }) => ($active ? "#ffffff" : "#e4e9f1")};
   }
 `;
 
 export const ActionRow = styled.div`
-  width: min(100%, 34rem);
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(1rem, 1.6vw, 1.4rem);
+  gap: 1rem;
 
-  @media (max-width: 40rem) {
-    width: 100%;
-    gap: 0.9rem;
-  }
-
-  @media (max-height: 56rem) {
-    width: min(100%, 31rem);
-    gap: 0.85rem;
+  @media (max-width: 34rem) {
+    gap: 0.7rem;
   }
 `;
 
 const actionButtonBase = styled.button`
-  width: clamp(9.8rem, 11vw, 10.8rem);
-  min-height: clamp(3.45rem, 4.9vh, 3.9rem);
+  width: 9.9rem;
+  min-height: 2.75rem;
   border: 0.0625rem solid transparent;
-  border-radius: 0.95rem;
-  font-size: clamp(1.15rem, 1.35vw, 1.3rem);
+  border-radius: 999rem;
+  font-size: 1.15rem;
   font-weight: 800;
   cursor: pointer;
   flex: 0 0 auto;
+  box-shadow: 0 0.35rem 0.75rem rgba(37, 126, 232, 0.2);
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
@@ -529,10 +376,10 @@ const actionButtonBase = styled.button`
     transform: translateY(-0.05rem);
   }
 
-  @media (max-height: 56rem) {
-    width: 8.75rem;
-    min-height: 3rem;
-    font-size: 1.02rem;
+  @media (max-width: 34rem) {
+    width: 8.8rem;
+    min-height: 2.55rem;
+    font-size: 1rem;
   }
 `;
 
@@ -540,6 +387,7 @@ export const SecondaryAction = styled(actionButtonBase)`
   background: rgba(255, 255, 255, 0.96);
   border-color: #d8e6fb;
   color: #111111;
+  box-shadow: 0 0.35rem 0.75rem rgba(15, 23, 42, 0.08);
 
   &:hover {
     background: #f7fbff;
@@ -556,8 +404,88 @@ export const PrimaryAction = styled(actionButtonBase)`
   }
 `;
 
+export const IconActionButton = styled.button`
+  position: relative;
+  width: 2.55rem;
+  height: 2.55rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0.35rem 0.95rem rgba(76, 112, 171, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1684ef;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-0.05rem);
+    box-shadow: 0 0.5rem 1.1rem rgba(76, 112, 171, 0.18);
+  }
+
+  @media (max-width: 34rem) {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+`;
+
+export const CameraGlyph = styled.span`
+  position: relative;
+  width: 1.2rem;
+  height: 0.82rem;
+  border-radius: 0.16rem;
+  background: currentColor;
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: -0.45rem;
+    top: 0.17rem;
+    width: 0;
+    height: 0;
+    border-top: 0.23rem solid transparent;
+    border-bottom: 0.23rem solid transparent;
+    border-left: 0.45rem solid currentColor;
+  }
+`;
+
+export const MicGlyph = styled.span`
+  position: relative;
+  width: 0.68rem;
+  height: 1.1rem;
+  border: 0.16rem solid currentColor;
+  border-radius: 999rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -0.42rem;
+    width: 0.16rem;
+    height: 0.42rem;
+    border-radius: 999rem;
+    background: currentColor;
+    transform: translateX(-50%);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -0.58rem;
+    width: 0.8rem;
+    height: 0.16rem;
+    border-radius: 999rem;
+    background: currentColor;
+    transform: translateX(-50%);
+  }
+`;
+
 export const InlineVisualizerWrap = styled.div<VoiceLevelProps>`
-  width: 100%;
+  width: min(100%, 6.4rem);
   position: relative;
   display: flex;
   align-items: center;
@@ -587,7 +515,7 @@ export const InlineVisualizerWrap = styled.div<VoiceLevelProps>`
 `;
 
 export const InlineVisualizerIcon = styled.img<VoiceLevelProps>`
-  width: clamp(4.6rem, 5.6vw, 5.4rem);
+  width: clamp(4.7rem, 5.8vw, 5.8rem);
   position: relative;
   z-index: 1;
   height: auto;
@@ -601,25 +529,24 @@ export const InlineVisualizerIcon = styled.img<VoiceLevelProps>`
     transform 90ms linear,
     opacity 90ms linear;
 
-  @media (max-height: 56rem) {
+  @media (max-height: 42rem) {
     width: 4.2rem;
   }
 `;
 
 export const TextAnswerCard = styled.div`
   width: 100%;
-  min-height: clamp(5.9rem, 9.5vh, 6.8rem);
-  height: auto;
-  padding: 0.9rem 1.2rem;
-  border-radius: 0.95rem;
+  min-height: clamp(8rem, 18vh, 11rem);
+  padding: 1rem 1.2rem;
+  border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.97);
   border: 0.0625rem solid #dce3ee;
-  box-shadow: 0 0.4rem 1.2rem rgba(15, 23, 42, 0.06);
+  box-shadow: none;
   min-width: 0;
   box-sizing: border-box;
 
-  @media (max-height: 56rem) {
-    min-height: 5.2rem;
+  @media (max-height: 42rem) {
+    min-height: 6.2rem;
     padding: 0.8rem 1rem;
   }
 `;
@@ -651,11 +578,10 @@ export const TextActionRow = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
   margin: 0 auto;
-  padding-inline: clamp(0.2rem, 1vw, 0.6rem);
   box-sizing: border-box;
 
   & > button {
@@ -663,16 +589,14 @@ export const TextActionRow = styled.div`
   }
 
   @media (max-width: 40rem) {
-    width: 100%;
     gap: 0.75rem;
-    padding-inline: 0;
 
     & > button {
       width: clamp(7.6rem, 42vw, 9.6rem);
     }
   }
 
-  @media (max-height: 56rem) {
+  @media (max-height: 42rem) {
     gap: 0.85rem;
   }
 `;
