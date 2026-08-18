@@ -1,4 +1,3 @@
-import { LANDING_STYLE } from "@/shared/constants/landing-page/first-section";
 import styled from "styled-components";
 
 export const Header = styled.header`
@@ -16,6 +15,7 @@ export const Header = styled.header`
 export const Logo = styled.div`
   display: flex;
   align-items: center;
+  padding-left: 0.2rem;
 `;
 
 export const LogoImage = styled.img`
@@ -38,30 +38,30 @@ export const SignUp = styled.button`
   border: none;
   color: ${({ theme }) => theme.colors.white};
   padding: 0.5rem 0.375rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1;
   cursor: pointer;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${LANDING_STYLE.gradientAccent};
+    color: #D4E7FF;
   }
 `;
 
 export const Login = styled.button`
-  background: ${LANDING_STYLE.login};
+  background: #3388F7;
   border: none;
   color: ${({ theme }) => theme.colors.white};
   min-height: 2.25rem;
   padding: 0.55rem 1rem;
   border-radius: ${({ theme }) => theme.radius.sm};
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1;
   cursor: pointer;
 
   &:hover {
-    background: ${LANDING_STYLE.loginHover};
+    background: #2975d7;
   }
 `;

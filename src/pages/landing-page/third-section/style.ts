@@ -13,6 +13,8 @@ export const Container = styled.section`
     radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.82) 16%, rgba(234, 242, 255, 0.88) 38%, rgba(242, 243, 245, 0.96) 74%),
     linear-gradient(180deg, #edf4ff 0%, #f6f8fc 45%, #f2f3f5 100%);
   overflow: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 `;
 
 export const Content = styled.div`

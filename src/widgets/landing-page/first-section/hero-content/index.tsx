@@ -1,32 +1,34 @@
 import * as S from "./style";
 import { useNavigate } from "react-router-dom";
-
+import BrowserImg from "@/shared/img/landing-page/Browser.svg?url";
 const HeroContent = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  
   return (
-    <S.Content>
-      <S.Badge>
-        <span>AI 기반 모의 면접 플랫폼,</span>
-        <S.BadgeBrand>
-          <span>Re:pit</span>
-        </S.BadgeBrand>
-      </S.Badge>
+    <S.ContentContainer>
+      {/* 왼쪽 영역 */}
+      <S.LeftSection>
+        <S.Badge>
+          AI 기반 모의 면접 플랫폼, Repit
+        </S.Badge>
 
-      <S.Title>
-        실전처럼 준비하는
-      </S.Title>
-      <S.MainTitle>
-        AI 면접 코칭 플랫폼
-      </S.MainTitle>
+        <S.Title>실전처럼 준비하는</S.Title>
+        <S.MainTitle>AI 면접 코칭</S.MainTitle>
 
-      <S.Subtitle>
-        취업 준비를 위한 맞춤 기술 면접 연습과 피드백
-      </S.Subtitle>
+        <S.Subtitle>
+          취업 성공을 위한 가장 스마트한 면접 연습
+        </S.Subtitle>
 
-      <S.StartButton onClick={() => navigate('/login')}>
-        면접 시작하기
-      </S.StartButton>
-    </S.Content>
+        <S.StartButton onClick={() => navigate('/login')}>
+          면접 시작하기
+        </S.StartButton>
+      </S.LeftSection>
+
+      {/* 오른쪽 영역 */}
+      <S.RightSection>
+        <S.BrowserImage src={BrowserImg} alt="Browser preview" />
+      </S.RightSection>
+    </S.ContentContainer>
   );
 };
 

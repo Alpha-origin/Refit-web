@@ -1,4 +1,4 @@
-import RepitLogo from "@/shared/img/logo/Repit-logo.svg?url";
+import RepitLogo from "@/shared/img/logo/Logo2.svg?url";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 
