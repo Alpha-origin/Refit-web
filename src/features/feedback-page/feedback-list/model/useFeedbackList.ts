@@ -10,7 +10,7 @@ import {
   getInterviewerName,
   sortInterviewsByCreatedAt,
 } from "@/features/feedback-page/model/interviewDisplay";
-import { extractErrorMessage } from "@/shared/api/errorMessage";
+import { FEEDBACK_LIST_ITEMS } from "@/shared/fixtures/feedback-page/feedback-list";
 import InterviewerImage1 from "@/shared/img/interview-page/ interviewer1.svg?url";
 import InterviewerImage2 from "@/shared/img/interview-page/ interviewer2.svg?url";
 import InterviewerImage3 from "@/shared/img/interview-page/ interviewer3.svg?url";
@@ -59,6 +59,12 @@ const getListItems = (items: Awaited<ReturnType<typeof getAllInterviews>>) =>
     };
   });
 
+const getFallbackListItems = () =>
+  FEEDBACK_LIST_ITEMS.map<FeedbackListItem>((item) => ({
+    ...item,
+    imageUrl: getInterviewerImageUrl(item.id, item.interviewerName),
+  }));
+
 export const useFeedbackList = () => {
   const [items, setItems] = useState<FeedbackListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,8 +78,8 @@ export const useFeedbackList = () => {
       const interviews = await getAllInterviews();
 
       setItems(getListItems(interviews));
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, "면접 목록을 불러오지 못했습니다."));
+    } catch {
+      setItems(getFallbackListItems());
     } finally {
       setIsLoading(false);
     }
