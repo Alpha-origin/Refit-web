@@ -1,4 +1,15 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+
+interface StatusBadgeProps {
+  $complete: boolean;
+}
+
+const focusRing = css`
+  &:focus-visible {
+    outline: 0.125rem solid rgba(26, 115, 232, 0.32);
+    outline-offset: 0.125rem;
+  }
+`;
 
 export const Page = styled.div`
   width: 100%;
@@ -6,84 +17,128 @@ export const Page = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 1.4rem 2rem 2.4rem;
+  padding: 1.55rem clamp(1rem, 6.5vw, 4.4rem) 3rem;
   box-sizing: border-box;
 
-  @media (max-width: 48rem) {
-    padding: 0.85rem 1rem 1.35rem;
+  @media (max-width: 56rem) {
+    padding: 1rem 1rem 1.5rem;
   }
 `;
 
 export const Panel = styled.section`
-  width: min(100%, 104rem);
-  min-height: calc(100% - 0.5rem);
+  width: min(100%, 59.25rem);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-start;
-  gap: 1.45rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 255, 0.94));
-  border: 0.0625rem solid rgba(217, 227, 245, 0.85);
-  border-radius: 1.25rem;
-  padding: 1.6rem 1.85rem 1.8rem;
+  gap: 0.7rem;
+`;
 
-  @media (max-width: 48rem) {
-    border-radius: 1rem;
-    gap: 0.95rem;
-    padding: 1.15rem 1rem 1.2rem;
+export const Toolbar = styled.div`
+  min-height: 1.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.35rem;
+
+  @media (max-width: 34rem) {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.45rem;
   }
 `;
 
 export const SectionTitle = styled.h2`
   margin: 0;
-  padding-left: 0.45rem;
   color: #1a73e8;
-  font-size: clamp(1.18rem, 1.5vw, 1.45rem);
-  font-weight: 600;
-  letter-spacing: -0.04rem;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+`;
+
+export const SortSelectWrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0.25rem;
+    width: 0.43rem;
+    height: 0.43rem;
+    border-right: 0.125rem solid #1a73e8;
+    border-bottom: 0.125rem solid #1a73e8;
+    pointer-events: none;
+    transform: translateY(-0.12rem) rotate(45deg);
+  }
+`;
+
+export const SortSelect = styled.select`
+  appearance: none;
+  min-height: 1.8rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #1a73e8;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.25rem 1.2rem 0.25rem 0.25rem;
+
+  ${focusRing}
 `;
 
 export const List = styled.div`
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 0.7rem;
+
+  @media (max-width: 48rem) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 export const StateCard = styled.div`
   width: 100%;
-  min-height: 8rem;
+  min-height: 9rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.9rem;
-  padding: 1.6rem;
-  border: 0.125rem dashed rgba(181, 199, 232, 0.92);
-  border-radius: 1.2rem;
-  background: rgba(255, 255, 255, 0.62);
+  gap: 0.85rem;
+  padding: 1.5rem;
+  border: 0.0625rem dashed #bfd1ef;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.86);
   text-align: center;
 `;
 
 export const StateText = styled.p`
   margin: 0;
+  max-width: 36rem;
   color: #4f6389;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   line-height: 1.5;
-  letter-spacing: -0.02rem;
+  overflow-wrap: anywhere;
 `;
 
 export const RetryButton = styled.button`
-  min-width: 7rem;
-  height: 2.6rem;
+  appearance: none;
+  min-width: 6.5rem;
+  height: 2.35rem;
   border: none;
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   background: #1f6fe4;
   color: #ffffff;
-  font-size: 0.92rem;
-  font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
   transition:
     transform 0.2s ease,
     filter 0.2s ease;
@@ -92,104 +147,159 @@ export const RetryButton = styled.button`
     transform: translateY(-0.05rem);
     filter: brightness(1.03);
   }
+
+  ${focusRing}
 `;
 
-export const FeedbackCard = styled.article`
+export const FeedbackCard = styled.button`
+  appearance: none;
+  position: relative;
   width: 100%;
-  min-height: 6.2rem;
+  min-width: 0;
+  min-height: 9.25rem;
   display: grid;
-  grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr) auto;
+  grid-template-columns: 6.25rem minmax(0, 1fr);
   align-items: center;
-  column-gap: 1.75rem;
-  padding: 1.4rem 2rem;
-  border: 0.125rem solid rgba(214, 223, 237, 0.92);
-  border-radius: 1.35rem;
-  background: rgba(255, 255, 255, 0.74);
+  column-gap: 1.7rem;
+  padding: 1rem 5.4rem 1rem 1rem;
+  border: 0.0625rem solid #d8dde8;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: inherit;
   cursor: pointer;
+  font-family: inherit;
+  text-align: left;
   transition:
-    transform 0.2s ease,
     border-color 0.2s ease,
-    background 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
-    background: linear-gradient(180deg, rgba(242, 247, 255, 0.98), rgba(235, 242, 255, 0.94));
-    border-color: rgba(157, 194, 247, 0.98);
+    border-color: #9cc5fb;
+    box-shadow: 0 0.65rem 1.4rem rgba(26, 115, 232, 0.08);
+    transform: translateY(-0.05rem);
   }
 
-  @media (max-width: 64rem) {
-    grid-template-columns: 1fr auto;
-    row-gap: 0.8rem;
-    padding: 1.2rem 1.35rem;
+  ${focusRing}
+
+  @media (max-width: 56rem) {
+    column-gap: 1.1rem;
+    padding-right: 4.9rem;
   }
 
-  @media (max-width: 40rem) {
-    grid-template-columns: 1fr;
-    justify-items: start;
-    padding: 1.1rem 1.05rem;
+  @media (max-width: 30rem) {
+    grid-template-columns: 5.35rem minmax(0, 1fr);
+    min-height: 8.4rem;
+    padding: 0.8rem;
   }
 `;
 
-export const CardDate = styled.p`
-  margin: 0;
-  color: #1d6fe5;
-  font-size: clamp(1.08rem, 1.5vw, 1.4rem);
-  font-weight: 600;
-  letter-spacing: -0.05rem;
-  line-height: 1;
+export const CardImage = styled.img`
+  width: 6.25rem;
+  height: 6.8rem;
+  display: block;
+  border-radius: 0.18rem;
+  background: #edf1f8;
+  object-fit: cover;
+
+  @media (max-width: 30rem) {
+    width: 5.35rem;
+    height: 5.85rem;
+  }
 `;
 
 export const CardBody = styled.div`
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.24rem;
+  gap: 0.38rem;
 `;
 
 export const CardTitle = styled.h3`
   margin: 0;
-  color: #1f6fe4;
-  font-size: clamp(1.18rem, 1.65vw, 1.48rem);
+  color: #30343b;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.25;
+`;
+
+export const MetaGroup = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+`;
+
+export const MetaLabel = styled.span`
+  color: #5f6978;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.2;
+`;
+
+export const TagGroup = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+`;
+
+export const Tag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  min-height: 1rem;
+  max-width: 100%;
+  padding: 0.08rem 0.34rem;
+  border: 0.0625rem solid #9bc9ff;
+  border-radius: 0.12rem;
+  background: #eef6ff;
+  color: #1376ef;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.15;
+`;
+
+export const CardDate = styled.p`
+  margin: 0.05rem 0 0;
+  color: #53606f;
+  font-size: 0.66rem;
   font-weight: 600;
-  letter-spacing: -0.04rem;
-  line-height: 1.05;
+  line-height: 1.2;
 `;
 
-export const CardMeta = styled.p`
-  margin: 0;
-  color: #6d6d6d;
-  font-size: clamp(0.86rem, 0.96vw, 0.94rem);
-  font-weight: 450;
-  letter-spacing: -0.02rem;
-`;
+export const StatusBadge = styled.span<StatusBadgeProps>`
+  position: absolute;
+  top: 0.9rem;
+  right: 0.8rem;
+  min-height: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0 0.68rem;
+  border: 0.0625rem solid
+    ${({ $complete }) => ($complete ? "#1a73e8" : "#86bdff")};
+  border-radius: 999rem;
+  background: ${({ $complete }) => ($complete ? "#1a73e8" : "#f4f9ff")};
+  color: ${({ $complete }) => ($complete ? "#ffffff" : "#1a73e8")};
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
 
-export const StatusButton = styled.button`
-  min-width: 6.7rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 0.6rem;
-  background: #2d66fd;
-  color: #ffffff;
-  font-size: 0.88rem;
-  font-weight: 500;
-  letter-spacing: -0.02rem;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    filter 0.2s ease;
-
-  &:hover {
-    transform: translateY(-0.05rem);
-    filter: brightness(1.02);
+  &::after {
+    content: "";
+    display: ${({ $complete }) => ($complete ? "block" : "none")};
+    width: 0.32rem;
+    height: 0.56rem;
+    border: solid #ffffff;
+    border-width: 0 0.12rem 0.12rem 0;
+    transform: translateY(-0.05rem) rotate(45deg);
   }
 
-  @media (max-width: 64rem) {
-    grid-column: 2;
-  }
-
-  @media (max-width: 40rem) {
-    grid-column: auto;
-    width: 100%;
-    min-width: 0;
-    height: 2.55rem;
+  @media (max-width: 30rem) {
+    position: static;
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 0.15rem;
   }
 `;

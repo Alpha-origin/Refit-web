@@ -1,6 +1,7 @@
 export interface FeedbackListItem {
   id: number;
   date: string;
+  imageUrl: string;
   title: string;
   styleLabel: string;
   levelLabel: string;
