@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { getAllInterviews } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
+import {
+  getAllInterviews,
+  getFeedback,
+} from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import {
   getCareerLabel,
   getFormattedDate,
@@ -56,6 +59,7 @@ const getListItems = (items: Awaited<ReturnType<typeof getAllInterviews>>) =>
       levelLabel: getCareerLabel(interview.persona?.career),
       interviewerName,
       statusLabel: getInterviewStatusLabel(interview.status),
+      sessionId: interview.sessionId,
     };
   });
 
@@ -89,10 +93,20 @@ export const useFeedbackList = () => {
     void loadFeedbackList();
   }, [loadFeedbackList]);
 
+  const fetchFeedback = useCallback(async (sessionId: string) => {
+    try {
+      const data = await getFeedback(sessionId);
+      return data;
+    } catch {
+      return null;
+    }
+  }, []);
+
   return {
     errorMessage,
     isLoading,
     items,
     refetch: loadFeedbackList,
+    fetchFeedback,
   };
 };

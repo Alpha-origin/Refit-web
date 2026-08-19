@@ -7,6 +7,7 @@ export interface FeedbackListItem {
   levelLabel: string;
   interviewerName: string;
   statusLabel: string;
+  sessionId?: string;
 }
 
 export interface FeedbackListProps {

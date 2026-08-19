@@ -1,7 +1,7 @@
-import * as S from "./style";
-import type { FeedbackListProps } from "./type";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import * as S from "./style";
+import type { FeedbackListProps } from "./type";
 
 type SortOrder = "oldest" | "latest";
 
@@ -11,7 +11,8 @@ const getDateTime = (date: string) => {
   return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
 };
 
-const getNormalizedStatusLabel = (statusLabel: string) => statusLabel.replace(/\s/g, "");
+const getNormalizedStatusLabel = (statusLabel: string) =>
+  statusLabel.replace(/\s/g, "");
 
 const getStatusDisplayLabel = (statusLabel: string) => {
   if (getNormalizedStatusLabel(statusLabel) === "분석완료") {
@@ -25,6 +26,10 @@ const getStatusDisplayLabel = (statusLabel: string) => {
   return statusLabel;
 };
 
+type InternalProps = FeedbackListProps & {
+  onItemClick?: (item: FeedbackListProps["items"][number]) => void;
+};
+
 const FeedbackList = ({
   emptyMessage = "아직 저장된 면접 결과가 없습니다.",
   errorMessage,
@@ -32,7 +37,8 @@ const FeedbackList = ({
   items,
   onRetry,
   title,
-}: FeedbackListProps) => {
+  onItemClick,
+}: InternalProps) => {
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState<SortOrder>("oldest");
   const sortedItems = useMemo(
@@ -41,7 +47,9 @@ const FeedbackList = ({
         const leftTime = getDateTime(left.date);
         const rightTime = getDateTime(right.date);
 
-        return sortOrder === "oldest" ? leftTime - rightTime : rightTime - leftTime;
+        return sortOrder === "oldest"
+          ? leftTime - rightTime
+          : rightTime - leftTime;
       }),
     [items, sortOrder],
   );
@@ -55,7 +63,9 @@ const FeedbackList = ({
             <S.SortSelect
               aria-label="면접 목록 정렬"
               value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+              onChange={(event) =>
+                setSortOrder(event.target.value as SortOrder)
+              }
             >
               <option value="oldest">오래된 순</option>
               <option value="latest">최신순</option>
@@ -83,13 +93,22 @@ const FeedbackList = ({
         ) : (
           <S.List>
             {sortedItems.map((item) => {
-              const isComplete = getNormalizedStatusLabel(item.statusLabel).includes("완료");
+              const isComplete = getNormalizedStatusLabel(
+                item.statusLabel,
+              ).includes("완료");
 
               return (
                 <S.FeedbackCard
                   key={item.id}
                   type="button"
-                  onClick={() => navigate(`/main/feedback/overall/${item.id}`)}
+                  onClick={() => {
+                    if (onItemClick) {
+                      onItemClick(item);
+                      return;
+                    }
+
+                    navigate(`/main/feedback/overall/${item.id}`);
+                  }}
                 >
                   <S.CardImage
                     src={item.imageUrl}

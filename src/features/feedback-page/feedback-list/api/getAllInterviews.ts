@@ -24,6 +24,47 @@ interface ApiResponse<T> {
 }
 
 const GET_ALL_INTERVIEWS_URL = "/api/interviews/getAll";
+const GET_FEEDBACK_URL = "/api/answer";
+
+export interface FrequentWord {
+  word: string;
+  count: number;
+}
+
+export interface QuestionFeedback {
+  questionId?: string;
+  questionContent?: string;
+  intention?: string;
+  userAnswer?: string;
+  modelAnswer?: string;
+  strengths?: string[];
+  improvements?: string[];
+  comment?: string;
+}
+
+export interface FeedbackData {
+  feedbackId?: number;
+  interviewId?: number;
+  sessionId?: string;
+  status?: string;
+  totalScore?: number;
+  intentAlignmentScore?: number;
+  reliabilityScore?: number;
+  summary?: string;
+  strengths?: string[];
+  improvements?: string[];
+  frequentWords?: FrequentWord[];
+  answeredCount?: number;
+  questionCount?: number;
+  errorMessage?: string;
+  feedbacks?: QuestionFeedback[];
+  createdAt?: string;
+}
+
+interface FeedbackApiResponse {
+  success: boolean;
+  data?: FeedbackData;
+}
 
 const normalizeInterviews = (
   payload: InterviewSummary[] | ApiResponse<InterviewSummary[]>,
@@ -31,7 +72,6 @@ const normalizeInterviews = (
   if (Array.isArray(payload)) {
     return payload;
   }
-
   if (Array.isArray(payload.data)) {
     return payload.data;
   }
@@ -45,4 +85,12 @@ export const getAllInterviews = async () => {
   >(GET_ALL_INTERVIEWS_URL);
 
   return normalizeInterviews(response.data);
+};
+
+export const getFeedback = async (sessionId: string) => {
+  const response = await apiInstance.get<FeedbackApiResponse>(GET_FEEDBACK_URL, {
+    params: { sessionId },
+  });
+
+  return response.data?.data ?? null;
 };
