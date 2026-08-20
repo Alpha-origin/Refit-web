@@ -27,7 +27,7 @@ export const Content = styled.div`
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 5.5rem 6.5rem 6.5rem;
+  padding: 5.5rem 0rem 0em;
 
   @media (max-width: 56.25rem) {
     padding: 4.5rem 1.5rem 5rem;
@@ -40,11 +40,7 @@ export const Footer = styled.footer`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    180deg,
-    #c5dcff 0%,
-    #d8e8ff 100%
-  );
+  background: #D1E2F8;
   font-size: 2rem;
   font-weight: 700;
   color: black;

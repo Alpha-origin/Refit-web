@@ -14,7 +14,7 @@ const scrollLeft = keyframes`
 
 export const ContentMotion = styled(motion.div)`
   width: 100%;
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -22,14 +22,14 @@ export const ContentMotion = styled(motion.div)`
   box-sizing: border-box;
   padding-top: 0;
   padding-bottom: 2rem;
-  overflow: hidden; /* 상위 요소 잘림 방지 */
+  overflow: hidden;
 `;
 
 export const Header = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 6rem;
+  margin-bottom: 8rem;
   font-weight: 200;
   text-align: center;
   font-family: 'Wave', sans-serif;
@@ -41,7 +41,7 @@ export const Header = styled(motion.div)`
 
 export const SubTitle = styled.span`
   color: ${({ theme }) => theme.colors.brand.blueLight};
-  margin: 0 0 2rem;
+  margin: 0 0 1rem;
   font-weight: 500;
   font-size: 1.5rem;
   line-height: 1.5;
@@ -100,10 +100,16 @@ export const ReviewChip = styled.div<ReviewChipProps>`
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: min(${({ $width }) => $width}, calc(100vw - 3rem));
-  min-height: clamp(4.25rem, 7vw, 6.2rem);
-  padding: 1rem clamp(1.5rem, 3vw, 3.4rem);
-  border: 1px solid rgba(64, 64, 64, 0.3);
+  height: ${({ $height }) => $height ?? "auto"};
+  width: ${({ $width }) => $width}; 
+
+  align-self: center;
+  box-sizing: border-box;
+
+  max-width: 90vw; 
+  padding: 1.25rem 4rem;
+
+  border: 1px solid rgba(64, 64, 64, 0.16);
   border-radius: ${({ theme }) => theme.radius.pill};
   background: rgba(255, 255, 255, ${({ $opacity }) => $opacity});
   box-shadow:
@@ -113,15 +119,16 @@ export const ReviewChip = styled.div<ReviewChipProps>`
   backdrop-filter: blur(7.5px);
   color: ${({ theme }) => theme.colors.text.strong};
   font-family: ${({ theme }) => theme.fontFamily.A2Z};
-  font-size: clamp(1rem, 1.55vw, 1.55rem);
-  font-weight: 500;
+  font-size: 1.25rem;
+  font-weight: 400;
   line-height: 1.45;
   letter-spacing: 0;
   text-align: center;
   white-space: normal;
 
   @media (max-width: 56.25rem) {
-    width: min(28rem, calc(100vw - 2rem));
+    width: min(${({ $width }) => $width}, calc(100vw - 2rem));
+    height: auto; 
     min-height: 4.25rem;
     padding: 0.9rem 1.4rem;
     font-size: 1rem;

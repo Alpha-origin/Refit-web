@@ -1,5 +1,6 @@
 export type ReviewChipProps = {
   $width: string;
+  $height?: string;
   $opacity: number;
 };
 

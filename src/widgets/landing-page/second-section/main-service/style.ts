@@ -38,16 +38,12 @@ export const Title = styled.h2`
 export const ServiceGrid = styled(motion.div)`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   width: min(100%, 72rem);
-  min-height: 52rem;
   margin: 0 auto;
+  /* min-height 및 justify-content 제거 */
 
   @media (max-width: 56.25rem) {
-    justify-content: flex-start;
     width: 100%;
-    min-height: auto;
-    gap: 4rem;
   }
 `;
 
@@ -56,9 +52,13 @@ export const ServiceRow = styled(motion.div)<ServiceRowProps>`
   justify-content: ${({ $align }) =>
     $align === "right" ? "flex-end" : "flex-start"};
   width: 100%;
+  
+  margin-bottom: 3rem; 
+
 
   @media (max-width: 56.25rem) {
     justify-content: flex-start;
+    margin-bottom: 1.5rem; 
   }
 `;
 
@@ -69,7 +69,7 @@ export const ServiceCard = styled.article<ServiceCardProps>`
   align-items: ${({ $align }) =>
   $align === "right" ? "flex-end" : "flex-start"};
   text-align: ${({ $align }) => $align};
-  min-height: 8.5rem;
+    min-height: auto; 
 
   @media (max-width: 56.25rem) {
     width: 100%;
