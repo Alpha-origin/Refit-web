@@ -7,7 +7,6 @@ import {
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
-  generateMockInterview,
   prepareInterview,
   quitInterview,
   setActiveInterviewSessionId,
@@ -45,12 +44,7 @@ const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
 
 const buildInitialQuestion = (
   preparedInterview?: PreparedInterviewData | null,
-  options: { allowGeneratedQuestions?: boolean } = {},
 ): CurrentInterviewQuestion | null => {
-  if (preparedInterview?.jobId && !options.allowGeneratedQuestions) {
-    return null;
-  }
-
   if (!preparedInterview || preparedInterview.questions.length === 0) {
     return null;
   }
@@ -248,34 +242,12 @@ export const useInterviewSession = (
     let isCancelled = false;
 
     const startInterviewSession = async () => {
-      const presetJobId = preparedInterview.jobId?.trim() ?? "";
-      let jobId = presetJobId;
-
-      if (!jobId) {
-        const {
-          data: generateMockData,
-          errorMessage: generateMockErrorMessage,
-        } = await generateMockInterview();
-
-        if (isCancelled) {
-          return;
-        }
-
-        if (generateMockErrorMessage || !generateMockData?.jobId) {
-          preparedChatSessionIdRef.current = null;
-          return;
-        }
-
-        jobId = generateMockData.jobId;
-      }
-
       const { data, errorMessage } = await prepareInterview({
         sessionId,
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
-        jobId,
         questions: preparedInterview.questions,
       });
 
@@ -295,9 +267,7 @@ export const useInterviewSession = (
         setInterviewStatus(data.status);
       }
 
-      const firstQuestion = buildInitialQuestion(data, {
-        allowGeneratedQuestions: true,
-      });
+      const firstQuestion = buildInitialQuestion(data);
 
       if (firstQuestion) {
         applyCurrentQuestion(firstQuestion);

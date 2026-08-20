@@ -1,12 +1,10 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   createInterview,
-  generateMockInterview,
   savePersona,
   setActiveInterviewSessionId,
-  waitForGeneratedInterview,
   type CreateInterviewPersonaType,
   type InterviewPersonaGender,
   type InterviewPersonaMajor,
@@ -25,6 +23,7 @@ const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> 
   일반: "NEUTRAL",
   압박: "STRESS",
 };
+
 const CREATE_PERSONA_TYPE_BY_STYLE: Record<
   InterviewStyleOption,
   CreateInterviewPersonaType
@@ -33,11 +32,13 @@ const CREATE_PERSONA_TYPE_BY_STYLE: Record<
   일반: "NEUTRAL",
   압박: "STRESS",
 };
+
 const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
   쉬움: 0,
   보통: 3,
   어려움: 5,
 };
+
 const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
 const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
 
@@ -46,12 +47,19 @@ const buildUniquePersonaName = (personaName: string) =>
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
-  const [selectedStyle, setSelectedStyle] =
-    useState(INTERVIEW_SETTING_DEFAULT_SELECTION.style);
-  const [selectedDifficulty, setSelectedDifficulty] =
-    useState(INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
-  const [selectedInterviewerId, setSelectedInterviewerId] =
-    useState(INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId);
+
+  const [selectedStyle, setSelectedStyle] = useState(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.style,
+  );
+
+  const [selectedDifficulty, setSelectedDifficulty] = useState(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty,
+  );
+
+  const [selectedInterviewerId, setSelectedInterviewerId] = useState(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId,
+  );
+
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -99,9 +107,8 @@ export const useInterviewSetup = () => {
     console.log("[persona/save] response data", savedPersona);
     console.log("[interviews/create] request payload", personaPayload);
 
-    const { data, errorMessage: createErrorMessage } = await createInterview(
-      personaPayload,
-    );
+    const { data, errorMessage: createErrorMessage } =
+      await createInterview(personaPayload);
 
     if (createErrorMessage || !data) {
       setIsSubmitting(false);
@@ -109,40 +116,15 @@ export const useInterviewSetup = () => {
       return;
     }
 
-    const {
-      data: generateMockData,
-      errorMessage: generateMockErrorMessage,
-    } = await generateMockInterview();
-
-    if (generateMockErrorMessage || !generateMockData?.jobId) {
-      setIsSubmitting(false);
-      setErrorMessage(
-        generateMockErrorMessage ?? "모의 면접 생성 요청에 실패했습니다.",
-      );
-      return;
-    }
-
-    console.log("[GET /api/v1/ai/subscribe/{jobId}] jobId", generateMockData.jobId);
-
-    const { errorMessage: subscribeErrorMessage } =
-      await waitForGeneratedInterview(generateMockData.jobId);
-
-    if (subscribeErrorMessage) {
-      setIsSubmitting(false);
-      setErrorMessage(subscribeErrorMessage);
-      return;
-    }
-
-    setIsSubmitting(false);
-
     console.log("[interviews/create] response data", data);
     console.log("[interviews/create] server sessionId", data.sessionId);
-    console.log("[generate-mock] jobId", generateMockData.jobId);
 
     const personaId =
       data.personaId > 0 ? data.personaId : savedPersona.personaId;
 
     setActiveInterviewSessionId(data.sessionId);
+
+    setIsSubmitting(false);
 
     navigate("/main/interview/1", {
       state: {
@@ -152,10 +134,9 @@ export const useInterviewSetup = () => {
           userId: data.userId,
           personaId,
           personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
-          jobId: generateMockData.jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: [],
+          questions: data.questions,
         },
         interviewSetting: {
           style: selectedStyle,
