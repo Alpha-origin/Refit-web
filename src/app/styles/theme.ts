@@ -44,6 +44,7 @@ export const theme = {
     calSans: "'Cal Sans', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     pretendard: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     wavvePado: "'Wave', sans-serif",
+    A2Z: "'A2Z', sans-serif",
   },
   radius: {
     sm: "0.5rem",

@@ -1,4 +1,4 @@
-import type { ChangeEvent, RefObject } from "react";
+import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
 
 import { MY_PAGE_PORTFOLIO_JOB_ROLE_OPTIONS } from "@/shared/constants/my-page";
 import MyPageFileImage from "@/shared/img/my-page/Repit-mypage.svg?url";
@@ -8,41 +8,76 @@ import * as S from "./style";
 interface PortfolioProps {
   fileError: string;
   fileInputRef: RefObject<HTMLInputElement | null>;
-  gitLink: string;
+  gitInput: string;
+  gitUrls: string[];
+  isSaving: boolean;
   jobRole: string;
-  onGitLinkChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  jobRoleError: string;
+  onGitAdd: () => void;
+  onGitInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onGitInputKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
+  onGitRemove: (gitUrl: string) => void;
   onJobRoleChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   onPortfolioFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onPortfolioSave: () => void;
   onPortfolioUploadClick: () => void;
+  saveError: string;
+  saveMessage: string;
   selectedPortfolioFile: File | null;
 }
+
+const TrashIcon = () => (
+  <svg
+    aria-hidden="true"
+    focusable="false"
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+  >
+    <path
+      d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 6v9h2V9h-2Zm4 0v9h2V9h-2ZM7 9h2v9c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2V9h2v9c0 2.21-1.79 4-4 4h-2c-2.21 0-4-1.79-4-4V9Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 
 const Portfolio = ({
   fileError,
   fileInputRef,
-  gitLink,
+  gitInput,
+  gitUrls,
+  isSaving,
   jobRole,
-  onGitLinkChange,
+  jobRoleError,
+  onGitAdd,
+  onGitInputChange,
+  onGitInputKeyDown,
+  onGitRemove,
   onJobRoleChange,
   onPortfolioFileChange,
+  onPortfolioSave,
   onPortfolioUploadClick,
+  saveError,
+  saveMessage,
   selectedPortfolioFile,
 }: PortfolioProps) => {
+  const isGitAddDisabled = !gitInput.trim();
+
   return (
     <S.PortfolioWrapper>
       <S.Title>포트폴리오</S.Title>
 
       <S.UploadBox>
         <S.GuideBadge>
-          내용이 정밀할수록 가이드 정밀도 <span>UP</span>
+          내용이 자세할수록 가이드 정확도 <span>UP</span>
         </S.GuideBadge>
 
         <S.UploadContent>
           <S.FileIcon src={MyPageFileImage} alt="" aria-hidden="true" />
 
           <S.UploadText>
-            자신의 포트폴리오를 첨부해주세요
-            <span> PDF형식</span>
+            자신의 포트폴리오를 첨부해주세요.
+            <span> PDF 형식</span>
           </S.UploadText>
 
           <S.UploadButton type="button" onClick={onPortfolioUploadClick}>
@@ -67,12 +102,40 @@ const Portfolio = ({
       <S.InputSection>
         <S.Label>git</S.Label>
 
-        <S.Input
-          type="text"
-          value={gitLink}
-          placeholder="깃허브 주소를 링크 또는 아이디로 입력해주세요."
-          onChange={onGitLinkChange}
-        />
+        <S.GitInputWrapper>
+          <S.Input
+            type="text"
+            value={gitInput}
+            placeholder="깃허브 주소를 링크 또는 아이디로 입력해주세요."
+            onChange={onGitInputChange}
+            onKeyDown={onGitInputKeyDown}
+          />
+          <S.GitAddButton
+            type="button"
+            aria-label="Git 주소 추가"
+            disabled={isGitAddDisabled}
+            onClick={onGitAdd}
+          >
+            +
+          </S.GitAddButton>
+        </S.GitInputWrapper>
+
+        {gitUrls.length > 0 && (
+          <S.GitUrlList>
+            {gitUrls.map((gitUrl) => (
+              <S.GitUrlRow key={gitUrl}>
+                <S.GitUrlText>{gitUrl}</S.GitUrlText>
+                <S.GitRemoveButton
+                  type="button"
+                  aria-label={`${gitUrl} 삭제`}
+                  onClick={() => onGitRemove(gitUrl)}
+                >
+                  <TrashIcon />
+                </S.GitRemoveButton>
+              </S.GitUrlRow>
+            ))}
+          </S.GitUrlList>
+        )}
       </S.InputSection>
 
       <S.InputSection>
@@ -91,17 +154,27 @@ const Portfolio = ({
             ))}
           </S.Select>
 
-          <S.Arrow>▼</S.Arrow>
+          <S.Arrow>⌄</S.Arrow>
         </S.SelectWrapper>
+
+        {jobRoleError && <S.FileErrorText>{jobRoleError}</S.FileErrorText>}
       </S.InputSection>
 
-      <S.ButtonWrapper>
-        <S.BackButton type="button">
-          돌아가기
-        </S.BackButton>
+      {(saveMessage || saveError) && (
+        <S.SaveStatus role={saveError ? "alert" : "status"} $isError={!!saveError}>
+          {saveError || saveMessage}
+        </S.SaveStatus>
+      )}
 
-        <S.SaveButton type="button">
-          저장
+      <S.ButtonWrapper>
+        <S.BackButton type="button">돌아가기</S.BackButton>
+
+        <S.SaveButton
+          type="button"
+          disabled={isSaving}
+          onClick={onPortfolioSave}
+        >
+          {isSaving ? "저장 중..." : "저장"}
         </S.SaveButton>
       </S.ButtonWrapper>
     </S.PortfolioWrapper>

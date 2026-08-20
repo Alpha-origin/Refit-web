@@ -1,4 +1,4 @@
-import { apiInstance } from "@/shared/api/axiosInstance";
+import { API_URL, apiInstance } from "@/shared/api/axiosInstance";
 
 import {
   getErrorMessage,
@@ -7,7 +7,9 @@ import {
 } from "../shared";
 import type { GenerateMockResponse } from "../type";
 
-const GENERATE_MOCK_URL = "/api/v1/ai/generate-mock";
+const GENERATE_MOCK_URL = "/api/v1/ai/generate";
+
+const getApiTargetUrl = (path: string) => (API_URL ? `${API_URL}${path}` : path);
 
 const normalizeGenerateMockResponse = (
   payload: unknown,
@@ -25,16 +27,27 @@ const normalizeGenerateMockResponse = (
 
 export const generateMockInterview = async () => {
   try {
+    console.log("[POST /api/v1/ai/generate] request start", {
+      apiTargetUrl: getApiTargetUrl(GENERATE_MOCK_URL),
+      browserUrl: GENERATE_MOCK_URL,
+      mode: import.meta.env.MODE,
+    });
     const response = await apiInstance.post(GENERATE_MOCK_URL);
     const data = normalizeGenerateMockResponse(response.data);
 
-    console.log("[POST /api/v1/ai/generate-mock] jobId", data.jobId);
+    console.log("[POST /api/v1/ai/generate] response data", {
+      data: response.data,
+      jobId: data.jobId,
+      status: response.status,
+    });
 
     return {
       data,
       errorMessage: null,
     };
   } catch (error) {
+    console.error("[POST /api/v1/ai/generate] error", error);
+
     return {
       data: null,
       errorMessage: getErrorMessage(

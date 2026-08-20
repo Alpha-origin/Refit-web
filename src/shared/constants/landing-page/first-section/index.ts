@@ -1,15 +1,11 @@
-export const LANDING_STYLE = {
-  gradientTop: "#041b63",
-  gradientMiddle: "#0a3ea8",
-  gradientAccent: "#2f8fff",
-  gradientBottom: "#cfe6ff",
-  logo: "#7ec0ff",
-  login: "#1f6fff",
-  loginHover: "#175de0",
-  mainTitle: "#A8D8FF",
-  badge: "rgba(255, 255, 255, 0.15)",
-  subtitle: "rgba(255, 255, 255, 0.8)",
-  buttonHover: "rgba(255, 255, 255, 0.1)",
-  glowSoft: "rgba(255, 255, 255, 0.08)",
-  glowStrong: "rgba(255, 255, 255, 0.18)",
-} as const;
+    export const LANDING_STYLE = {
+    gradientTop: "#0E0814",
+    gradientMiddle: "#0E0814",
+    gradientBottom: "#0E0814",
+    glowSoft: "rgba(212, 231, 255, 0.08)",
+    glowStrong: "rgba(212, 231, 255, 0.15)",
+    badge: "linear-gradient(135deg, #F0F6FF 0%, #C1DBFC 63%, #A6CAFA 100%)",
+    subtitle: "#FFFFFF",
+    mainTitle: "#D4E7FF",
+    buttonHover: "#83C7FF",
+    };

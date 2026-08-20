@@ -9,24 +9,24 @@ export const ContentMotion = styled(motion.div)`
 export const Header = styled(motion.div)`
   text-align: center;
   margin-bottom: 6rem;
-  font-weight: 300;
+  font-weight: 200;
   font-family: 'Wave', sans-serif;
 `;
 
 export const SubTitle = styled.p`
   margin: 0 0 ${({ theme }) => theme.spacing.sm};
   color: ${({ theme }) => theme.colors.brand.blueLight};
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   margin-bottom: 1.35rem;
-  font-family: 'Wave', sans-serif;
-  font-weight: 300;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
 `;
 
 export const Title = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 2.4rem;
-  font-weight: 300;
+  font-size: 1.8rem;
+  font-weight: 200;
   line-height: 1.15;
   letter-spacing: -0.05rem;
 
@@ -38,16 +38,12 @@ export const Title = styled.h2`
 export const ServiceGrid = styled(motion.div)`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  width: min(100%, 78rem);
-  min-height: 52rem;
+  width: min(100%, 72rem);
   margin: 0 auto;
+  /* min-height 및 justify-content 제거 */
 
   @media (max-width: 56.25rem) {
-    justify-content: flex-start;
     width: 100%;
-    min-height: auto;
-    gap: 4rem;
   }
 `;
 
@@ -56,9 +52,13 @@ export const ServiceRow = styled(motion.div)<ServiceRowProps>`
   justify-content: ${({ $align }) =>
     $align === "right" ? "flex-end" : "flex-start"};
   width: 100%;
+  
+  margin-bottom: 3rem; 
+
 
   @media (max-width: 56.25rem) {
     justify-content: flex-start;
+    margin-bottom: 1.5rem; 
   }
 `;
 
@@ -69,7 +69,7 @@ export const ServiceCard = styled.article<ServiceCardProps>`
   align-items: ${({ $align }) =>
   $align === "right" ? "flex-end" : "flex-start"};
   text-align: ${({ $align }) => $align};
-  min-height: 8.5rem;
+    min-height: auto; 
 
   @media (max-width: 56.25rem) {
     width: 100%;
@@ -81,8 +81,8 @@ export const ServiceCard = styled.article<ServiceCardProps>`
 export const CardTitle = styled.h3`
   margin: 0 0 0.125rem;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 1.6rem;
-  font-weight: 550;
+  font-size: 1.15rem;
+  font-weight: 500;
 
   @media (max-width: 56.25rem) {
     font-size: 1.15rem;
@@ -92,12 +92,12 @@ export const CardTitle = styled.h3`
 export const CardHeading = styled.p`
   margin: 0 0 0.5rem;
   color: ${({ theme }) => theme.colors.text.strong};
-  font-size: 1.8rem;
-  font-weight: 200;
-  line-height: 1.15;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.3;
   letter-spacing: -0.05rem;
   padding-top: 0.7rem;
-  font-family: 'Wave', sans-serif;
+  font-family: 'A2Z', sans-serif;
 
   @media (max-width: 56.25rem) {
     font-size: 1.45rem;
@@ -108,9 +108,10 @@ export const CardHeading = styled.p`
 export const CardDescription = styled.p`
   margin: 0.5rem 0 0;
   color: ${({ theme }) => theme.colors.text.muted};
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.2;
+  
 
   span {
     display: block;

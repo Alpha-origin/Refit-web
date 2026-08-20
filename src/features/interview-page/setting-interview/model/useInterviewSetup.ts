@@ -6,22 +6,19 @@ import {
   generateMockInterview,
   savePersona,
   setActiveInterviewSessionId,
+  waitForGeneratedInterview,
   type CreateInterviewPersonaType,
   type InterviewPersonaGender,
   type InterviewPersonaMajor,
   type PersonaType,
 } from "@/features/interview-page/interview/api";
 import {
+  INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
-  INTERVIEW_SETTING_OPTION_SECTIONS,
+  type InterviewDifficultyOption,
+  type InterviewSettingSelectHandlers,
+  type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
-
-type InterviewStyleOption =
-  (typeof INTERVIEW_SETTING_OPTION_SECTIONS)[0]["options"][number];
-type InterviewDifficultyOption =
-  (typeof INTERVIEW_SETTING_OPTION_SECTIONS)[1]["options"][number];
-type InterviewerId =
-  (typeof INTERVIEW_SETTING_INTERVIEWERS)[number]["id"];
 
 const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
   편함: "FRIENDLY",
@@ -50,23 +47,18 @@ const buildUniquePersonaName = (personaName: string) =>
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
   const [selectedStyle, setSelectedStyle] =
-    useState<InterviewStyleOption | null>(null);
+    useState(INTERVIEW_SETTING_DEFAULT_SELECTION.style);
   const [selectedDifficulty, setSelectedDifficulty] =
-    useState<InterviewDifficultyOption | null>(null);
+    useState(INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty);
   const [selectedInterviewerId, setSelectedInterviewerId] =
-    useState<InterviewerId | null>(null);
+    useState(INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const isSelectionComplete =
-    selectedStyle !== null &&
-    selectedDifficulty !== null &&
-    selectedInterviewerId !== null;
 
   const handleBack = () => navigate(-1);
 
   const handleNext = async () => {
-    if (isSubmitting || !selectedStyle || !selectedDifficulty || !selectedInterviewerId) {
+    if (isSubmitting) {
       return;
     }
 
@@ -130,6 +122,17 @@ export const useInterviewSetup = () => {
       return;
     }
 
+    console.log("[GET /api/v1/ai/subscribe/{jobId}] jobId", generateMockData.jobId);
+
+    const { errorMessage: subscribeErrorMessage } =
+      await waitForGeneratedInterview(generateMockData.jobId);
+
+    if (subscribeErrorMessage) {
+      setIsSubmitting(false);
+      setErrorMessage(subscribeErrorMessage);
+      return;
+    }
+
     setIsSubmitting(false);
 
     console.log("[interviews/create] response data", data);
@@ -152,7 +155,7 @@ export const useInterviewSetup = () => {
           jobId: generateMockData.jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: data.questions,
+          questions: [],
         },
         interviewSetting: {
           style: selectedStyle,
@@ -163,17 +166,23 @@ export const useInterviewSetup = () => {
     });
   };
 
+  const select: InterviewSettingSelectHandlers = {
+    difficulty: setSelectedDifficulty,
+    interviewer: setSelectedInterviewerId,
+    style: setSelectedStyle,
+  };
+
   return {
     errorMessage,
-    isSelectionComplete,
+    isNextDisabled: isSubmitting,
     isSubmitting,
     onBack: handleBack,
-    onDifficultySelect: setSelectedDifficulty,
-    onInterviewerSelect: setSelectedInterviewerId,
     onNext: handleNext,
-    onStyleSelect: setSelectedStyle,
-    selectedDifficulty,
-    selectedInterviewerId,
-    selectedStyle,
+    select,
+    selection: {
+      difficulty: selectedDifficulty,
+      interviewerId: selectedInterviewerId,
+      style: selectedStyle,
+    },
   };
 };

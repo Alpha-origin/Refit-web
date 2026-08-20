@@ -1,11 +1,11 @@
-export type ReviewAlign = "left" | "right";
-
-export type BubbleAssetKey = 1 | 2 | 3 | 4;
-
-export type ReviewWrapperProps = {
-  $align: ReviewAlign;
+export type ReviewChipProps = {
+  $width: string;
+  $height?: string;
+  $opacity: number;
 };
 
-export type EmojiProps = {
-  $align: ReviewAlign;
+export type ReviewTrackProps = {
+  $duration: number;
+  $offset: string;
+  $isPaused: boolean;
 };

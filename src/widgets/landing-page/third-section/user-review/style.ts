@@ -1,14 +1,28 @@
-import EmojiGraphic from "@/shared/img/landing-page/Repit-emoji.svg?react";
-import TalkBoxGraphic1 from "@/shared/img/landing-page/Repit-talk-box-1.svg?react";
-import TalkBoxGraphic2 from "@/shared/img/landing-page/Repit-talk-box-2.svg?react";
-import TalkBoxGraphic3 from "@/shared/img/landing-page/Repit-talk-box-3.svg?react";
-import TalkBoxGraphic4 from "@/shared/img/landing-page/Repit-talk-box-4.svg?react";
 import { motion } from "framer-motion";
-import styled, { css } from "styled-components";
-import type { EmojiProps, ReviewWrapperProps } from "./types";
+import styled, { keyframes } from "styled-components";
+import type { ReviewChipProps, ReviewTrackProps } from "./types";
+
+const scrollLeft = keyframes`
+  from {
+    transform: translate3d(var(--review-offset), 0, 0);
+  }
+
+  to {
+    transform: translate3d(calc(var(--review-offset) - 50%), 0, 0);
+  }
+`;
 
 export const ContentMotion = styled(motion.div)`
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  box-sizing: border-box;
+  padding-top: 0;
+  padding-bottom: 2rem;
+  overflow: hidden;
 `;
 
 export const Header = styled(motion.div)`
@@ -16,7 +30,9 @@ export const Header = styled(motion.div)`
   flex-direction: column;
   align-items: center;
   margin-bottom: 8rem;
+  font-weight: 200;
   text-align: center;
+  font-family: 'Wave', sans-serif;
 
   @media (max-width: 56.25rem) {
     margin-bottom: 3.5rem;
@@ -24,180 +40,97 @@ export const Header = styled(motion.div)`
 `;
 
 export const SubTitle = styled.span`
-  margin-bottom: 1.15rem;
-  color: #9dc1ff;
-  font-size: 1.25rem;
-  font-weight: 300;
-  font-family: 'Wave', sans-serif;
-
+  color: ${({ theme }) => theme.colors.brand.blueLight};
+  margin: 0 0 1rem;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.5;
+  font-family: ${({ theme }) => theme.fontFamily.pretendard};
 `;
 
 export const Title = styled.h2`
   margin: 0;
-  color: #2f80ed;
-  font-size: 2.85rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-size: 1.8rem;
   font-weight: 200;
-  line-height: 1.18;
+  line-height: 1.15;
   letter-spacing: -0.05rem;
-  font-family: 'Wave', sans-serif;
 
   @media (max-width: 56.25rem) {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 `;
 
-export const ReviewGrid = styled(motion.div)`
-  display: flex;
-  flex-direction: column;
-  gap: 5rem;
-  width: min(100%, 74rem);
-  margin: 0 auto;
-
-  @media (max-width: 56.25rem) {
-    width: 100%;
-    gap: 2rem;
-  }
-`;
-
-export const ReviewWrapper = styled(motion.div)<ReviewWrapperProps>`
-  display: flex;
-  width: 100%;
-  justify-content: ${({ $align }) =>
-    $align === "right" ? "flex-end" : "flex-start"};
-
-  @media (max-width: 56.25rem) {
-    justify-content: flex-start;
-  }
-`;
-
-export const BubbleCluster = styled.div<ReviewWrapperProps>`
+export const ReviewStage = styled(motion.div)`
   position: relative;
-  width: min(100%, 35rem);
-  padding-top: 0.4rem;
-  overflow: visible;
-
-  @media (min-width: 56.2501rem) {
-    ${({ $align }) =>
-      $align === "right" &&
-      css`
-        width: min(100%, 35rem);
-      `}
-  }
-
-  @media (max-width: 56.25rem) {
-    width: min(100%, 21.75rem);
-  }
+  width: 250vw;
+  left: calc(50% - 50vw);
+  margin-left: 0;
+  margin-right: 0;
+  overflow: hidden;
 `;
 
-export const Emoji = styled.div<EmojiProps>`
-  position: absolute;
-  top: -2.45rem;
-  z-index: 2;
-  width: 4.75rem;
-  height: 4.75rem;
-  pointer-events: none;
-
-  ${({ $align }) =>
-    $align === "right"
-      ? css`
-          right: -0.65rem;
-        `
-      : css`
-          left: -0.65rem;
-        `}
-
-  @media (max-width: 56.25rem) {
-    top: -2.1rem;
-    width: 4.1rem;
-    height: 4.1rem;
-
-    ${({ $align }) =>
-      $align === "right"
-        ? css`
-            right: -0.45rem;
-            left: auto;
-          `
-        : css`
-            left: -0.45rem;
-            right: auto;
-          `}
-  }
-`;
-
-export const ChatBubble = styled.div`
-  position: relative;
-  z-index: 0;
+export const ReviewRow = styled.div`
   width: 100%;
-  aspect-ratio: 1851 / 473;
-  color: ${({ theme }) => theme.colors.white};
-  isolation: isolate;
-`;
 
-const bubbleShapeStyles = css`
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  filter: drop-shadow(0 0.875rem 1.5rem rgba(24, 119, 242, 0.14));
-  
-  & > svg {
-    width: 100%;
-    height: 100%;
-    display: block;
+  & + & {
+    margin-top: clamp(1.45rem, 3vw, 2.5rem);
   }
 `;
 
-export const EmojiShape = styled(EmojiGraphic)`
-  width: 100%;
-  height: 100%;
-  display: block;
+export const ReviewTrack = styled.div<ReviewTrackProps>`
+  --review-offset: ${({ $offset }) => $offset};
+
+  display: flex;
+  width: max-content;
+  animation: ${scrollLeft} ${({ $duration }) => $duration}s linear infinite;
+  animation-play-state: ${({ $isPaused }) => ($isPaused ? "paused" : "running")};
+  will-change: transform;
 `;
 
-export const BubbleShapeFrame = styled.div`
-  ${bubbleShapeStyles}
+export const ReviewSet = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+  gap: clamp(1.5rem, 3vw, 2.6rem);
+  padding-right: clamp(1.5rem, 3vw, 2.6rem);
 `;
 
-export const bubbleGraphics = {
-  1: TalkBoxGraphic1,
-  2: TalkBoxGraphic2,
-  3: TalkBoxGraphic3,
-  4: TalkBoxGraphic4,
-} as const;
+export const ReviewChip = styled.div<ReviewChipProps>`
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  height: ${({ $height }) => $height ?? "auto"};
+  width: ${({ $width }) => $width}; 
 
-export const MessageLayer = styled.div<ReviewWrapperProps>`
-  position: absolute;
-  top: 0.35rem;
-  bottom: 0.8rem;
-  left: ${({ $align }) => ($align === "right" ? "1.35rem" : "3.4rem")};
-  right: ${({ $align }) => ($align === "right" ? "3.4rem" : "1.35rem")};
-  display: grid;
-  place-items: center;
+  align-self: center;
   box-sizing: border-box;
 
-  @media (max-width: 56.25rem) {
-    top: 0.3rem;
-    bottom: 0.7rem;
-    left: ${({ $align }) => ($align === "right" ? "1.05rem" : "2.7rem")};
-    right: ${({ $align }) => ($align === "right" ? "2.7rem" : "1.05rem")};
-  }
-`;
+  max-width: 90vw; 
+  padding: 1.25rem 4rem;
 
-export const Message = styled.p`
-  margin: 0;
-  width: 100%;
-  font-size: 1.5rem;
-  font-weight: 100;
-  line-height: 1.38;
-  letter-spacing: 1.5rem;
+  border: 1px solid rgba(64, 64, 64, 0.16);
+  border-radius: ${({ theme }) => theme.radius.pill};
+  background: rgba(255, 255, 255, ${({ $opacity }) => $opacity});
+  box-shadow:
+    -0.94rem 2.31rem 1.5rem rgba(145, 145, 145, 0.03),
+    -0.44rem 1.06rem 1.13rem rgba(145, 145, 145, 0.04),
+    -0.13rem 0.25rem 0.63rem rgba(145, 145, 145, 0.05);
+  backdrop-filter: blur(7.5px);
+  color: ${({ theme }) => theme.colors.text.strong};
+  font-family: ${({ theme }) => theme.fontFamily.A2Z};
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
   text-align: center;
-  white-space: pre-line;
-  font-family: 'Wave', sans-serif;
-  letter-spacing: 0.02rem;
+  white-space: normal;
 
   @media (max-width: 56.25rem) {
-    font-size: 1.02rem;
+    width: min(${({ $width }) => $width}, calc(100vw - 2rem));
+    height: auto; 
+    min-height: 4.25rem;
+    padding: 0.9rem 1.4rem;
+    font-size: 1rem;
   }
 `;

@@ -5,7 +5,10 @@ import * as S from "./style";
 
 const MainLayout = () => {
   const { pathname } = useLocation();
-  const isInterviewRoute = pathname === "/main/interview";
+  const normalizedPathname = pathname.toLowerCase().replace(/\/+$/, "");
+  const isInterviewRoute =
+    normalizedPathname === "/main/interview" ||
+    normalizedPathname.startsWith("/main/interview/");
 
   return (
     <S.Page>
