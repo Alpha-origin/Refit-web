@@ -1,3 +1,5 @@
+// style.ts
+
 import styled from "styled-components";
 
 export const Container = styled.section`
@@ -9,9 +11,13 @@ export const Container = styled.section`
   width: 100vw;
   min-height: 100vh;
   margin-left: -50vw;
-  background:
-    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.82) 16%, rgba(234, 242, 255, 0.88) 38%, rgba(242, 243, 245, 0.96) 74%),
-    linear-gradient(180deg, #edf4ff 0%, #f6f8fc 45%, #f2f3f5 100%);
+  /* 상하 색상 반전 (아래가 은은한 하늘색, 위가 하얀색) */
+  background: linear-gradient(
+    180deg,
+    #f8fafc 0%,
+    #edf6ff 55%,
+    #dbeeff 100%
+  );
   overflow: hidden;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
@@ -36,8 +42,8 @@ export const Footer = styled.footer`
   justify-content: center;
   background: linear-gradient(
     180deg,
-    #d8e8ff 0%,
-    #c5dcff 100%
+    #c5dcff 0%,
+    #d8e8ff 100%
   );
   font-size: 2rem;
   font-weight: 700;

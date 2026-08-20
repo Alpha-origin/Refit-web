@@ -26,18 +26,18 @@ export const Header = styled(motion.div)`
 export const SubTitle = styled.span`
   margin-bottom: 1.15rem;
   color: #9dc1ff;
-  font-size: 1.25rem;
-  font-weight: 300;
-  font-family: 'Wave', sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  font-family: 'Pretendard', sans-serif;
 
 `;
 
 export const Title = styled.h2`
   margin: 0;
   color: #2f80ed;
-  font-size: 2.85rem;
+  font-size: 1.8rem;
   font-weight: 200;
-  line-height: 1.18;
+  line-height: 1;
   letter-spacing: -0.05rem;
   font-family: 'Wave', sans-serif;
 

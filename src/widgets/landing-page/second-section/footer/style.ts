@@ -10,15 +10,11 @@ export const Container = styled.footer`
 export const Inner = styled.div`
   position: relative;
   width: 100%;
-  height: 11rem;
+  height: 10rem;
   overflow: hidden;
   border-radius: 0; 
-  padding: 0 6.5rem;
-  background: linear-gradient(
-    90deg,
-    ${({ theme }) => theme.colors.surface.blueSoft} 0%,
-    ${({ theme }) => theme.colors.surface.blueMuted} 100%
-  );
+  padding: 0 8em;
+  background: #D1E2F8;
 
   @media (max-width: 56.25rem) {
     min-height: 13rem;
@@ -47,9 +43,9 @@ export const LeftSection = styled.div`
 export const Title = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.brand.blue};
-  font-size: 1.8rem;
-  font-weight: 300;
-  line-height: 1.25;
+  font-size: 1.5rem;
+  font-weight: 50;
+  line-height: 1.3;
   letter-spacing: -0.05rem;
   font-family: 'Wave', sans-serif;
   margin-right: 1.5rem;
@@ -60,21 +56,22 @@ export const Title = styled.h2`
 `;
 
 export const StartButton = styled.button`
-  width: 10.5rem;
-  height: 3rem;
+  width: 9.5rem;
+  height: 2.7rem;
   border: none;
   border-radius: ${({ theme }) => theme.radius.sm};
   background: ${({ theme }) => theme.colors.brand.blueAction};
   color: ${({ theme }) => theme.colors.white};
-  font-size: 1.25rem;
-  font-weight: 300;
-  font-family: 'Wave', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  font-family: 'A2Z', sans-serif;
   cursor: pointer;
   box-shadow: 0 0.1875rem 0.5rem ${({ theme }) => theme.colors.shadow.blue};
   transition: 0.2s ease;
 
   &:hover {
     transform: translateY(-0.125rem);
+    background-color: #478eec;
   }
 
   @media (max-width: 56.25rem) {
@@ -86,7 +83,7 @@ export const StartButton = styled.button`
 
 export const GraphicImage = styled.div`
   position: absolute;
-  right: 0;
+  right: 4rem;
   top: 0rem;
   z-index: 1;
   width: 35rem;

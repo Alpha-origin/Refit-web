@@ -37,7 +37,7 @@ export const AuthNav = styled.nav`
 export const NavTextButton = styled.button`
   background: none;
   border: none;
-  color: #fdfdfd;
+  color: #3388f7;
   padding: 0.5rem 0.375rem;
   font-size: 1rem;
   font-weight: 500;
