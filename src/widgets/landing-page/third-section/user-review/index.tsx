@@ -3,16 +3,24 @@ import {
   THIRD_SECTION_SUBTITLE,
   THIRD_SECTION_TITLE,
 } from "@/shared/constants/landing-page/third-section";
-import type { ComponentType, SVGProps } from "react";
 import { useReducedMotion } from "framer-motion";
-import { listVariants, revealVariants, userReviewViewport } from "./animation";
+import { revealVariants, userReviewViewport } from "./animation";
 import * as S from "./style";
-import type { BubbleAssetKey } from "./types";
 
-const bubbleGraphicMap: Record<
-  BubbleAssetKey,
-  ComponentType<SVGProps<SVGSVGElement>>
-> = S.bubbleGraphics;
+const REVIEW_ROWS = [
+  {
+    id: "top",
+    duration: 34,
+    offset: "-14rem",
+    items: THIRD_SECTION_REVIEW_ITEMS.slice(0, 3),
+  },
+  {
+    id: "bottom",
+    duration: 38,
+    offset: "4.5rem",
+    items: THIRD_SECTION_REVIEW_ITEMS.slice(2),
+  },
+] as const;
 
 const UserReview = () => {
   const shouldReduceMotion = useReducedMotion();
@@ -28,33 +36,31 @@ const UserReview = () => {
         <S.Title>{THIRD_SECTION_TITLE}</S.Title>
       </S.Header>
 
-      <S.ReviewGrid variants={listVariants}>
-        {THIRD_SECTION_REVIEW_ITEMS.map((review) => {
-          const BubbleGraphic = bubbleGraphicMap[review.bubbleAsset];
-
-          return (
-            <S.ReviewWrapper
-              key={review.id}
-              $align={review.align}
-              variants={revealVariants}
+      <S.ReviewStage variants={revealVariants}>
+        {REVIEW_ROWS.map((row) => (
+          <S.ReviewRow key={row.id}>
+            <S.ReviewTrack
+              $duration={row.duration}
+              $offset={row.offset}
+              $isPaused={Boolean(shouldReduceMotion)}
             >
-              <S.BubbleCluster $align={review.align}>
-                <S.Emoji $align={review.align} aria-hidden="true">
-                  <S.EmojiShape />
-                </S.Emoji>
-                <S.ChatBubble>
-                  <S.BubbleShapeFrame aria-hidden="true">
-                    <BubbleGraphic />
-                  </S.BubbleShapeFrame>
-                  <S.MessageLayer $align={review.align}>
-                    <S.Message>{review.message}</S.Message>
-                  </S.MessageLayer>
-                </S.ChatBubble>
-              </S.BubbleCluster>
-            </S.ReviewWrapper>
-          );
-        })}
-      </S.ReviewGrid>
+              {[0, 1].map((groupIndex) => (
+                <S.ReviewSet key={`${row.id}-${groupIndex}`} aria-hidden={groupIndex === 1}>
+                  {row.items.map((review) => (
+                    <S.ReviewChip
+                      key={`${row.id}-${groupIndex}-${review.id}`}
+                      $width={review.width}
+                      $opacity={review.opacity}
+                    >
+                      {review.message}
+                    </S.ReviewChip>
+                  ))}
+                </S.ReviewSet>
+              ))}
+            </S.ReviewTrack>
+          </S.ReviewRow>
+        ))}
+      </S.ReviewStage>
     </S.ContentMotion>
   );
 };
