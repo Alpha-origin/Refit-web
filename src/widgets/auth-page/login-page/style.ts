@@ -2,20 +2,19 @@ import styled from "styled-components";
 
 export const Section = styled.section`
   position: relative;
+  z-index: 1;
   width: 50%;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 6.7rem 2rem 4rem 1.8rem;
+  justify-content: center;
+  padding: 6.65rem clamp(2rem, 8vw, 6.7rem) 3.85rem 2rem;
   box-sizing: border-box;
-  overflow-y: auto;
 
   @media (max-width: 60rem) {
     width: 100%;
     min-height: auto;
     padding: 0 1.5rem 3rem;
-    justify-content: center;
   }
 `;
 
@@ -38,7 +37,7 @@ export const AuthNav = styled.nav`
 export const NavTextButton = styled.button`
   background: none;
   border: none;
-  color: #3388f7;
+  color: #fdfdfd;
   padding: 0.5rem 0.375rem;
   font-size: 1rem;
   font-weight: 500;
@@ -69,37 +68,37 @@ export const NavPrimaryButton = styled.button`
 `;
 
 export const Panel = styled.div`
-  width: min(23.2rem, calc(100% - 2rem));
-  min-height: 22rem;
-  margin-left: clamp(0rem, 4vw, 5rem);
-  padding: 4rem 3rem 2.15rem;
+  width: min(24.05rem, 100%);
+  min-height: 30rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4.7rem 3.05rem 4.9rem;
   border-radius: 0.75rem;
   background-color: #fcfaff;
   box-shadow: 0.0625rem 0.9375rem 3.125rem rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
 
   @media (max-width: 60rem) {
-    margin-left: 0;
-    padding: 2.5rem 1.8rem 2rem;
+    min-height: auto;
+    padding: 3rem 2rem;
   }
-  padding-bottom: 60px;
 `;
 
 export const Title = styled.h2`
-  margin: 0 0 1.8rem;
+  width: 100%;
+  margin: 0 0 1.85rem;
   color: ${({ theme }) => theme.colors.brand.blue};
   font-family: ${({ theme }) => theme.fontFamily.A2Z};
-  font-size: 1.5rem;
+  font-size: 1.55rem;
   font-weight: 600;
+  line-height: 1.2;
 `;
 
 export const Form = styled.form`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 2rem;
 `;
 
 export const InputWrapper = styled.div`
@@ -109,32 +108,38 @@ export const InputWrapper = styled.div`
 export const Label = styled.label`
   display: block;
   margin: 0 0 0.55rem;
-  color: rgba(0, 0, 0, 0.8);
-  font-size: 0.88rem;
+  color: #000000;
+  font-size: 0.9rem;
   font-weight: 500;
-  letter-spacing: 0.0175rem;
+  letter-spacing: 0.018rem;
 `;
 
 export const InputBox = styled.div`
   width: 100%;
   height: 2.45rem;
-  padding: 0 0.8rem;
-  border: 0.0625rem solid rgba(186, 186, 186, 0.6);
-  border-radius: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  padding: 0 0.75rem;
+  border: 0.0625rem solid rgba(186, 186, 186, 0.8);
+  border-radius: 0.5rem;
+  background-color: transparent;
   overflow: hidden;
-    &:focus-within {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:focus-within {
     border-color: rgba(26, 115, 232, 0.58);
     box-shadow: 0 0 0 0.1875rem rgba(26, 115, 232, 0.12);
   }
 `;
 
 export const InputIcon = styled.img`
-  width: 0.9rem;
-  height: 0.9rem;
+  width: 0.8rem;
+  height: 0.8rem;
   flex: 0 0 auto;
+  object-fit: contain;
   opacity: 0.72;
 `;
 
@@ -142,16 +147,15 @@ export const Input = styled.input`
   width: 100%;
   min-width: 0;
   height: 100%;
-  padding: 0;
   border: none;
   background-color: transparent;
-  color: #222222;
+  color: #1f2937;
   font-size: 0.75rem;
   font-weight: 400;
   outline: none;
 
   &::placeholder {
-    color: rgba(118, 122, 130, 0.7);
+    color: #767a82;
     opacity: 1;
   }
 
@@ -164,8 +168,8 @@ export const Input = styled.input`
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
-    -webkit-text-fill-color: #2478e8;
-    caret-color: #2478e8;
+    -webkit-text-fill-color: #1f2937;
+    caret-color: #1f2937;
     -webkit-box-shadow: 0 0 0 62.5rem #fcfaff inset;
     box-shadow: 0 0 0 62.5rem #fcfaff inset;
     transition: background-color 9999s ease-out;
@@ -173,34 +177,34 @@ export const Input = styled.input`
 `;
 
 export const ErrorMessage = styled.p`
-  margin: 0.5rem 0 0 1rem;
+  margin: 0.45rem 0 0 0.2rem;
   color: #ff4d4f;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
 export const StatusMessage = styled.p`
-  margin: 0.25rem 0 0 1rem;
+  margin: -0.15rem 0 0 0.2rem;
   color: #ff4d4f;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
 export const SubmitButton = styled.button`
   width: 100%;
   height: 2.55rem;
-  margin: 0.15rem 0 0;
   border: none;
   border-radius: 0.5rem;
   background-color: ${({ theme }) => theme.colors.brand.blue};
-  font-family: ${({ theme }) => theme.fontFamily.A2Z};
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.9);
   box-shadow:
     inset 0 0.35rem 0.7rem rgba(53, 106, 185, 0.09),
     inset 0 -0.0625rem 0.0625rem rgba(151, 193, 255, 0.4);
+  font-family: ${({ theme }) => theme.fontFamily.A2Z};
   font-size: 1rem;
   font-weight: 400;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 
   &:hover {
     background-color: #1767d4;
@@ -213,23 +217,13 @@ export const SubmitButton = styled.button`
 `;
 
 export const LinkWrapper = styled.div`
-  margin-top: 1.45rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: none;
 `;
 
 export const LinkText = styled.button`
-  border: none;
-  background: transparent;
-  color: #2478e8;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
+  display: none;
 `;
 
 export const Divider = styled.span`
-  color: #2478e8;
-  font-size: 0.85rem;
+  display: none;
 `;
