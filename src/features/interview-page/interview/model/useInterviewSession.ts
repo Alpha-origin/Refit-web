@@ -91,6 +91,7 @@ export const useInterviewSession = (
   const questionTts = useSupertoneTts(currentQuestion?.content ?? "");
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
+  const hasPreparedChatSessionRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
@@ -123,6 +124,7 @@ export const useInterviewSession = (
     setInterviewStatus(preparedInterview?.status ?? "IN_PROGRESS");
     setIsChatSessionReady(!preparedInterview);
     isSessionClosedRef.current = false;
+    hasPreparedChatSessionRef.current = !preparedInterview;
   }, [preparedInterview]);
 
   useEffect(() => {
@@ -264,6 +266,7 @@ export const useInterviewSession = (
 
       setActiveInterviewSessionId(data.sessionId);
       sessionIdRef.current = data.sessionId;
+      hasPreparedChatSessionRef.current = true;
 
       if (data.status) {
         setInterviewStatus(data.status);
@@ -308,6 +311,7 @@ export const useInterviewSession = (
 
       if (
         !latestSessionId ||
+        !hasPreparedChatSessionRef.current ||
         isSessionClosedRef.current ||
         activeSessionId !== latestSessionId
       ) {

@@ -1,4 +1,4 @@
-import { chatInstance } from "@/shared/api/axiosInstance";
+import { API_URL, chatInstance } from "@/shared/api/axiosInstance";
 
 import {
   getCurrentUserId,
@@ -16,7 +16,62 @@ import type {
 } from "../type";
 
 const PREPARE_INTERVIEW_URL = "/chat/interviews";
+const AI_SUBSCRIBE_URL = "/api/v1/ai/subscribe";
+const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
 type PrepareInterviewRequestData = PreparedInterviewData;
+
+const waitForAiJobEvent = (jobId: string) =>
+  new Promise<void>((resolve, reject) => {
+    const baseUrl =
+      import.meta.env.MODE === "development" ? window.location.origin : API_URL;
+    const subscribeUrl = new URL(
+      `${AI_SUBSCRIBE_URL}/${encodeURIComponent(jobId)}`,
+      baseUrl,
+    );
+    console.log("[AI SSE] connecting", {
+      jobId,
+      url: subscribeUrl.toString(),
+    });
+    const eventSource = new EventSource(subscribeUrl, {
+      withCredentials: true,
+    });
+
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      eventSource.close();
+    };
+    const timeoutId = window.setTimeout(() => {
+      console.error("[AI SSE] timeout", {
+        jobId,
+        timeoutMs: AI_SUBSCRIBE_TIMEOUT_MS,
+      });
+      cleanup();
+      reject(new Error("포트폴리오 분석 완료를 기다리는 시간이 초과되었습니다."));
+    }, AI_SUBSCRIBE_TIMEOUT_MS);
+
+    eventSource.onopen = () => {
+      console.log("[AI SSE] connected", { jobId });
+    };
+    eventSource.onmessage = (event) => {
+      console.log("[AI SSE] message received", {
+        jobId,
+        data: event.data,
+        lastEventId: event.lastEventId,
+        type: event.type,
+      });
+      cleanup();
+      resolve();
+    };
+    eventSource.onerror = (event) => {
+      console.error("[AI SSE] connection error", {
+        event,
+        jobId,
+        readyState: eventSource.readyState,
+      });
+      cleanup();
+      reject(new Error("포트폴리오 분석 상태를 확인하지 못했습니다."));
+    };
+  });
 
 const normalizeQuestion = (
   value: unknown,
@@ -138,6 +193,8 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
+    await waitForAiJobEvent(requestData.jobId);
+
     const requestPayload = {
       sessionId: requestData.sessionId,
       interviewId: requestData.interviewId,
