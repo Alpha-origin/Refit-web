@@ -26,6 +26,7 @@ export type {
   CompleteInterviewQuestion,
   CompleteInterviewResponse,
   InterviewLifecycleStatus,
+  InterviewLevel,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewProgressStatus,

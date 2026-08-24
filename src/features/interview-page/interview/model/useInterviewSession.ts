@@ -248,6 +248,8 @@ export const useInterviewSession = (
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
+        level: preparedInterview.level,
+        jobId: preparedInterview.jobId,
         questions: preparedInterview.questions,
       });
 

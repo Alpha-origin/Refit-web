@@ -66,6 +66,8 @@ const buildPrepareInterviewRequest = (
       })(),
     personaId: params.personaId,
     personaType: params.personaType,
+    level: params.level,
+    jobId: params.jobId.trim(),
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
@@ -113,6 +115,8 @@ const normalizePreparedInterview = (
     personaType: isPersonaType(sourceRecord?.personaType)
       ? sourceRecord.personaType
       : fallbackData.personaType,
+    level: fallbackData.level,
+    jobId: fallbackData.jobId,
     status: isInterviewProgressStatus(sourceRecord?.status)
       ? sourceRecord.status
       : fallbackData.status,
@@ -140,6 +144,8 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
       userId: requestData.userId,
       personaId: requestData.personaId,
       personaType: requestData.personaType,
+      level: requestData.level,
+      jobId: requestData.jobId,
     };
 
     console.log("[chat/interviews] request payload", requestPayload);

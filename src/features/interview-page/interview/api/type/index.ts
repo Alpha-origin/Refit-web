@@ -13,6 +13,7 @@ export type {
   CompleteInterviewResponse,
 } from "./complete-interview";
 export type {
+  InterviewLevel,
   InterviewProgressStatus,
   PersonaType,
   PrepareInterviewParams,

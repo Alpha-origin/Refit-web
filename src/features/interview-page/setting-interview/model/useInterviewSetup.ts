@@ -7,6 +7,7 @@ import {
   setActiveInterviewSessionId,
   type CreateInterviewPersonaType,
   type InterviewPersonaGender,
+  type InterviewLevel,
   type InterviewPersonaMajor,
   type PersonaType,
 } from "@/features/interview-page/interview/api";
@@ -17,6 +18,7 @@ import {
   type InterviewSettingSelectHandlers,
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
+import { getInterviewJobId } from "@/shared/storage/interviewJobId";
 
 const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
   편함: "FRIENDLY",
@@ -37,6 +39,12 @@ const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
   쉬움: 0,
   보통: 3,
   어려움: 5,
+};
+
+const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
+  쉬움: "EASY",
+  보통: "MEDIUM",
+  어려움: "HARD",
 };
 
 const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
@@ -72,6 +80,14 @@ export const useInterviewSetup = () => {
 
     setErrorMessage("");
     setIsSubmitting(true);
+
+    const jobId = getInterviewJobId();
+
+    if (!jobId) {
+      setIsSubmitting(false);
+      setErrorMessage("마이페이지에서 포트폴리오를 먼저 등록해주세요.");
+      return;
+    }
 
     const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
       (interviewer) => interviewer.id === selectedInterviewerId,
@@ -134,6 +150,8 @@ export const useInterviewSetup = () => {
           userId: data.userId,
           personaId,
           personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
+          level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
+          jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
           questions: data.questions,
