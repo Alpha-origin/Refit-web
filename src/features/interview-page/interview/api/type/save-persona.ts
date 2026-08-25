@@ -5,7 +5,11 @@ import type {
   InterviewPersonaMajor,
 } from "./create-interview";
 
-export type SavePersonaParams = CreateInterviewParams;
+export type InterviewPersonaRole = "TECH";
+
+export interface SavePersonaParams extends CreateInterviewParams {
+  role: InterviewPersonaRole;
+}
 
 export interface SavedPersonaData {
   personaId: number;

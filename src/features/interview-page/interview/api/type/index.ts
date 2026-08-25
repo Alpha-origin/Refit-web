@@ -24,7 +24,11 @@ export type {
   QuitInterviewQuestion,
   QuitInterviewResponse,
 } from "./quit-interview";
-export type { SavePersonaParams, SavedPersonaData } from "./save-persona";
+export type {
+  InterviewPersonaRole,
+  SavePersonaParams,
+  SavedPersonaData,
+} from "./save-persona";
 export type {
   SubmitInterviewAnswerParams,
   SubmitInterviewAnswerQuestion,

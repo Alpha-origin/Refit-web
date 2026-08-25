@@ -9,7 +9,9 @@ import {
   type InterviewPersonaGender,
   type InterviewLevel,
   type InterviewPersonaMajor,
+  type InterviewPersonaRole,
   type PersonaType,
+  type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
@@ -49,6 +51,7 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
 
 const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
 const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
+const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
 
 const buildUniquePersonaName = (personaName: string) =>
   `${personaName}-${Date.now().toString(36)}`;
@@ -99,8 +102,9 @@ export const useInterviewSetup = () => {
       return;
     }
 
-    const personaPayload = {
+    const personaPayload: SavePersonaParams = {
       personaName: buildUniquePersonaName(selectedInterviewer.personaName),
+      role: DEFAULT_INTERVIEW_ROLE,
       major: DEFAULT_INTERVIEW_MAJOR,
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
@@ -121,10 +125,19 @@ export const useInterviewSetup = () => {
     }
 
     console.log("[persona/save] response data", savedPersona);
-    console.log("[interviews/create] request payload", personaPayload);
+
+    const interviewPayload = {
+      personaName: personaPayload.personaName,
+      major: personaPayload.major,
+      type: personaPayload.type,
+      career: personaPayload.career,
+      gender: personaPayload.gender,
+    };
+
+    console.log("[interviews/create] request payload", interviewPayload);
 
     const { data, errorMessage: createErrorMessage } =
-      await createInterview(personaPayload);
+      await createInterview(interviewPayload);
 
     if (createErrorMessage || !data) {
       setIsSubmitting(false);

@@ -187,6 +187,10 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   try {
     await waitForAiSseConnection(requestData.jobId);
 
+    console.log("[AI SSE] connected, proceeding to chat/interviews", {
+      jobId: requestData.jobId,
+    });
+
     const requestPayload = {
       sessionId: requestData.sessionId,
       interviewId: requestData.interviewId,
