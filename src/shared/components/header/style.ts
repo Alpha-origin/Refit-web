@@ -17,13 +17,14 @@ export const Header = styled.header`
   position: relative;
   z-index: 1;
   width: 100%;
-  min-height: 4.25rem;
+  min-height: 5rem;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(26, 115, 232, 0.16);
   background-color: transparent;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   padding: 0 2.5rem;
-  margin-top: 0.6rem;
 
   @media (max-width: 72rem) {
     padding: 0 1.5rem;

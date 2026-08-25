@@ -1,4 +1,4 @@
-import { chatInstance } from "@/shared/api/axiosInstance";
+import { API_URL, chatInstance } from "@/shared/api/axiosInstance";
 
 import {
   getCurrentUserId,
@@ -16,10 +16,54 @@ import type {
 } from "../type";
 
 const PREPARE_INTERVIEW_URL = "/chat/interviews";
+const AI_SUBSCRIBE_URL = "/api/v1/ai/subscribe";
+const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
+type PrepareInterviewRequestData = PreparedInterviewData;
 
-interface PrepareInterviewRequestData extends PreparedInterviewData {
-  jobId: string;
-}
+const waitForAiSseConnection = (jobId: string) =>
+  new Promise<void>((resolve, reject) => {
+    const baseUrl =
+      import.meta.env.MODE === "development" ? window.location.origin : API_URL;
+    const subscribeUrl = new URL(
+      `${AI_SUBSCRIBE_URL}/${encodeURIComponent(jobId)}`,
+      baseUrl,
+    );
+    console.log("[AI SSE] connecting", {
+      jobId,
+      url: subscribeUrl.toString(),
+    });
+    const eventSource = new EventSource(subscribeUrl, {
+      withCredentials: true,
+    });
+
+    const cleanup = () => {
+      window.clearTimeout(timeoutId);
+      eventSource.close();
+    };
+    const timeoutId = window.setTimeout(() => {
+      console.error("[AI SSE] timeout", {
+        jobId,
+        timeoutMs: AI_SUBSCRIBE_TIMEOUT_MS,
+      });
+      cleanup();
+      reject(new Error("포트폴리오 분석 서버 연결 시간이 초과되었습니다."));
+    }, AI_SUBSCRIBE_TIMEOUT_MS);
+
+    eventSource.onopen = () => {
+      console.log("[AI SSE] connected", { jobId });
+      cleanup();
+      resolve();
+    };
+    eventSource.onerror = (event) => {
+      console.error("[AI SSE] connection error", {
+        event,
+        jobId,
+        readyState: eventSource.readyState,
+      });
+      cleanup();
+      reject(new Error("포트폴리오 분석 상태를 확인하지 못했습니다."));
+    };
+  });
 
 const normalizeQuestion = (
   value: unknown,
@@ -48,7 +92,6 @@ const normalizeQuestion = (
 const buildPrepareInterviewRequest = (
   params: PrepareInterviewParams,
   sessionId: string,
-  jobId: string,
 ): PrepareInterviewRequestData => {
   const normalizedQuestions = params.questions.map((question, index) => ({
     questionId: getNumericValue(question.questionId) ?? index + 1,
@@ -70,7 +113,8 @@ const buildPrepareInterviewRequest = (
       })(),
     personaId: params.personaId,
     personaType: params.personaType,
-    jobId,
+    level: params.level,
+    jobId: params.jobId.trim(),
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
@@ -118,7 +162,8 @@ const normalizePreparedInterview = (
     personaType: isPersonaType(sourceRecord?.personaType)
       ? sourceRecord.personaType
       : fallbackData.personaType,
-    jobId: getTrimmedString(sourceRecord?.jobId) ?? fallbackData.jobId,
+    level: fallbackData.level,
+    jobId: fallbackData.jobId,
     status: isInterviewProgressStatus(sourceRecord?.status)
       ? sourceRecord.status
       : fallbackData.status,
@@ -129,7 +174,6 @@ const normalizePreparedInterview = (
 
 export const prepareInterview = async (params: PrepareInterviewParams) => {
   const normalizedSessionId = getTrimmedString(params.sessionId);
-  const normalizedJobId = getTrimmedString(params.jobId);
 
   if (!normalizedSessionId) {
     return {
@@ -138,30 +182,23 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
     };
   }
 
-  if (!normalizedJobId) {
-    return {
-      data: null,
-      errorMessage: "jobId가 없어 면접을 시작할 수 없습니다.",
-    };
-  }
-
-  const requestData = buildPrepareInterviewRequest(
-    params,
-    normalizedSessionId,
-    normalizedJobId,
-  );
+  const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
+    await waitForAiSseConnection(requestData.jobId);
+
     const requestPayload = {
       sessionId: requestData.sessionId,
       interviewId: requestData.interviewId,
       userId: requestData.userId,
       personaId: requestData.personaId,
       personaType: requestData.personaType,
+      level: requestData.level,
       jobId: requestData.jobId,
     };
 
     console.log("[chat/interviews] request payload", requestPayload);
+    console.log("[chat/interviews] sending after SSE", { jobId: requestData.jobId });
     const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestPayload);
     const responseRecord = getRecord(response.data);
 

@@ -1,6 +1,34 @@
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as S from "./style";
 import type { FeedbackListProps } from "./type";
-import { useNavigate } from "react-router-dom";
+
+type SortOrder = "oldest" | "latest";
+
+const getDateTime = (date: string) => {
+  const parsedDate = new Date(date.split("/").join("-"));
+
+  return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+};
+
+const getNormalizedStatusLabel = (statusLabel: string) =>
+  statusLabel.replace(/\s/g, "");
+
+const getStatusDisplayLabel = (statusLabel: string) => {
+  if (getNormalizedStatusLabel(statusLabel) === "분석완료") {
+    return "분석 완료";
+  }
+
+  if (statusLabel === "진행중") {
+    return "분석중";
+  }
+
+  return statusLabel;
+};
+
+type InternalProps = FeedbackListProps & {
+  onItemClick?: (item: FeedbackListProps["items"][number]) => void;
+};
 
 const FeedbackList = ({
   emptyMessage = "아직 저장된 면접 결과가 없습니다.",
@@ -9,13 +37,41 @@ const FeedbackList = ({
   items,
   onRetry,
   title,
-}: FeedbackListProps) => {
+  onItemClick,
+}: InternalProps) => {
   const navigate = useNavigate();
+  const [sortOrder, setSortOrder] = useState<SortOrder>("oldest");
+  const sortedItems = useMemo(
+    () =>
+      [...items].sort((left, right) => {
+        const leftTime = getDateTime(left.date);
+        const rightTime = getDateTime(right.date);
+
+        return sortOrder === "oldest"
+          ? leftTime - rightTime
+          : rightTime - leftTime;
+      }),
+    [items, sortOrder],
+  );
 
   return (
     <S.Page>
       <S.Panel>
-        <S.SectionTitle>{title}</S.SectionTitle>
+        <S.Toolbar>
+          <S.SectionTitle>{title}</S.SectionTitle>
+          <S.SortSelectWrapper>
+            <S.SortSelect
+              aria-label="면접 목록 정렬"
+              value={sortOrder}
+              onChange={(event) =>
+                setSortOrder(event.target.value as SortOrder)
+              }
+            >
+              <option value="oldest">오래된 순</option>
+              <option value="latest">최신순</option>
+            </S.SortSelect>
+          </S.SortSelectWrapper>
+        </S.Toolbar>
 
         {isLoading ? (
           <S.StateCard aria-live="polite">
@@ -36,23 +92,51 @@ const FeedbackList = ({
           </S.StateCard>
         ) : (
           <S.List>
-            {items.map((item) => (
-              <S.FeedbackCard
-                key={item.id}
-                onClick={() => navigate(`/main/feedback/overall/${item.id}`)}
-              >
-                <S.CardDate>{item.date}</S.CardDate>
+            {sortedItems.map((item) => {
+              const isComplete = getNormalizedStatusLabel(
+                item.statusLabel,
+              ).includes("완료");
 
-                <S.CardBody>
-                  <S.CardTitle>{item.title}</S.CardTitle>
-                  <S.CardMeta>
-                    {item.styleLabel}/{item.levelLabel}/{item.interviewerName}
-                  </S.CardMeta>
-                </S.CardBody>
+              return (
+                <S.FeedbackCard
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    if (onItemClick) {
+                      onItemClick(item);
+                      return;
+                    }
 
-                <S.StatusButton type="button">{item.statusLabel}</S.StatusButton>
-              </S.FeedbackCard>
-            ))}
+                    navigate(`/main/feedback/overall/${item.id}`);
+                  }}
+                >
+                  <S.CardImage
+                    src={item.imageUrl}
+                    alt={`${item.interviewerName} 이미지`}
+                  />
+                  <S.CardBody>
+                    <S.CardTitle>{item.title}</S.CardTitle>
+                    <S.MetaGroup>
+                      <S.MetaLabel>스타일/난이도</S.MetaLabel>
+                      <S.TagGroup>
+                        <S.Tag>{item.styleLabel}</S.Tag>
+                        <S.Tag>{item.levelLabel}</S.Tag>
+                      </S.TagGroup>
+                    </S.MetaGroup>
+                    <S.MetaGroup>
+                      <S.MetaLabel>면접관</S.MetaLabel>
+                      <S.TagGroup>
+                        <S.Tag>{item.interviewerName}</S.Tag>
+                      </S.TagGroup>
+                    </S.MetaGroup>
+                    <S.CardDate>{item.date}</S.CardDate>
+                  </S.CardBody>
+                  <S.StatusBadge $complete={isComplete}>
+                    {getStatusDisplayLabel(item.statusLabel)}
+                  </S.StatusBadge>
+                </S.FeedbackCard>
+              );
+            })}
           </S.List>
         )}
       </S.Panel>

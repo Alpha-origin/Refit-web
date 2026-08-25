@@ -14,7 +14,7 @@ export const INTERVIEW_SETTING_OPTION_SECTIONS = [
   },
   {
     key: 'difficulty',
-    title: '면접 난이도',
+    title: '난이도',
     options: ['쉬움', '보통', '어려움'],
   },
 ] as const satisfies readonly InterviewSettingOptionSection[];

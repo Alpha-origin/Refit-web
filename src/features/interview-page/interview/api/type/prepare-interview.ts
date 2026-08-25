@@ -1,4 +1,5 @@
 export type PersonaType = "FRIENDLY" | "NEUTRAL" | "STRESS";
+export type InterviewLevel = "EASY" | "MEDIUM" | "HARD";
 export type InterviewProgressStatus =
   | "IN_PROGRESS"
   | "COMPLETED"
@@ -17,7 +18,8 @@ export interface PrepareInterviewParams {
   userId?: number;
   personaId: number;
   personaType: PersonaType;
-  jobId?: string;
+  level: InterviewLevel;
+  jobId: string;
   questions: PrepareInterviewQuestion[];
 }
 
@@ -27,7 +29,8 @@ export interface PreparedInterviewData {
   userId: number;
   personaId: number;
   personaType: PersonaType;
-  jobId?: string | null;
+  level: InterviewLevel;
+  jobId: string;
   status: InterviewProgressStatus;
   currentQuestionIndex: number;
   questions: PrepareInterviewQuestion[];

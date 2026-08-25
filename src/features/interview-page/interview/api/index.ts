@@ -6,7 +6,6 @@ export {
 export { completeInterview } from "./complete-interview";
 export { createInterview } from "./create-interview";
 export { createAnswer } from "./create-answer";
-export { generateMockInterview } from "./generate-mock";
 export { getCurrentInterviewQuestion } from "./current-question";
 export {
   connectInterviewSocket,
@@ -16,7 +15,6 @@ export {
 export { prepareInterview } from "./prepare-interview";
 export { quitInterview } from "./quit-interview";
 export { savePersona } from "./save-persona";
-export { waitForGeneratedInterview } from "./subscribe-generated-interview";
 export { submitInterviewAnswer } from "./submit-answer";
 
 export type {
@@ -24,11 +22,11 @@ export type {
   CreateInterviewPersonaType,
   CreatedInterviewData,
   CreateAnswerRequest,
-  GenerateMockResponse,
   CurrentInterviewQuestion,
   CompleteInterviewQuestion,
   CompleteInterviewResponse,
   InterviewLifecycleStatus,
+  InterviewLevel,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewProgressStatus,
