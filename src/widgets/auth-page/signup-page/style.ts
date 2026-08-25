@@ -1,121 +1,192 @@
 import styled from "styled-components";
+
 import type { StepDotInnerProps } from "./type";
 
 export const Section = styled.section`
   position: relative;
+  z-index: 1;
   width: 50%;
-  min-height: 100vh;
-  background-color: #f7fbff;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 1.5rem;
+  padding: 6.65rem clamp(2rem, 8vw, 6.7rem) 3.85rem 2rem;
   box-sizing: border-box;
-  overflow-y: auto;
 
   @media (max-width: 60rem) {
     width: 100%;
     min-height: auto;
-    padding: 2.5rem 1.5rem 3rem;
+    padding: 0 1.5rem 3rem;
+  }
+`;
+
+export const AuthNav = styled.nav`
+  position: fixed;
+  top: 1.45rem;
+  right: 1.75rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+
+  @media (max-width: 60rem) {
+    top: 1rem;
+    right: 1rem;
+    gap: 0.875rem;
+  }
+`;
+
+export const NavTextButton = styled.button`
+  background: none;
+  border: none;
+  color: #3388f7;
+  padding: 0.5rem 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #002655;
+  }
+`;
+
+export const NavPrimaryButton = styled.button`
+  background: #3388f7;
+  border: none;
+  color: ${({ theme }) => theme.colors.white};
+  min-height: 2.25rem;
+  padding: 0.55rem 1rem;
+  border-radius: ${({ theme }) => theme.radius.sm};
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: #2975d7;
   }
 `;
 
 export const Logo = styled.button`
-  position: absolute;
-  top: 1.5rem;
-  right: 2rem;
-  border: none;
-  background: transparent;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-
-  img {
-    display: block;
-    width: 4rem;
-    height: 4rem;
-  }
-
-  @media (max-width: 60rem) {
-    right: 1.5rem;
-  }
+  display: none;
 `;
 
 export const Panel = styled.div`
-  width: min(27rem, calc(100% - 2rem));
+  width: min(24.05rem, 100%);
+  min-height: 30.85rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-`;
-
-export const Title = styled.h2`
-  margin: 0 0 3rem;
-  color: #2478e8;
-  font-size: 2.6rem;
-  font-weight: 800;
-`;
-
-export const Form = styled.form`
-  width: min(25.5rem, 100%);
-  align-self: center;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-export const FirstStepLayout = styled.div`
-  position: relative;
-  width: 100%;
-  display: block;
+  justify-content: center;
+  padding: 4.7rem 3.05rem 4.9rem;
+  border-radius: 0.75rem;
+  background-color: #fcfaff;
+  box-shadow: 0.0625rem 0.9375rem 3.125rem rgba(0, 0, 0, 0.15);
 
   @media (max-width: 60rem) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+    min-height: auto;
+    padding: 3rem 2rem;
   }
 `;
 
-export const SecondStepLayout = styled.div`
-  position: relative;
+
+export const Title = styled.h2`
+  width: 100%;
+  margin: 0 0 1.85rem;
+  color: ${({ theme }) => theme.colors.brand.blue};
+  font-family: ${({ theme }) => theme.fontFamily.A2Z};
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1.2;
+`;
+
+export const Form = styled.form`
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+`;
+
+
+export const FirstStepLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+`;
+
+export const SecondStepLayout = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.55rem;
+  padding: 0.65rem 0 0;
 `;
 
 export const StepFields = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
 `;
 
 export const InputWrapper = styled.div`
   width: 100%;
 `;
 
+export const Label = styled.label`
+  display: block;
+  margin: 0 0 0.55rem;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.018rem;
+`;
+
+export const FieldBox = styled.div`
+  width: 100%;
+  height: 2.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.75rem;
+  border: 0.0625rem solid rgba(186, 186, 186, 0.8);
+  border-radius: 0.5rem;
+  background-color: transparent;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: rgba(26, 115, 232, 0.58);
+    box-shadow: 0 0 0 0.1875rem rgba(26, 115, 232, 0.12);
+  }
+`;
+
+export const FieldIcon = styled.img`
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: 0 0 auto;
+  object-fit: contain;
+  opacity: 0.72;
+`;
+
 export const Input = styled.input`
   width: 100%;
-  height: 3.55rem;
-  padding: 0 2.8rem;
-  border: 0.0938rem solid #2478e8;
-  border-radius: 999rem;
+  min-width: 0;
+  height: 100%;
+  border: none;
   background-color: transparent;
-  color: #2478e8;
-  font-size: 1.05rem;
-  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.75rem;
+  font-weight: 400;
   outline: none;
-  box-sizing: border-box;
 
   &::placeholder {
-    color: #2478e8;
+    color: #767a82;
     opacity: 1;
-  }
-
-  &:focus {
-    box-shadow: 0 0 0 0.1875rem rgba(36, 120, 232, 0.15);
   }
 
   &:disabled {
@@ -127,102 +198,76 @@ export const Input = styled.input`
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
-    -webkit-text-fill-color: #2478e8;
-    caret-color: #2478e8;
-    -webkit-box-shadow: 0 0 0 62.5rem #f7fbff inset;
-    box-shadow: 0 0 0 62.5rem #f7fbff inset;
+    -webkit-text-fill-color: #1f2937;
+    caret-color: #1f2937;
+    -webkit-box-shadow: 0 0 0 62.5rem #fcfaff inset;
+    box-shadow: 0 0 0 62.5rem #fcfaff inset;
     transition: background-color 9999s ease-out;
   }
 `;
 
 export const ErrorMessage = styled.p`
-  margin: 0.5rem 0 0 1rem;
+  margin: 0.45rem 0 0 0.2rem;
   color: #ff4d4f;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
 export const StatusMessage = styled.p`
-  margin: 0.25rem 0 0 1rem;
+  margin: -0.15rem 0 0 0.2rem;
   color: #ff4d4f;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
 export const NextStepButton = styled.button`
-  position: absolute;
-  top: 50%;
-  right: -4.8rem;
-  width: 2.5rem;
-  height: 4.5rem;
+  width: 100%;
+  height: 2.55rem;
   border: none;
-  background: transparent;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 0.5rem;
+  background-color: ${({ theme }) => theme.colors.brand.blue};
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 0.35rem 0.7rem rgba(53, 106, 185, 0.09),
+    inset 0 -0.0625rem 0.0625rem rgba(151, 193, 255, 0.4);
+  font-family: ${({ theme }) => theme.fontFamily.A2Z};
+  font-size: 1rem;
+  font-weight: 400;
   cursor: pointer;
-  transform: translateY(-50%);
+  transition: background-color 0.2s ease;
 
-  @media (max-width: 60rem) {
-    position: static;
-    transform: none;
+  &:hover {
+    background-color: #1767d4;
   }
 `;
 
 export const ArrowIcon = styled.img`
-  width: 2.3rem;
-  height: auto;
-  display: block;
-
-  @media (max-width: 60rem) {
-    transform: rotate(90deg);
-  }
+  display: none;
 `;
 
 export const BackStepButton = styled.button`
-  position: absolute;
-  top: 50%;
-  left: -4.8rem;
-  width: 2.5rem;
-  height: 4.5rem;
-  border: none;
-  background: transparent;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transform: translateY(-50%);
-
-  @media (max-width: 60rem) {
-    position: static;
-    align-self: center;
-    transform: none;
-  }
+  display: none;
 `;
 
 export const BackArrowIcon = styled.img`
-  width: 2.3rem;
-  height: auto;
-  display: block;
-  transform: rotate(180deg);
-
-  @media (max-width: 60rem) {
-    transform: rotate(-90deg);
-  }
+  display: none;
 `;
 
 export const SubmitButton = styled.button`
   width: 100%;
-  height: 3.3rem;
+  height: 2.55rem;
   border: none;
-  border-radius: 999rem;
-  background-color: #2478e8;
-  color: #ffffff;
-  font-size: 1.15rem;
-  font-weight: 800;
+  border-radius: 0.5rem;
+  background-color: ${({ theme }) => theme.colors.brand.blue};
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 0.35rem 0.7rem rgba(53, 106, 185, 0.09),
+    inset 0 -0.0625rem 0.0625rem rgba(151, 193, 255, 0.4);
+  font-family: ${({ theme }) => theme.fontFamily.A2Z};
+  font-size: 1rem;
+  font-weight: 400;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 
   &:hover {
     background-color: #1767d4;
@@ -235,61 +280,25 @@ export const SubmitButton = styled.button`
 `;
 
 export const StepIndicator = styled.div`
-  width: 1.9rem;
-  align-self: center;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: none;
 `;
 
 export const StepDot = styled.span`
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: 50%;
-  border: 0.0938rem solid #2478e8;
-  background: #ffffff;
+  display: none;
 `;
 
 export const StepDotInner = styled.span<StepDotInnerProps>`
-  width: 0.32rem;
-  height: 0.32rem;
-  border-radius: 50%;
-  background: #2478e8;
-  opacity: ${({ $active }) => ($active ? 1 : 0)};
-  transform: scale(${({ $active }) => ($active ? 1 : 0.45)});
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+  display: none;
 `;
 
 export const LinkWrapper = styled.div`
-  margin-top: 1.45rem;
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
+  display: none;
 `;
 
 export const LinkText = styled.p`
-  margin: 0;
-  color: #2478e8;
-  font-size: 0.85rem;
-  font-weight: 600;
+  display: none;
 `;
 
 export const GoLoginButton = styled.button`
-  border: none;
-  background: transparent;
-  color: #2478e8;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-  }
+  display: none;
 `;

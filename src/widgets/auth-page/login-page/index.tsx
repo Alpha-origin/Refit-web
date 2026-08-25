@@ -1,4 +1,5 @@
-import RepitLogo from '@/shared/img/logo/Repit-R.svg?url';
+import MailIcon from '@/shared/img/auth-page/auth-email.svg?url';
+import LockIcon from '@/shared/img/auth-page/auth-lock.svg?url';
 import { useNavigate } from 'react-router-dom';
 
 import * as S from './style';
@@ -15,18 +16,27 @@ const LoginPanel = ({
 
   return (
     <S.Section>
-      <S.Logo type="button" aria-label="Repit 홈으로 이동" onClick={() => navigate('/')}>
-        <img src={RepitLogo} alt="Repit" />
-      </S.Logo>
+      <S.AuthNav aria-label="인증 메뉴">
+        <S.NavTextButton type="button" onClick={() => navigate('/signup')}>
+          회원가입
+        </S.NavTextButton>
+        <S.NavPrimaryButton type="button" aria-current="page">
+          로그인
+        </S.NavPrimaryButton>
+      </S.AuthNav>
 
       <S.Panel>
         <S.Title>로그인</S.Title>
 
         <S.Form onSubmit={onSubmit}>
           <S.InputWrapper>
+            <S.Label htmlFor="login-email">이메일</S.Label>
+            <S.InputBox>
+              <S.InputIcon src={MailIcon} alt="" aria-hidden="true" />
             <S.Input
+              id="login-email"
               type="email"
-              placeholder="이메일"
+              placeholder="이메일을 입력하세요"
               disabled={isSubmitting}
               {...register('email', {
                 required: '이메일을 입력해주세요.',
@@ -36,6 +46,7 @@ const LoginPanel = ({
                 },
               })}
             />
+            </S.InputBox>
 
             {errors.email && (
               <S.ErrorMessage>{errors.email.message}</S.ErrorMessage>
@@ -43,9 +54,13 @@ const LoginPanel = ({
           </S.InputWrapper>
 
           <S.InputWrapper>
+            <S.Label htmlFor="login-password">비밀번호</S.Label>
+            <S.InputBox>
+              <S.InputIcon src={LockIcon} alt="" aria-hidden="true" />
             <S.Input
+              id="login-password"
               type="password"
-              placeholder="비밀번호"
+              placeholder="비밀번호를 입력하세요"
               disabled={isSubmitting}
               {...register('password', {
                 required: '비밀번호를 입력해주세요.',
@@ -55,6 +70,7 @@ const LoginPanel = ({
                 },
               })}
             />
+            </S.InputBox>
 
             {errors.password && (
               <S.ErrorMessage>{errors.password.message}</S.ErrorMessage>
@@ -69,12 +85,6 @@ const LoginPanel = ({
             {isSubmitting ? '확인 중...' : '로그인'}
           </S.SubmitButton>
         </S.Form>
-
-        <S.LinkWrapper>
-          <S.LinkText type="button">아이디 찾기</S.LinkText>
-          <S.Divider>|</S.Divider>
-          <S.LinkText type="button">비밀번호 찾기</S.LinkText>
-        </S.LinkWrapper>
       </S.Panel>
     </S.Section>
   );

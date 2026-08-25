@@ -6,6 +6,7 @@ const FirstSection = () => {
   return (
     <S.Section>
       <S.BackgroundGlow />
+      <S.BackgroundGround />
       <LandingPageHeader />
       <HeroContent />
     </S.Section>

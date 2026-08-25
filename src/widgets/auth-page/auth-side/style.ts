@@ -1,38 +1,103 @@
+import { Link } from "react-router-dom";
 import styled from "styled-components";
-import type { SectionProps } from "./type";
 
-export const Section = styled.section<SectionProps>`
+import type { NavButtonStyleProps } from "./type";
+
+export const Section = styled.section`
   position: relative;
+  z-index: 1;
   width: 50%;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 2.5rem 0 clamp(4rem, 8vw, 9rem);
+  padding: 8.5rem 2.5rem 4rem clamp(7rem, 11.6vw, 9.6rem);
   box-sizing: border-box;
-  background-color: #1a73e8;
-  background-image: url(${({ $backgroundImage }) => $backgroundImage});
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  overflow: hidden;
 
   @media (max-width: 60rem) {
     width: 100%;
-    min-height: 42vh;
-    align-items: flex-end;
-    padding: 2.5rem;
+    min-height: auto;
+    padding: 6.25rem 1.5rem 2.5rem;
+  }
+`;
+
+export const Header = styled.header`
+  position: fixed;
+  top: 1.45rem;
+  left: 1.5rem;
+  right: 1.75rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+
+  @media (max-width: 60rem) {
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+`;
+
+export const LogoLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  pointer-events: auto;
+
+  img {
+    display: block;
+    width: 5.9rem;
+    height: auto;
+  }
+
+  @media (max-width: 60rem) {
+    img {
+      width: 5rem;
+    }
+  }
+`;
+
+export const Navigation = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  pointer-events: auto;
+`;
+
+export const NavButton = styled.button<NavButtonStyleProps>`
+  min-width: ${({ $active }) => ($active ? "4.6rem" : "auto")};
+  height: ${({ $active }) => ($active ? "2.05rem" : "auto")};
+  padding: ${({ $active }) => ($active ? "0 1rem" : "0")};
+  border: none;
+  border-radius: 0.4rem;
+  background-color: ${({ $active }) => ($active ? "#3388f7" : "transparent")};
+  color: ${({ $active, theme }) => ($active ? "#ffffff" : theme.colors.brand.blue)};
+  box-shadow: ${({ $active }) => ($active ? "0 0.25rem 0.125rem rgba(0, 0, 0, 0.25)" : "none")};
+  font-family: ${({ theme }) => theme.fontFamily.pretendard};
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
+
+  &:not(:disabled):hover {
+    color: ${({ $active }) => ($active ? "#ffffff" : "#1767d4")};
+    background-color: ${({ $active }) => ($active ? "#287be6" : "transparent")};
+  }
+
+  @media (max-width: 32rem) {
+    min-width: ${({ $active }) => ($active ? "4.1rem" : "auto")};
+    font-size: 0.85rem;
   }
 `;
 
 export const Content = styled.div`
   position: relative;
-  z-index: 1;
-  width: min(27rem, 100%);
-  color: #ffffff;
+  width: min(26rem, 100%);
+  color: ${({ theme }) => theme.colors.brand.blue};
 
   @media (max-width: 60rem) {
     width: 100%;
+    max-width: 28rem;
   }
 `;
 
@@ -40,59 +105,57 @@ export const ContentStack = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1.9rem;
+  gap: 1.55rem;
+  padding-bottom: 1.25rem;
 `;
 
 export const Title = styled.h2`
   margin: 0;
   font-family: ${({ theme }) => theme.fontFamily.calSans};
-  font-size: clamp(3.15rem, 4.1vw, 4.35rem);
-  line-height: 0.92;
-  font-weight: 600;
-  letter-spacing: -0.05em;
+  font-size: clamp(3.1rem, 5.8vw, 4.2rem);
+  line-height: 0.98;
+  font-weight: 500;
+  letter-spacing: 0;
 `;
 
 export const Description = styled.p`
   margin: 0;
-  font-size: clamp(1.15rem, 1.3vw, 1.45rem);
-  font-weight: 700;
+  color: rgba(0, 0, 0, 0.58);
+  font-size: clamp(0.95rem, 1.25vw, 1.05rem);
+  font-weight: 400;
   line-height: 1.45;
   white-space: nowrap;
+  font-family: ${({ theme }) => theme.fontFamily.A2Z};
 `;
 
 export const SwitchButton = styled.button`
-  min-width: 12rem;
-  height: 3rem;
-  padding: 0 1.7rem;
+  min-width: 8.75rem;
+  height: 2.85rem;
+  padding: 0 1.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0.125rem solid rgba(255, 255, 255, 0.58);
-  border-radius: 999rem;
-  background-color: rgba(255, 255, 255, 0.03);
+  border: 0.1563rem solid #a8d8ff;
+  border-radius: ${({ theme }) => theme.radius.pill};
+  background-color: ${({ theme }) => theme.colors.brand.blue};
   color: #ffffff;
-  font-size: 1.16rem;
-  font-weight: 700;
+  box-shadow:
+    inset 0 0.35rem 0.7rem rgba(53, 106, 185, 0.09),
+    inset 0 -0.0625rem 0.0625rem rgba(151, 193, 255, 0.4);
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
-    border-color 0.2s ease,
     transform 0.2s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.88);
+    background-color: #1767d4;
     transform: translateY(-0.0625rem);
   }
 
   &:focus-visible {
-    outline: 0.1875rem solid rgba(255, 255, 255, 0.35);
+    outline: 0.1875rem solid rgba(26, 115, 232, 0.22);
     outline-offset: 0.25rem;
-  }
-
-  @media (max-width: 60rem) {
-    min-width: 12rem;
-    height: 3.25rem;
-    font-size: 1.2rem;
   }
 `;

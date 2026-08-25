@@ -5,6 +5,6 @@ export interface AuthSidePanelProps {
   onSwitchAuth: () => void;
 }
 
-export interface SectionProps {
-  $backgroundImage: string;
+export interface NavButtonStyleProps {
+  $active?: boolean;
 }

@@ -1,4 +1,4 @@
-import authSideImage from '@/shared/img/auth-page/repit-auth.svg?url';
+import RepitLogo from '@/shared/img/logo/Repit-logo.svg?url';
 
 import * as S from './style';
 import type { AuthSidePanelProps } from './type';
@@ -9,8 +9,36 @@ const AuthSidePanel = ({
   switchAuthLabel,
   onSwitchAuth,
 }: AuthSidePanelProps) => {
+  // const isLoginPage = switchAuthLabel === '회원가입';
+
   return (
-    <S.Section $backgroundImage={authSideImage} aria-label={imageAlt}>
+    <S.Section aria-label={imageAlt}>
+      <S.Header>
+        <S.LogoLink to="/" aria-label="Repit 홈으로 이동">
+          <img src={RepitLogo} alt="Repit" />
+        </S.LogoLink>
+
+        {/* <S.Navigation aria-label="인증 페이지 이동">
+          <S.NavButton
+            type="button"
+            $active={!isLoginPage}
+            disabled={!isLoginPage}
+            onClick={isLoginPage ? onSwitchAuth : undefined}
+          >
+            회원가입
+          </S.NavButton>
+          <S.NavButton
+            type="button"
+            $active={isLoginPage}
+            disabled={isLoginPage}
+            onClick={isLoginPage ? undefined : onSwitchAuth}
+          >
+            로그인
+          </S.NavButton>
+        </S.Navigation> */}
+        
+      </S.Header>
+
       <S.Content>
         <S.ContentStack>
           <S.Title>
