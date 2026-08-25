@@ -7,7 +7,6 @@ import {
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
-  generateMockInterview,
   prepareInterview,
   quitInterview,
   setActiveInterviewSessionId,
@@ -45,12 +44,7 @@ const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
 
 const buildInitialQuestion = (
   preparedInterview?: PreparedInterviewData | null,
-  options: { allowGeneratedQuestions?: boolean } = {},
 ): CurrentInterviewQuestion | null => {
-  if (preparedInterview?.jobId && !options.allowGeneratedQuestions) {
-    return null;
-  }
-
   if (!preparedInterview || preparedInterview.questions.length === 0) {
     return null;
   }
@@ -97,6 +91,7 @@ export const useInterviewSession = (
   const questionTts = useSupertoneTts(currentQuestion?.content ?? "");
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
+  const hasPreparedChatSessionRef = useRef(false);
   const preparedChatSessionIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
@@ -129,6 +124,7 @@ export const useInterviewSession = (
     setInterviewStatus(preparedInterview?.status ?? "IN_PROGRESS");
     setIsChatSessionReady(!preparedInterview);
     isSessionClosedRef.current = false;
+    hasPreparedChatSessionRef.current = !preparedInterview;
   }, [preparedInterview]);
 
   useEffect(() => {
@@ -248,34 +244,14 @@ export const useInterviewSession = (
     let isCancelled = false;
 
     const startInterviewSession = async () => {
-      const presetJobId = preparedInterview.jobId?.trim() ?? "";
-      let jobId = presetJobId;
-
-      if (!jobId) {
-        const {
-          data: generateMockData,
-          errorMessage: generateMockErrorMessage,
-        } = await generateMockInterview();
-
-        if (isCancelled) {
-          return;
-        }
-
-        if (generateMockErrorMessage || !generateMockData?.jobId) {
-          preparedChatSessionIdRef.current = null;
-          return;
-        }
-
-        jobId = generateMockData.jobId;
-      }
-
       const { data, errorMessage } = await prepareInterview({
         sessionId,
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
         personaType: preparedInterview.personaType,
-        jobId,
+        level: preparedInterview.level,
+        jobId: preparedInterview.jobId,
         questions: preparedInterview.questions,
       });
 
@@ -290,14 +266,13 @@ export const useInterviewSession = (
 
       setActiveInterviewSessionId(data.sessionId);
       sessionIdRef.current = data.sessionId;
+      hasPreparedChatSessionRef.current = true;
 
       if (data.status) {
         setInterviewStatus(data.status);
       }
 
-      const firstQuestion = buildInitialQuestion(data, {
-        allowGeneratedQuestions: true,
-      });
+      const firstQuestion = buildInitialQuestion(data);
 
       if (firstQuestion) {
         applyCurrentQuestion(firstQuestion);
@@ -336,6 +311,7 @@ export const useInterviewSession = (
 
       if (
         !latestSessionId ||
+        !hasPreparedChatSessionRef.current ||
         isSessionClosedRef.current ||
         activeSessionId !== latestSessionId
       ) {

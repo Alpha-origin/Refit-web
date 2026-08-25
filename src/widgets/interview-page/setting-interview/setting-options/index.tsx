@@ -69,18 +69,20 @@ const DifficultyOptions = ({
       aria-label={SETTING_DIFFICULTY_SECTION.title}
     >
       {SETTING_DIFFICULTY_SECTION.options.map((option) => {
-        const isSelected = selectedValue === option;
+        const isSelected = selectedValue === option.value;
 
         return (
           <S.DifficultyButton
-            key={option}
+            key={option.value}
             $selected={isSelected}
             aria-checked={isSelected}
-            onClick={() => onSelect(option)}
+            onClick={() => onSelect(option.value)}
             role="radio"
             type="button"
           >
-            {option}
+            <S.DifficultyIcon src={option.image} alt="" aria-hidden="true" />
+            <S.OptionLabel>{option.value}</S.OptionLabel>
+            <S.SelectionCircle $selected={isSelected} aria-hidden="true" />
           </S.DifficultyButton>
         );
       })}

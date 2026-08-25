@@ -8,6 +8,26 @@ const getRecord = (value: unknown): Record<string, unknown> | null => {
   return value as Record<string, unknown>;
 };
 
+const looksLikeHtmlPayload = (value: string) => {
+  const sample = value.slice(0, 1000).toLowerCase();
+
+  return /<!doctype\s+html|<html(?:\s|>)|<head(?:\s|>)|<body(?:\s|>)|<meta(?:\s|>)|<link(?:\s|>)|<script(?:\s|>)/.test(
+    sample,
+  );
+};
+
+const getContentType = (headers: unknown) => {
+  const record = getRecord(headers);
+
+  if (!record) {
+    return "";
+  }
+
+  const contentType = record["content-type"] ?? record["Content-Type"];
+
+  return typeof contentType === "string" ? contentType.toLowerCase() : "";
+};
+
 const getTrimmedString = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;
@@ -15,7 +35,11 @@ const getTrimmedString = (value: unknown): string | null => {
 
   const trimmedValue = value.trim();
 
-  return trimmedValue ? trimmedValue : null;
+  if (!trimmedValue || looksLikeHtmlPayload(trimmedValue)) {
+    return null;
+  }
+
+  return trimmedValue;
 };
 
 const getMessageFromValue = (value: unknown, depth = 0): string | null => {
@@ -71,11 +95,17 @@ export const extractErrorMessage = (error: unknown, fallback: string) => {
       return "서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.";
     }
 
+    if (getContentType(error.response.headers).includes("text/html")) {
+      return fallback;
+    }
+
     const responseMessage = getMessageFromValue(error.response.data);
 
     if (responseMessage) {
       return responseMessage;
     }
+
+    return fallback;
   }
 
   const nestedMessage = getMessageFromValue(error);

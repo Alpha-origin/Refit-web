@@ -7,13 +7,13 @@ export type {
   InterviewPersonaMajor,
 } from "./create-interview";
 export type { CreateAnswerRequest } from "./create-answer";
-export type { GenerateMockResponse } from "./generate-mock";
 export type { CurrentInterviewQuestion } from "./current-question";
 export type {
   CompleteInterviewQuestion,
   CompleteInterviewResponse,
 } from "./complete-interview";
 export type {
+  InterviewLevel,
   InterviewProgressStatus,
   PersonaType,
   PrepareInterviewParams,
