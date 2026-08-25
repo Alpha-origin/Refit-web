@@ -8,6 +8,9 @@ import InterviewerImage1 from '@/shared/img/interview-page/ interviewer1.svg?url
 import InterviewerImage2 from '@/shared/img/interview-page/ interviewer2.svg?url';
 import InterviewerImage3 from '@/shared/img/interview-page/ interviewer3.svg?url';
 import InterviewerImage4 from '@/shared/img/interview-page/ interviewer4.svg?url';
+import DifficultyEasyImage from '@/shared/img/interview-page/easy.svg?url';
+import DifficultyNormalImage from '@/shared/img/interview-page/normal.svg?url';
+import DifficultyHardImage from '@/shared/img/interview-page/hard.svg?url';
 
 const [styleSection, difficultySection] = INTERVIEW_SETTING_OPTION_SECTIONS;
 
@@ -16,6 +19,15 @@ const INTERVIEWER_IMAGES: Record<InterviewerId, string> = {
   2: InterviewerImage2,
   3: InterviewerImage3,
   4: InterviewerImage4,
+};
+
+const DIFFICULTY_IMAGES: Record<
+  (typeof difficultySection.options)[number],
+  string
+> = {
+  쉬움: DifficultyEasyImage,
+  보통: DifficultyNormalImage,
+  어려움: DifficultyHardImage,
 };
 
 export const SETTING_STYLE_SECTION = {
@@ -28,7 +40,10 @@ export const SETTING_STYLE_SECTION = {
 
 export const SETTING_DIFFICULTY_SECTION = {
   title: difficultySection.title,
-  options: difficultySection.options,
+  options: difficultySection.options.map((value) => ({
+    value,
+    image: DIFFICULTY_IMAGES[value],
+  })),
 };
 
 export const SETTING_INTERVIEWER_CARDS = INTERVIEW_SETTING_INTERVIEWERS.map(

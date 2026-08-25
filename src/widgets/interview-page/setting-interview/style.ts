@@ -300,28 +300,25 @@ export const SelectionCircle = styled.span<SelectedProps>`
 
 export const DifficultyGroup = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-
-  @media (max-height: 44rem) {
-    gap: 0.55rem;
-  }
-
-  @media (max-width: 30rem) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  height: var(--interviewer-card-height);
+  gap: var(--style-option-gap);
 `;
 
 export const DifficultyButton = styled.button<SelectedProps>`
-  height: clamp(3.55rem, 7.6vh, 4.35rem);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) 1.5rem;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 0.6rem 1.65rem 0.6rem 1.2rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
   background: ${({ $selected }) => ($selected ? '#eef4ff' : '#ffffff')};
   color: #171717;
-  font-size: 1.24rem;
-  font-weight: 800;
-  line-height: 1.2;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -337,9 +334,28 @@ export const DifficultyButton = styled.button<SelectedProps>`
 
   ${focusRing}
 
+  @media (max-width: 30rem) {
+    grid-template-columns: 2.1rem minmax(0, 1fr) 1.35rem;
+    padding-inline: 1rem;
+  }
+
   @media (max-height: 44rem) {
-    height: 2.7rem;
-    font-size: 0.92rem;
+    grid-template-columns: 2rem minmax(0, 1fr) 1.35rem;
+    gap: 0.65rem;
+    padding: 0.45rem 0.8rem;
+  }
+`;
+
+export const DifficultyIcon = styled.img`
+  width: 2.15rem;
+  height: 2.15rem;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+
+  @media (max-height: 44rem) {
+    width: 2rem;
+    height: 2rem;
   }
 `;
 

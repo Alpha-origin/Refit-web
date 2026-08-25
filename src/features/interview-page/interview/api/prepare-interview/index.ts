@@ -20,7 +20,7 @@ const AI_SUBSCRIBE_URL = "/api/v1/ai/subscribe";
 const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
 type PrepareInterviewRequestData = PreparedInterviewData;
 
-const waitForAiJobEvent = (jobId: string) =>
+const waitForAiSseConnection = (jobId: string) =>
   new Promise<void>((resolve, reject) => {
     const baseUrl =
       import.meta.env.MODE === "development" ? window.location.origin : API_URL;
@@ -46,19 +46,11 @@ const waitForAiJobEvent = (jobId: string) =>
         timeoutMs: AI_SUBSCRIBE_TIMEOUT_MS,
       });
       cleanup();
-      reject(new Error("포트폴리오 분석 완료를 기다리는 시간이 초과되었습니다."));
+      reject(new Error("포트폴리오 분석 서버 연결 시간이 초과되었습니다."));
     }, AI_SUBSCRIBE_TIMEOUT_MS);
 
     eventSource.onopen = () => {
       console.log("[AI SSE] connected", { jobId });
-    };
-    eventSource.onmessage = (event) => {
-      console.log("[AI SSE] message received", {
-        jobId,
-        data: event.data,
-        lastEventId: event.lastEventId,
-        type: event.type,
-      });
       cleanup();
       resolve();
     };
@@ -193,7 +185,7 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
-    await waitForAiJobEvent(requestData.jobId);
+    await waitForAiSseConnection(requestData.jobId);
 
     const requestPayload = {
       sessionId: requestData.sessionId,
@@ -206,6 +198,7 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
     };
 
     console.log("[chat/interviews] request payload", requestPayload);
+    console.log("[chat/interviews] sending after SSE", { jobId: requestData.jobId });
     const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestPayload);
     const responseRecord = getRecord(response.data);
 
