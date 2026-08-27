@@ -1,5 +1,5 @@
 import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
-import { FEEDBACK_DETAIL_CONTENT } from "@/shared/fixtures/feedback-page/feedback-detail";
+import { buildFeedbackDetailContent } from "@/features/feedback-page/model/feedbackDisplay";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
 import FeedbackDetailBottomSection from "@/widgets/feedback-page/feedback-detail/bottom-section";
 import FeedbackDetailMiddleSection from "@/widgets/feedback-page/feedback-detail/middle-section";
@@ -10,9 +10,16 @@ import { useParams } from "react-router-dom";
 import * as S from "./style";
 
 const FeedbackDetailPage = () => {
-  const { bottomSection, middleSection, topSection } = FEEDBACK_DETAIL_CONTENT;
   const { id } = useParams();
-  const { errorMessage, interview, isLoading, refetch } = useFeedbackInterview(id);
+  const {
+    errorMessage,
+    feedback,
+    feedbackErrorMessage,
+    interview,
+    isLoading,
+    refetch,
+  } = useFeedbackInterview(id);
+  const content = feedback ? buildFeedbackDetailContent(feedback) : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
@@ -54,16 +61,30 @@ const FeedbackDetailPage = () => {
               다시 시도
             </S.RetryButton>
           </S.StateCard>
+        ) : !content ? (
+          <S.StateCard aria-live="polite">
+            <S.StateText>
+              {feedbackErrorMessage ?? "피드백 분석 결과를 불러오지 못했습니다."}
+            </S.StateText>
+            <S.RetryButton
+              type="button"
+              onClick={() => {
+                void refetch();
+              }}
+            >
+              다시 시도
+            </S.RetryButton>
+          </S.StateCard>
         ) : (
           <>
             <FeedbackSummaryCard
               interview={interview}
-              notice="현재 이 상단 카드의 면접 정보는 실제 API 데이터입니다. 질문별 분석, 모범 답변, 예상 꼬리질문은 전용 상세 피드백 조회 API가 연결되기 전까지 샘플 데이터로 표시됩니다."
+              notice="/api/feedbacks에서 불러온 실제 질문별 피드백 데이터입니다."
             />
-            <FeedbackDetailTopSection content={topSection} />
-            <FeedbackDetailMiddleSection content={middleSection} />
+            <FeedbackDetailTopSection content={content.topSection} />
+            <FeedbackDetailMiddleSection content={content.middleSection} />
             <FeedbackDetailBottomSection
-              content={bottomSection}
+              content={content.bottomSection}
               isDownloadingPdf={isDownloadingPdf}
               onDownloadPdf={handleDownloadPdf}
             />

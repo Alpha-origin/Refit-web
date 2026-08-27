@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   getAllInterviews,
-  getFeedback,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import {
   getCareerLabel,
@@ -93,20 +92,10 @@ export const useFeedbackList = () => {
     void loadFeedbackList();
   }, [loadFeedbackList]);
 
-  const fetchFeedback = useCallback(async (interviewId: number) => {
-    try {
-      const data = await getFeedback(interviewId);
-      return data;
-    } catch {
-      return null;
-    }
-  }, []);
-
   return {
     errorMessage,
     isLoading,
     items,
     refetch: loadFeedbackList,
-    fetchFeedback,
   };
 };
