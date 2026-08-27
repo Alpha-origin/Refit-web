@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   getAllInterviews,
+  getFeedback,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import {
   getCareerLabel,
@@ -9,10 +10,11 @@ import {
   getInterviewStatusLabel,
   getInterviewStyleLabel,
   getInterviewTitle,
+  getInterviewId,
   getInterviewerName,
   sortInterviewsByCreatedAt,
 } from "@/features/feedback-page/model/interviewDisplay";
-import { FEEDBACK_LIST_ITEMS } from "@/shared/fixtures/feedback-page/feedback-list";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 import InterviewerImage1 from "@/shared/img/interview-page/ interviewer1.svg?url";
 import InterviewerImage2 from "@/shared/img/interview-page/ interviewer2.svg?url";
 import InterviewerImage3 from "@/shared/img/interview-page/ interviewer3.svg?url";
@@ -41,15 +43,20 @@ const getInterviewerImageUrl = (
   return INTERVIEWER_IMAGES[(interviewId - 1) % INTERVIEWER_IMAGES.length];
 };
 
-const getListItems = (items: Awaited<ReturnType<typeof getAllInterviews>>) =>
+const getListItems = (
+  items: Awaited<ReturnType<typeof getAllInterviews>>,
+  feedbackByInterviewId: Map<number, Awaited<ReturnType<typeof getFeedback>>>,
+): FeedbackListItem[] =>
   sortInterviewsByCreatedAt(items).map<FeedbackListItem>((interview) => {
     const interviewerName = getInterviewerName(interview);
+    const interviewId = getInterviewId(interview);
+    const feedback = feedbackByInterviewId.get(interviewId);
 
     return {
-      id: interview.id,
+      id: interviewId,
       date: getFormattedDate(interview.createdAt),
       imageUrl: getInterviewerImageUrl(
-        interview.id,
+        interviewId,
         interviewerName,
         interview.persona?.id,
       ),
@@ -57,16 +64,14 @@ const getListItems = (items: Awaited<ReturnType<typeof getAllInterviews>>) =>
       styleLabel: getInterviewStyleLabel(interview.persona?.type),
       levelLabel: getCareerLabel(interview.persona?.career),
       interviewerName,
-      statusLabel: getInterviewStatusLabel(interview.status),
+      statusLabel: getInterviewStatusLabel(feedback?.status ?? interview.status),
       sessionId: interview.sessionId,
+      totalScore: feedback?.totalScore,
+      summary: feedback?.summary,
+      answeredCount: feedback?.answeredCount,
+      questionCount: feedback?.questionCount,
     };
-  });
-
-const getFallbackListItems = () =>
-  FEEDBACK_LIST_ITEMS.map<FeedbackListItem>((item) => ({
-    ...item,
-    imageUrl: getInterviewerImageUrl(item.id, item.interviewerName),
-  }));
+    });
 
 export const useFeedbackList = () => {
   const [items, setItems] = useState<FeedbackListItem[]>([]);
@@ -79,10 +84,27 @@ export const useFeedbackList = () => {
 
     try {
       const interviews = await getAllInterviews();
+      const latestInterview = sortInterviewsByCreatedAt(interviews).find(
+        (interview) => getInterviewId(interview) > 0,
+      );
 
-      setItems(getListItems(interviews));
-    } catch {
-      setItems(getFallbackListItems());
+      if (!latestInterview) {
+        setItems([]);
+        return;
+      }
+
+      const latestInterviewId = getInterviewId(latestInterview);
+      const feedback = await getFeedback(latestInterviewId).catch(() => null);
+      const feedbackByInterviewId = new Map([
+        [latestInterviewId, feedback],
+      ]);
+
+      setItems(getListItems([latestInterview], feedbackByInterviewId));
+    } catch (error) {
+      setItems([]);
+      setErrorMessage(
+        extractErrorMessage(error, "지난 면접 목록을 불러오지 못했습니다."),
+      );
     } finally {
       setIsLoading(false);
     }

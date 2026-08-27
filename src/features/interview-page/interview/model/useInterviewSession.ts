@@ -182,8 +182,16 @@ export const useInterviewSession = (
       isSessionClosedRef.current = true;
       clearActiveInterviewSessionId();
       if (reason === "quit") {
-        await quitInterview(activeSessionId);
+        const closeResult = await quitInterview(activeSessionId);
+
+        if (closeResult.errorMessage) {
+          console.error("[interview] quit request failed", {
+            sessionId: activeSessionId,
+            message: closeResult.errorMessage,
+          });
+        }
       }
+
       disconnectInterviewSocket(activeSessionId);
 
       if (shouldNavigateToMain) {

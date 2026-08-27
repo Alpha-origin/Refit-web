@@ -236,6 +236,41 @@ export const CardTitle = styled.h3`
   line-height: 1.25;
 `;
 
+export const ScoreLine = styled.p`
+  margin: 0;
+  color: #526b92;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.25;
+`;
+
+export const ScoreValue = styled.strong`
+  margin-left: 0.25rem;
+  color: #1f6fe4;
+  font-size: 1.05rem;
+`;
+
+export const CardSummary = styled.p`
+  display: -webkit-box;
+  margin: 0.05rem 0 0;
+  color: #526078;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+`;
+
+export const AnswerCount = styled.p`
+  margin: 0;
+  color: #6b7d9d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+`;
+
 export const MetaGroup = styled.div`
   min-width: 0;
   display: flex;

@@ -10,10 +10,6 @@ export type {
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";
 export type {
-  CompleteInterviewQuestion,
-  CompleteInterviewResponse,
-} from "./complete-interview";
-export type {
   InterviewLevel,
   InterviewProgressStatus,
   PersonaType,

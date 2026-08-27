@@ -6,7 +6,10 @@ import {
   type FeedbackData,
   type InterviewSummary,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
-import { sortInterviewsByCreatedAt } from "@/features/feedback-page/model/interviewDisplay";
+import {
+  getInterviewId,
+  sortInterviewsByCreatedAt,
+} from "@/features/feedback-page/model/interviewDisplay";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 export const useFeedbackInterview = (id?: string) => {
@@ -41,7 +44,8 @@ export const useFeedbackInterview = (id?: string) => {
     if (interviewsResult.status === "fulfilled") {
       const sortedInterviews = sortInterviewsByCreatedAt(interviewsResult.value);
       const nextInterview =
-        sortedInterviews.find((item) => item.id === interviewId) ?? null;
+        sortedInterviews.find((item) => getInterviewId(item) === interviewId) ??
+        null;
 
       setInterview(nextInterview);
 

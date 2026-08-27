@@ -3,7 +3,6 @@ export {
   getActiveInterviewSessionId,
   setActiveInterviewSessionId,
 } from "./active-interview-session";
-export { completeInterview } from "./complete-interview";
 export { createInterview } from "./create-interview";
 export { createAnswer } from "./create-answer";
 export { getCurrentInterviewQuestion } from "./current-question";
@@ -24,8 +23,6 @@ export type {
   CreatedInterviewData,
   CreateAnswerRequest,
   CurrentInterviewQuestion,
-  CompleteInterviewQuestion,
-  CompleteInterviewResponse,
   InterviewLifecycleStatus,
   InterviewLevel,
   InterviewPersonaGender,

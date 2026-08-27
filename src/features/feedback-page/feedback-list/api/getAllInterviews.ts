@@ -1,4 +1,7 @@
-import { apiInstance } from "@/shared/api/axiosInstance";
+import {
+  apiInstance,
+  ensureAccessToken,
+} from "@/shared/api/axiosInstance";
 
 export interface InterviewPersona {
   id?: number;
@@ -12,6 +15,7 @@ export interface InterviewPersona {
 
 export interface InterviewSummary {
   id: number;
+  interviewId?: number;
   userId?: number;
   persona?: InterviewPersona | null;
   sessionId?: string;
@@ -102,8 +106,27 @@ export const getAllInterviews = async () => {
 };
 
 export const getFeedback = async (interviewId: number) => {
+  if (!Number.isInteger(interviewId) || interviewId <= 0) {
+    throw new Error("피드백을 조회할 interviewId가 없습니다.");
+  }
+
+  const authorizationHeader = await ensureAccessToken();
+  const requestUrl = `${GET_FEEDBACK_URL}?interviewId=${encodeURIComponent(
+    interviewId,
+  )}`;
+
+  console.log("[feedbacks] GET request", {
+    method: "GET",
+    url: requestUrl,
+    interviewId,
+    hasAuthorization: Boolean(authorizationHeader),
+  });
+
   const response = await apiInstance.get<FeedbackApiResponse>(GET_FEEDBACK_URL, {
     params: { interviewId },
+    headers: {
+      Authorization: authorizationHeader,
+    },
   });
 
   return response.data?.data ?? null;
