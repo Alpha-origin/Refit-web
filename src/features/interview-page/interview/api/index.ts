@@ -13,6 +13,7 @@ export {
   parseInterviewSocketMessage,
 } from "./interview-socket";
 export { prepareInterview } from "./prepare-interview";
+export { prepareInterviewRecord } from "./prepare-interview-record";
 export { quitInterview } from "./quit-interview";
 export { savePersona } from "./save-persona";
 export { submitInterviewAnswer } from "./submit-answer";

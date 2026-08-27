@@ -6,6 +6,7 @@ import {
   getRecord,
 } from "../shared";
 
+
 const PREPARE_INTERVIEW_RECORD_URL = "/api/interviews";
 const PREPARE_INTERVIEW_RECORD_BODY = 0;
 
@@ -22,26 +23,38 @@ const getInterviewId = (payload: unknown) => {
   );
 };
 
-export const prepareInterviewRecord = async () => {
+export const prepareInterviewRecord = async (interviewId: number) => {
+  const requestUrl = `${PREPARE_INTERVIEW_RECORD_URL}/${encodeURIComponent(
+    interviewId,
+  )}`;
+
+  if (!Number.isInteger(interviewId) || interviewId <= 0) {
+    return {
+      data: null,
+      errorMessage: "유효한 인터뷰 ID가 없습니다.",
+    };
+  }
+
   try {
     console.log("[interviews/prepare] POST request", {
       method: "POST",
-      url: PREPARE_INTERVIEW_RECORD_URL,
+      url: requestUrl,
+      interviewId,
       body: PREPARE_INTERVIEW_RECORD_BODY,
     });
 
     const response = await apiInstance.post(
-      PREPARE_INTERVIEW_RECORD_URL,
+      requestUrl,
       PREPARE_INTERVIEW_RECORD_BODY,
     );
-    const interviewId = getInterviewId(response.data);
+    const responseInterviewId = getInterviewId(response.data);
 
     console.log("[interviews/prepare] response", {
-      interviewId,
+      interviewId: responseInterviewId,
       data: response.data,
     });
 
-    if (interviewId === null || interviewId <= 0) {
+    if (responseInterviewId === null || responseInterviewId <= 0) {
       return {
         data: null,
         errorMessage: "인터뷰 ID를 받지 못했습니다.",
@@ -49,7 +62,7 @@ export const prepareInterviewRecord = async () => {
     }
 
     return {
-      data: { interviewId },
+      data: { interviewId: responseInterviewId },
       errorMessage: null,
     };
   } catch (error) {

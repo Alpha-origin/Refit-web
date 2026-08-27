@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { getTailoredQuestions } from "@/features/feedback-page/api/tailorQuestions";
 import {
   createInterview,
+  prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
   type CreateInterviewPersonaType,
@@ -13,6 +15,7 @@ import {
   type PersonaType,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
@@ -149,6 +152,35 @@ export const useInterviewSetup = () => {
     console.log("[interviews/create] response data", data);
     console.log("[interviews/create] server sessionId", data.sessionId);
 
+    const {
+      data: preparedInterviewRecord,
+      errorMessage: prepareInterviewErrorMessage,
+    } = await prepareInterviewRecord(data.interviewId);
+
+    if (prepareInterviewErrorMessage || !preparedInterviewRecord) {
+      setIsSubmitting(false);
+      setErrorMessage(
+        prepareInterviewErrorMessage ?? "면접 준비에 실패했습니다.",
+      );
+      return;
+    }
+
+    console.log("[interviews/prepare] response data", preparedInterviewRecord);
+
+    try {
+      await getTailoredQuestions(preparedInterviewRecord.interviewId);
+    } catch (error) {
+      setIsSubmitting(false);
+      setErrorMessage(
+        extractErrorMessage(error, "맞춤 질문을 불러오지 못했습니다."),
+      );
+      return;
+    }
+
+    console.log("[questions/tailor] completed before SSE", {
+      interviewId: preparedInterviewRecord.interviewId,
+    });
+
     const personaId =
       data.personaId > 0 ? data.personaId : savedPersona.personaId;
 
@@ -160,7 +192,7 @@ export const useInterviewSetup = () => {
       state: {
         preparedInterview: {
           sessionId: data.sessionId,
-          interviewId: data.interviewId,
+          interviewId: preparedInterviewRecord.interviewId,
           userId: data.userId,
           personaId,
           personaName: personaPayload.personaName,

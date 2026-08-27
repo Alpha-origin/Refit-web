@@ -5,6 +5,7 @@ import type { PreparedInterviewData } from "@/features/interview-page/interview/
 import { useInterviewSession } from "@/features/interview-page/interview/model/useInterviewSession";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
+import Loading from "@/shared/components/loading";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
 import * as S from "@/widgets/interview-page/interview/style";
@@ -90,6 +91,10 @@ const InterviewPage = () => {
       window.clearInterval(intervalId);
     };
   }, [isTimerRunning]);
+
+  if (interviewSession.isPreparingInterview) {
+    return <Loading message="포트폴리오 분석 및 면접 준비 중입니다..." />;
+  }
 
   const handleStartVoice = () => {
     setIsVoiceAnswering(true);

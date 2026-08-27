@@ -8,7 +8,11 @@ import * as S from "./style";
 
 const loadingFrames = [Vector, Vector1, Vector2, Vector1, Vector];
 
-const Loading = () => {
+interface LoadingProps {
+    message?: string;
+}
+
+const Loading = ({ message = "로딩 중..." }: LoadingProps) => {
     const [frameIndex, setFrameIndex] = useState(0);
 
     useEffect(() => {
@@ -29,7 +33,7 @@ const Loading = () => {
             <S.Spinner>
             <S.LoadingImage src={loadingFrames[frameIndex]} alt="" aria-hidden="true" />
             </S.Spinner>
-            <S.Text>로딩 중...</S.Text>
+            <S.Text>{message}</S.Text>
         </S.LoadingBox>
         </S.Container>
     );

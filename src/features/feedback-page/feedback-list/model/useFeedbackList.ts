@@ -13,7 +13,6 @@ import {
   getInterviewerName,
   sortInterviewsByCreatedAt,
 } from "@/features/feedback-page/model/interviewDisplay";
-import { useTailoredQuestionsPolling } from "@/features/feedback-page/model/useTailoredQuestionsPolling";
 import { FEEDBACK_LIST_ITEMS } from "@/shared/fixtures/feedback-page/feedback-list";
 import InterviewerImage1 from "@/shared/img/interview-page/ interviewer1.svg?url";
 import InterviewerImage2 from "@/shared/img/interview-page/ interviewer2.svg?url";
@@ -72,25 +71,17 @@ const getFallbackListItems = () =>
 
 export const useFeedbackList = () => {
   const [items, setItems] = useState<FeedbackListItem[]>([]);
-  const [interviewIds, setInterviewIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const tailorPolling = useTailoredQuestionsPolling(interviewIds);
 
   const loadFeedbackList = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
-    setInterviewIds([]);
 
     try {
       const interviews = await getAllInterviews();
 
       setItems(getListItems(interviews));
-      setInterviewIds(
-        interviews
-          .map((interview) => interview.id)
-          .filter((interviewId) => interviewId > 0),
-      );
     } catch {
       setItems(getFallbackListItems());
     } finally {
@@ -115,7 +106,6 @@ export const useFeedbackList = () => {
     errorMessage,
     isLoading,
     items,
-    ...tailorPolling,
     refetch: loadFeedbackList,
     fetchFeedback,
   };

@@ -1,29 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getTailoredQuestions } from "@/features/feedback-page/api/tailorQuestions";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 const TAILOR_QUESTIONS_POLL_INTERVAL = 10 * 60 * 1000;
-type InterviewIdInput = number | readonly number[] | undefined;
 
-const normalizeInterviewIds = (input: InterviewIdInput) => {
-  const interviewIds = Array.isArray(input) ? input : [input];
-
-  return [
-    ...new Set(
-      interviewIds.filter(
-        (interviewId): interviewId is number =>
-          typeof interviewId === "number" && interviewId > 0,
-      ),
-    ),
-  ];
-};
-
-export const useTailoredQuestionsPolling = (input?: InterviewIdInput) => {
-  const interviewIds = useMemo(() => normalizeInterviewIds(input), [input]);
-  const [tailoredQuestions, setTailoredQuestions] = useState<
-    Record<number, unknown>
-  >({});
+export const useTailoredQuestionsPolling = (interviewId?: number) => {
+  const [tailoredQuestions, setTailoredQuestions] = useState<unknown>(null);
   const [tailorErrorMessage, setTailorErrorMessage] = useState<string | null>(
     null,
   );
@@ -32,8 +15,8 @@ export const useTailoredQuestionsPolling = (input?: InterviewIdInput) => {
   );
 
   useEffect(() => {
-    if (interviewIds.length === 0) {
-      setTailoredQuestions({});
+    if (!interviewId) {
+      setTailoredQuestions(null);
       setTailorErrorMessage(null);
       setLastTailorPolledAt(null);
       return;
@@ -48,41 +31,34 @@ export const useTailoredQuestionsPolling = (input?: InterviewIdInput) => {
       }
 
       isRequestInFlight = true;
-      const nextTailoredQuestions: Record<number, unknown> = {};
-      let latestErrorMessage: string | null = null;
 
       try {
-        for (const interviewId of interviewIds) {
-          if (!isActive) {
-            return;
-          }
-
-          try {
-            const data = await getTailoredQuestions(interviewId);
-
-            nextTailoredQuestions[interviewId] = data;
-          } catch (error) {
-            latestErrorMessage = extractErrorMessage(
-              error,
-              "맞춤 질문 데이터를 불러오지 못했습니다.",
-            );
-            console.error("[questions/tailor] polling error", {
-              interviewId,
-              message: latestErrorMessage,
-            });
-          }
-        }
+        const data = await getTailoredQuestions(interviewId);
 
         if (!isActive) {
           return;
         }
 
-        setTailoredQuestions(nextTailoredQuestions);
-        setTailorErrorMessage(latestErrorMessage);
+        setTailoredQuestions(data);
+        setTailorErrorMessage(null);
         setLastTailorPolledAt(new Date());
         console.log("[questions/tailor] response", {
-          interviewIds,
-          data: nextTailoredQuestions,
+          interviewId,
+          data,
+        });
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        const message = extractErrorMessage(
+          error,
+          "맞춤 질문 데이터를 불러오지 못했습니다.",
+        );
+        setTailorErrorMessage(message);
+        console.error("[questions/tailor] polling error", {
+          interviewId,
+          message,
         });
       } finally {
         isRequestInFlight = false;
@@ -92,7 +68,7 @@ export const useTailoredQuestionsPolling = (input?: InterviewIdInput) => {
     void pollTailoredQuestions();
 
     console.log("[questions/tailor] polling started", {
-      interviewIds,
+      interviewId,
       intervalMinutes: 10,
     });
 
@@ -104,7 +80,7 @@ export const useTailoredQuestionsPolling = (input?: InterviewIdInput) => {
       isActive = false;
       window.clearInterval(intervalId);
     };
-  }, [interviewIds]);
+  }, [interviewId]);
 
   return {
     lastTailorPolledAt,

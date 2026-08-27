@@ -1,4 +1,3 @@
-import { prepareInterviewRecord } from "@/features/interview-page/interview/api/prepare-interview-record";
 import {
   MAIN_PAGE_DASHBOARD_CONTENT,
   MAIN_PAGE_DASHBOARD_FEATURE_ITEMS,
@@ -7,34 +6,10 @@ import DashboardBottomImage from "@/shared/img/main-page/Main-DahBoard-Bottom.sv
 import DashboardCheckImage from "@/shared/img/main-page/Repit-check.svg?url";
 import DashboardTopImage from "@/shared/img/main-page/Main-DashBoard-Top.svg?url";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import * as S from "./style";
 
 const DashboardMain = () => {
   const navigate = useNavigate();
-  const [isPreparingInterview, setIsPreparingInterview] = useState(false);
-
-  const handleStartInterview = async () => {
-    if (isPreparingInterview) {
-      return;
-    }
-
-    setIsPreparingInterview(true);
-
-    const { data, errorMessage } = await prepareInterviewRecord();
-
-    setIsPreparingInterview(false);
-
-    if (errorMessage || !data) {
-      window.alert(errorMessage ?? "면접 준비에 실패했습니다.");
-      return;
-    }
-
-    console.log("[interviews/prepare] received interviewId", data.interviewId);
-    navigate("/main/setting/interview", {
-      state: { interviewId: data.interviewId },
-    });
-  };
 
   return (
     <S.Section>
@@ -77,13 +52,9 @@ const DashboardMain = () => {
 
             <S.StartButton
               type="button"
-              onClick={() => void handleStartInterview()}
-              disabled={isPreparingInterview}
-              aria-busy={isPreparingInterview}
+              onClick={() => navigate("/main/setting/interview")}
             >
-              {isPreparingInterview
-                ? "면접 준비 중..."
-                : MAIN_PAGE_DASHBOARD_CONTENT.startButton}
+              {MAIN_PAGE_DASHBOARD_CONTENT.startButton}
             </S.StartButton>
           </S.RightCopy>
         </S.TopCardInner>
