@@ -17,6 +17,9 @@ export interface PrepareInterviewQuestion {
   questionId: number;
   intention: string;
   content: string;
+  expectedAnswer?: string;
+  basedOn?: string[];
+  personaId?: number;
 }
 
 export interface PrepareInterviewParams {

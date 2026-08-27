@@ -14,8 +14,10 @@ import {
   isPersonaType,
 } from "../shared";
 import type {
+  InterviewLevel,
   PrepareInterviewParams,
   PrepareInterviewQuestion,
+  PersonaType,
   PreparedInterviewData,
 } from "../type";
 
@@ -23,6 +25,16 @@ const PREPARE_INTERVIEW_URL = "/chat/interviews";
 const AI_SUBSCRIBE_URL = "/api/v1/ai/subscribe";
 const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
 type PrepareInterviewRequestData = PreparedInterviewData;
+
+interface PrepareChatInterviewPayload {
+  sessionId: string;
+  interviewId: number;
+  userId: number;
+  personaId: number;
+  personaType: PersonaType;
+  level: InterviewLevel;
+  jobId: string;
+}
 
 const waitForAiSseMessage = async (jobId: string): Promise<void> => {
   const baseUrl =
@@ -263,17 +275,14 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
       jobId: requestData.jobId,
     });
 
-    const requestPayload = {
+    const requestPayload: PrepareChatInterviewPayload = {
       sessionId: requestData.sessionId,
       interviewId: requestData.interviewId,
       userId: requestData.userId,
-      status: "IN_PROGRESS",
-      questions: requestData.questions.map((question) => ({
-        id: question.questionId,
-        category: question.intention,
-        question: question.content,
-        personaId: requestData.personaId,
-      })),
+      personaId: requestData.personaId,
+      personaType: requestData.personaType,
+      level: requestData.level,
+      jobId: requestData.jobId,
     };
 
     console.log("[chat/interviews] request payload", requestPayload);

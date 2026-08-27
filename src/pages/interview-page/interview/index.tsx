@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
-import { useInterviewSession } from "@/features/interview-page/interview/model/useInterviewSession";
+import {
+  InterviewSessionProvider,
+} from "@/features/interview-page/interview/model/interviewSessionContext";
+import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
 import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
@@ -24,8 +27,6 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
-const FALLBACK_TOTAL_QUESTION_COUNT = 10;
-
 const formatElapsedTime = (elapsedSeconds: number) => {
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
@@ -33,28 +34,19 @@ const formatElapsedTime = (elapsedSeconds: number) => {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 };
 
-const formatQuestionLabel = ({
-  currentQuestionNumber,
-  isLoading,
-  totalQuestionCount,
-}: {
-  currentQuestionNumber: number;
-  isLoading: boolean;
-  totalQuestionCount: number;
-}) => {
-  if (isLoading) {
-    return "Question -- / --";
-  }
-
-  return `Question ${String(currentQuestionNumber).padStart(2, "0")} / ${String(
-    totalQuestionCount,
-  ).padStart(2, "0")}`;
-};
-
 const InterviewPage = () => {
   const location = useLocation();
   const preparedInterview = getPreparedInterviewFromState(location.state);
-  const interviewSession = useInterviewSession(preparedInterview);
+
+  return (
+    <InterviewSessionProvider preparedInterview={preparedInterview}>
+      <InterviewPageContent />
+    </InterviewSessionProvider>
+  );
+};
+
+const InterviewPageContent = () => {
+  const interviewSession = useInterviewSessionContext();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
@@ -64,19 +56,6 @@ const InterviewPage = () => {
   const isQuestionLoading = interviewSession.currentQuestion === null;
   const isStartActionDisabled =
     !interviewSession.isInterviewReady || isQuestionLoading;
-  const totalQuestionCount =
-    preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
-  const currentQuestionNumber = Math.max(interviewSession.displayQuestionNumber, 1);
-  const currentQuestion = {
-    id: formatQuestionLabel({
-      currentQuestionNumber,
-      isLoading: isQuestionLoading,
-      totalQuestionCount,
-    }),
-    text:
-      interviewSession.currentQuestion?.content ??
-      "질문을 불러오는 중입니다. 잠시만 기다려주세요.",
-  };
 
   useEffect(() => {
     if (!isTimerRunning) {
@@ -152,22 +131,10 @@ const InterviewPage = () => {
         ) : null}
 
         <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
-          <InterviewContentView
-            answerText={interviewSession.answerText}
-            isVoiceStarted={isVoiceActionStarted}
-            mode={interviewSession.mode}
-            onAnswerTextChange={interviewSession.onAnswerTextChange}
-            onModeChange={handleModeChange}
-            onSubmitText={interviewSession.onSubmitText}
-            question={currentQuestion}
-            voiceLevel={interviewSession.voiceLevel}
-          />
+          <InterviewContentView onModeChange={handleModeChange} />
 
           {isVoiceMode && (
-            <InterviewCameraView
-              cameraState={interviewSession.cameraState}
-              videoRef={interviewSession.videoRef}
-            />
+            <InterviewCameraView />
           )}
         </S.InterviewStage>
 

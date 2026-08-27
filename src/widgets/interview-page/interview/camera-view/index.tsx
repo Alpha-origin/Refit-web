@@ -1,10 +1,9 @@
-import type { InterviewCameraViewProps } from "../type";
+import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import * as S from "../style";
 
-const InterviewCameraView = ({
-  cameraState,
-  videoRef,
-}: InterviewCameraViewProps) => {
+const InterviewCameraView = () => {
+  const { cameraState, videoRef } = useInterviewSessionContext();
+
   return (
     <S.PreviewSection>
       <S.PreviewFrame>

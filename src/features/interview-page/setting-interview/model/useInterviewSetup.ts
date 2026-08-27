@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getTailoredQuestions } from "@/features/feedback-page/api/tailorQuestions";
+import {
+  getTailoredQuestions,
+  normalizeTailoredQuestions,
+} from "@/features/feedback-page/api/tailorQuestions";
 import {
   createInterview,
   prepareInterviewRecord,
@@ -167,8 +170,28 @@ export const useInterviewSetup = () => {
 
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
+    const personaId =
+      data.personaId > 0 ? data.personaId : savedPersona.personaId;
+    let tailoredQuestions = preparedInterviewRecord.questions;
+
     try {
-      await getTailoredQuestions(preparedInterviewRecord.interviewId);
+      const tailorResponse = await getTailoredQuestions(
+        preparedInterviewRecord.interviewId,
+      );
+      const normalizedTailoredQuestions = normalizeTailoredQuestions(
+        tailorResponse,
+        personaId,
+      );
+
+      if (normalizedTailoredQuestions.length > 0) {
+        tailoredQuestions = normalizedTailoredQuestions;
+      }
+
+      console.log("[questions/tailor] questions saved", {
+        interviewId: preparedInterviewRecord.interviewId,
+        questionCount: tailoredQuestions.length,
+        questions: tailoredQuestions,
+      });
     } catch (error) {
       setIsSubmitting(false);
       setErrorMessage(
@@ -180,9 +203,6 @@ export const useInterviewSetup = () => {
     console.log("[questions/tailor] completed before SSE", {
       interviewId: preparedInterviewRecord.interviewId,
     });
-
-    const personaId =
-      data.personaId > 0 ? data.personaId : savedPersona.personaId;
 
     setActiveInterviewSessionId(data.sessionId);
 
@@ -206,7 +226,7 @@ export const useInterviewSetup = () => {
           jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: data.questions,
+          questions: tailoredQuestions,
         },
         interviewSetting: {
           style: selectedStyle,
