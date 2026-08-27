@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   clearActiveInterviewSessionId,
-  completeInterview,
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
@@ -180,12 +179,10 @@ export const useInterviewSession = (
 
       isSessionClosedRef.current = true;
       clearActiveInterviewSessionId();
-      disconnectInterviewSocket(activeSessionId);
-      if (reason === "completed") {
-        await completeInterview(activeSessionId);
-      } else {
+      if (reason === "quit") {
         await quitInterview(activeSessionId);
       }
+      disconnectInterviewSocket(activeSessionId);
 
       if (shouldNavigateToMain) {
         navigate(nextPath, {
@@ -249,8 +246,14 @@ export const useInterviewSession = (
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
+        personaName: preparedInterview.personaName,
+        role: preparedInterview.role,
+        major: preparedInterview.major,
+        type: preparedInterview.type,
         personaType: preparedInterview.personaType,
         level: preparedInterview.level,
+        career: preparedInterview.career,
+        gender: preparedInterview.gender,
         jobId: preparedInterview.jobId,
         questions: preparedInterview.questions,
       });

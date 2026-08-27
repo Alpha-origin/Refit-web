@@ -3,6 +3,7 @@ import type { PrepareInterviewQuestion } from "./prepare-interview";
 export type InterviewPersonaMajor = "BACKEND" | "FRONTEND";
 export type CreateInterviewPersonaType = "FRIENDLY" | "NEUTRAL" | "STRESS";
 export type InterviewPersonaGender = "MALE" | "FEMALE";
+export type InterviewPersonaRole = "TECH";
 export type InterviewLifecycleStatus =
   | "IN_PROGRESS"
   | "COMPLETED"

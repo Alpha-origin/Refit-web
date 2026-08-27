@@ -1,4 +1,8 @@
-import { API_URL, chatInstance } from "@/shared/api/axiosInstance";
+import {
+  API_URL,
+  chatInstance,
+  ensureAccessToken,
+} from "@/shared/api/axiosInstance";
 
 import {
   getCurrentUserId,
@@ -20,50 +24,105 @@ const AI_SUBSCRIBE_URL = "/api/v1/ai/subscribe";
 const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
 type PrepareInterviewRequestData = PreparedInterviewData;
 
-const waitForAiSseConnection = (jobId: string) =>
-  new Promise<void>((resolve, reject) => {
-    const baseUrl =
-      import.meta.env.MODE === "development" ? window.location.origin : API_URL;
-    const subscribeUrl = new URL(
-      `${AI_SUBSCRIBE_URL}/${encodeURIComponent(jobId)}`,
-      baseUrl,
-    );
-    console.log("[AI SSE] connecting", {
+const waitForAiSseMessage = async (jobId: string): Promise<void> => {
+  const baseUrl =
+    import.meta.env.MODE === "development" ? window.location.origin : API_URL;
+  const subscribeUrl = new URL(
+    `${AI_SUBSCRIBE_URL}/${encodeURIComponent(jobId)}`,
+    baseUrl,
+  );
+  const abortController = new AbortController();
+  const timeoutId = window.setTimeout(() => {
+    abortController.abort();
+  }, AI_SUBSCRIBE_TIMEOUT_MS);
+
+  try {
+    const authorizationHeader = await ensureAccessToken();
+
+    console.log("[AI SSE] GET subscribe request", {
+      method: "GET",
       jobId,
       url: subscribeUrl.toString(),
-    });
-    const eventSource = new EventSource(subscribeUrl, {
-      withCredentials: true,
+      hasAuthorization: Boolean(authorizationHeader),
     });
 
-    const cleanup = () => {
-      window.clearTimeout(timeoutId);
-      eventSource.close();
-    };
-    const timeoutId = window.setTimeout(() => {
-      console.error("[AI SSE] timeout", {
-        jobId,
-        timeoutMs: AI_SUBSCRIBE_TIMEOUT_MS,
-      });
-      cleanup();
-      reject(new Error("포트폴리오 분석 서버 연결 시간이 초과되었습니다."));
-    }, AI_SUBSCRIBE_TIMEOUT_MS);
+    const response = await fetch(subscribeUrl, {
+      method: "GET",
+      headers: {
+        Accept: "text/event-stream",
+        Authorization: authorizationHeader,
+        "ngrok-skip-browser-warning": "true",
+      },
+      credentials: "include",
+      signal: abortController.signal,
+    });
 
-    eventSource.onopen = () => {
-      console.log("[AI SSE] connected", { jobId });
-      cleanup();
-      resolve();
-    };
-    eventSource.onerror = (event) => {
-      console.error("[AI SSE] connection error", {
-        event,
-        jobId,
-        readyState: eventSource.readyState,
-      });
-      cleanup();
-      reject(new Error("포트폴리오 분석 상태를 확인하지 못했습니다."));
-    };
-  });
+    if (!response.ok) {
+      throw new Error(`AI SSE request failed: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error("AI SSE response stream is unavailable.");
+    }
+
+    console.log("[AI SSE] connected", {
+      jobId,
+      contentType: response.headers.get("content-type"),
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        throw new Error("AI SSE stream closed before receiving a message.");
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      const eventBlocks = buffer.split(/\r?\n\r?\n/);
+      buffer = eventBlocks.pop() ?? "";
+
+      for (const eventBlock of eventBlocks) {
+        const data = eventBlock
+          .split(/\r?\n/)
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.slice(5).replace(/^ /, ""))
+          .join("\n");
+
+        if (!data) {
+          continue;
+        }
+
+        console.log("[AI SSE] message received", {
+          jobId,
+          data,
+        });
+        await reader.cancel();
+        return;
+      }
+    }
+  } catch (error) {
+    const errorMessage =
+      error instanceof DOMException && error.name === "AbortError"
+        ? "포트폴리오 분석 서버 연결 시간이 초과되었습니다."
+        : error instanceof Error
+          ? error.message
+          : "포트폴리오 분석 상태를 확인하지 못했습니다.";
+
+    console.error("[AI SSE] connection error", {
+      error,
+      jobId,
+      message: errorMessage,
+    });
+    throw new Error(errorMessage);
+  } finally {
+    window.clearTimeout(timeoutId);
+    abortController.abort();
+  }
+};
 
 const normalizeQuestion = (
   value: unknown,
@@ -112,8 +171,14 @@ const buildPrepareInterviewRequest = (
         return userId !== null && userId >= 0 ? userId : getCurrentUserId();
       })(),
     personaId: params.personaId,
+    personaName: params.personaName,
+    role: params.role,
+    major: params.major,
+    type: params.type,
     personaType: params.personaType,
     level: params.level,
+    career: params.career,
+    gender: params.gender,
     jobId: params.jobId.trim(),
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
@@ -159,10 +224,17 @@ const normalizePreparedInterview = (
       getNumericValue(sourceRecord?.interviewId) ?? fallbackData.interviewId,
     userId: getNumericValue(sourceRecord?.userId) ?? fallbackData.userId,
     personaId: getNumericValue(sourceRecord?.personaId) ?? fallbackData.personaId,
+    personaName:
+      getTrimmedString(sourceRecord?.personaName) ?? fallbackData.personaName,
+    role: fallbackData.role,
+    major: fallbackData.major,
+    type: fallbackData.type,
     personaType: isPersonaType(sourceRecord?.personaType)
       ? sourceRecord.personaType
       : fallbackData.personaType,
     level: fallbackData.level,
+    career: fallbackData.career,
+    gender: fallbackData.gender,
     jobId: fallbackData.jobId,
     status: isInterviewProgressStatus(sourceRecord?.status)
       ? sourceRecord.status
@@ -185,9 +257,9 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
-    await waitForAiSseConnection(requestData.jobId);
+    await waitForAiSseMessage(requestData.jobId);
 
-    console.log("[AI SSE] connected, proceeding to chat/interviews", {
+    console.log("[AI SSE] message received, proceeding to chat/interviews", {
       jobId: requestData.jobId,
     });
 
@@ -195,10 +267,13 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
       sessionId: requestData.sessionId,
       interviewId: requestData.interviewId,
       userId: requestData.userId,
-      personaId: requestData.personaId,
-      personaType: requestData.personaType,
-      level: requestData.level,
-      jobId: requestData.jobId,
+      status: "IN_PROGRESS",
+      questions: requestData.questions.map((question) => ({
+        id: question.questionId,
+        category: question.intention,
+        question: question.content,
+        personaId: requestData.personaId,
+      })),
     };
 
     console.log("[chat/interviews] request payload", requestPayload);

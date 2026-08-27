@@ -164,35 +164,44 @@ const InterviewPage = () => {
           )}
         </S.InterviewStage>
 
-        {isVoiceMode ? (
-          <S.ActionRow>
-            <S.IconActionButton type="button" aria-label="카메라 상태">
-              <S.ActionIconImage
-                src={CameraIcon}
-                alt=""
-                aria-hidden="true"
-                $iconType="camera"
-              />
-            </S.IconActionButton>
-            <S.IconActionButton type="button" aria-label="마이크 상태">
-              <S.ActionIconImage
-                src={MicIcon}
-                alt=""
-                aria-hidden="true"
-                $iconType="mic"
-              />
-            </S.IconActionButton>
-            {isVoiceActionStarted ? (
-              <S.PrimaryAction type="button" onClick={handleCompleteVoice}>
-                끝내기
-              </S.PrimaryAction>
-            ) : (
-              <S.PrimaryAction type="button" onClick={handleStartVoice}>
-                시작하기
-              </S.PrimaryAction>
-            )}
-          </S.ActionRow>
-        ) : null}
+        <S.ActionRow>
+          <S.SecondaryAction
+            type="button"
+            onClick={() => void interviewSession.onQuitInterview()}
+          >
+            그만두기
+          </S.SecondaryAction>
+
+          {isVoiceMode ? (
+            <>
+              <S.IconActionButton type="button" aria-label="카메라 상태">
+                <S.ActionIconImage
+                  src={CameraIcon}
+                  alt=""
+                  aria-hidden="true"
+                  $iconType="camera"
+                />
+              </S.IconActionButton>
+              <S.IconActionButton type="button" aria-label="마이크 상태">
+                <S.ActionIconImage
+                  src={MicIcon}
+                  alt=""
+                  aria-hidden="true"
+                  $iconType="mic"
+                />
+              </S.IconActionButton>
+              {isVoiceActionStarted ? (
+                <S.PrimaryAction type="button" onClick={handleCompleteVoice}>
+                  끝내기
+                </S.PrimaryAction>
+              ) : (
+                <S.PrimaryAction type="button" onClick={handleStartVoice}>
+                  시작하기
+                </S.PrimaryAction>
+              )}
+            </>
+          ) : null}
+        </S.ActionRow>
       </S.Content>
     </S.Container>
   );

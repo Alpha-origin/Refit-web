@@ -5,6 +5,7 @@ export type {
   InterviewLifecycleStatus,
   InterviewPersonaGender,
   InterviewPersonaMajor,
+  InterviewPersonaRole,
 } from "./create-interview";
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";
@@ -24,11 +25,7 @@ export type {
   QuitInterviewQuestion,
   QuitInterviewResponse,
 } from "./quit-interview";
-export type {
-  InterviewPersonaRole,
-  SavePersonaParams,
-  SavedPersonaData,
-} from "./save-persona";
+export type { SavePersonaParams, SavedPersonaData } from "./save-persona";
 export type {
   SubmitInterviewAnswerParams,
   SubmitInterviewAnswerQuestion,
