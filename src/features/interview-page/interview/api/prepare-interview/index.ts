@@ -34,6 +34,17 @@ interface PrepareChatInterviewPayload {
   personaType: PersonaType;
   level: InterviewLevel;
   jobId: string;
+  status: "IN_PROGRESS";
+  questions: PrepareChatInterviewQuestion[];
+}
+
+interface PrepareChatInterviewQuestion {
+  id: number;
+  category: string;
+  question: string;
+  expectedAnswer: string;
+  basedOn: string[];
+  personaId: number;
 }
 
 const waitForAiSseMessage = async (jobId: string): Promise<void> => {
@@ -139,6 +150,7 @@ const waitForAiSseMessage = async (jobId: string): Promise<void> => {
 const normalizeQuestion = (
   value: unknown,
   index: number,
+  fallbackPersonaId: number,
 ): PrepareInterviewQuestion | null => {
   const questionRecord = getRecord(value);
   const content = getTrimmedString(
@@ -157,6 +169,16 @@ const normalizeQuestion = (
       getTrimmedString(questionRecord?.intention ?? questionRecord?.purpose) ??
       "",
     content,
+    expectedAnswer:
+      getTrimmedString(questionRecord?.expectedAnswer ?? questionRecord?.answer) ??
+      "",
+    basedOn: Array.isArray(questionRecord?.basedOn)
+      ? questionRecord.basedOn.filter(
+          (item): item is string => typeof item === "string",
+        )
+      : [],
+    personaId:
+      getNumericValue(questionRecord?.personaId) ?? fallbackPersonaId,
   };
 };
 
@@ -168,6 +190,9 @@ const buildPrepareInterviewRequest = (
     questionId: getNumericValue(question.questionId) ?? index + 1,
     intention: question.intention.trim(),
     content: question.content.trim(),
+    expectedAnswer: question.expectedAnswer?.trim() ?? "",
+    basedOn: question.basedOn ?? [],
+    personaId: question.personaId ?? params.personaId,
   }));
 
   return {
@@ -207,9 +232,13 @@ const normalizePreparedInterview = (
   const sourceRecord = responseDataRecord ?? responseRecord;
   const responseQuestions =
     sourceRecord?.questions ?? sourceRecord?.interviewQuestions;
-  const normalizedQuestions = Array.isArray(responseQuestions)
+  const responseNormalizedQuestions = Array.isArray(responseQuestions)
     ? responseQuestions.reduce<PrepareInterviewQuestion[]>((accumulator, question, index) => {
-        const normalizedQuestion = normalizeQuestion(question, index);
+        const normalizedQuestion = normalizeQuestion(
+          question,
+          index,
+          fallbackData.personaId,
+        );
 
         if (normalizedQuestion) {
           accumulator.push(normalizedQuestion);
@@ -218,6 +247,10 @@ const normalizePreparedInterview = (
         return accumulator;
       }, [])
     : [];
+  const normalizedQuestions =
+    responseNormalizedQuestions.length > 0
+      ? responseNormalizedQuestions
+      : fallbackData.questions;
   const totalQuestionCount =
     normalizedQuestions.length > 0
       ? normalizedQuestions.length
@@ -283,6 +316,15 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
       personaType: requestData.personaType,
       level: requestData.level,
       jobId: requestData.jobId,
+      status: "IN_PROGRESS",
+      questions: requestData.questions.map((question) => ({
+        id: question.questionId,
+        category: question.intention,
+        question: question.content,
+        expectedAnswer: question.expectedAnswer ?? "",
+        basedOn: question.basedOn ?? [],
+        personaId: question.personaId ?? requestData.personaId,
+      })),
     };
 
     console.log("[chat/interviews] request payload", requestPayload);

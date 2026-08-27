@@ -10,20 +10,16 @@ const FeedbackListPage = () => {
   const navigate = useNavigate();
 
   const handleItemClick = async (item: FeedbackListItem) => {
-    const sessionId = item.sessionId;
-
     let feedbackData = null;
 
     // Lazy import API to avoid circular deps
     const { getFeedback } =
       await import("@/features/feedback-page/feedback-list/api/getAllInterviews");
 
-    if (sessionId) {
-      try {
-        feedbackData = await getFeedback(sessionId);
-      } catch {
-        feedbackData = null;
-      }
+    try {
+      feedbackData = await getFeedback(item.id);
+    } catch {
+      feedbackData = null;
     }
 
     navigate(`/main/feedback/overall/${item.id}`, {

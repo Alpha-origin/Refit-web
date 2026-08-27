@@ -93,9 +93,9 @@ export const useFeedbackList = () => {
     void loadFeedbackList();
   }, [loadFeedbackList]);
 
-  const fetchFeedback = useCallback(async (sessionId: string) => {
+  const fetchFeedback = useCallback(async (interviewId: number) => {
     try {
-      const data = await getFeedback(sessionId);
+      const data = await getFeedback(interviewId);
       return data;
     } catch {
       return null;
