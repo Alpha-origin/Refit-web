@@ -61,6 +61,8 @@ const InterviewPage = () => {
   const isTextMode = interviewSession.mode === "text";
   const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
   const isQuestionLoading = interviewSession.currentQuestion === null;
+  const isStartActionDisabled =
+    !interviewSession.isInterviewReady || isQuestionLoading;
   const totalQuestionCount =
     preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
   const currentQuestionNumber = Math.max(interviewSession.displayQuestionNumber, 1);
@@ -164,6 +166,12 @@ const InterviewPage = () => {
           )}
         </S.InterviewStage>
 
+        {interviewSession.isPreparingInterview ? (
+          <S.PreparationMessage role="status" aria-live="polite">
+            포트폴리오를 등록하고 있습니다. 분석이 끝날 때까지 잠시 기다려주세요.
+          </S.PreparationMessage>
+        ) : null}
+
         <S.ActionRow>
           <S.SecondaryAction
             type="button"
@@ -195,8 +203,19 @@ const InterviewPage = () => {
                   끝내기
                 </S.PrimaryAction>
               ) : (
-                <S.PrimaryAction type="button" onClick={handleStartVoice}>
-                  시작하기
+                <S.PrimaryAction
+                  type="button"
+                  onClick={handleStartVoice}
+                  disabled={isStartActionDisabled}
+                  aria-disabled={isStartActionDisabled}
+                  aria-busy={interviewSession.isPreparingInterview}
+                  title={
+                    isStartActionDisabled
+                      ? "포트폴리오를 등록하고 잠시 기다려주세요."
+                      : undefined
+                  }
+                >
+                  {interviewSession.isPreparingInterview ? "준비 중..." : "시작하기"}
                 </S.PrimaryAction>
               )}
             </>

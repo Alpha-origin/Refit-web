@@ -99,7 +99,9 @@ export const useInterviewSession = (
     buildQuestionKey(initialQuestion),
   );
   const canSubmitAnswer =
-    interviewStatus === "IN_PROGRESS" && currentQuestion !== null;
+    isChatSessionReady &&
+    interviewStatus === "IN_PROGRESS" &&
+    currentQuestion !== null;
   const getInterviewExitPath = useCallback(
     (reason: InterviewCloseReason) =>
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
@@ -340,6 +342,11 @@ export const useInterviewSession = (
   };
 
   const handleStartVoice = () => {
+    if (!isChatSessionReady) {
+      console.info("[interview] start voice blocked until SSE preparation completes");
+      return;
+    }
+
     if (isSubmitting || !canSubmitAnswer) {
       console.warn("[interview] start voice blocked", {
         canSubmitAnswer,
@@ -434,6 +441,8 @@ export const useInterviewSession = (
     cameraState,
     currentQuestion,
     displayQuestionNumber,
+    isInterviewReady: isChatSessionReady,
+    isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
     questionAudioStatus: questionTts.status,
