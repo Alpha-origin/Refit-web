@@ -5,12 +5,14 @@ import {
   type InterviewSummary,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import { sortInterviewsByCreatedAt } from "@/features/feedback-page/model/interviewDisplay";
+import { useTailoredQuestionsPolling } from "@/features/feedback-page/model/useTailoredQuestionsPolling";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 export const useFeedbackInterview = (id?: string) => {
   const [interview, setInterview] = useState<InterviewSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const tailorPolling = useTailoredQuestionsPolling(interview?.id ?? undefined);
 
   const loadInterview = useCallback(async () => {
     const interviewId = Number(id);
@@ -52,6 +54,7 @@ export const useFeedbackInterview = (id?: string) => {
     errorMessage,
     interview,
     isLoading,
+    ...tailorPolling,
     refetch: loadInterview,
   };
 };
