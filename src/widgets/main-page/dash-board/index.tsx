@@ -10,6 +10,7 @@ import * as S from "./style";
 
 const DashboardMain = () => {
   const navigate = useNavigate();
+
   return (
     <S.Section>
       <S.TopCard>
@@ -49,7 +50,10 @@ const DashboardMain = () => {
               ))}
             </S.FeatureGrid>
 
-            <S.StartButton type="button" onClick={() => navigate("/main/setting/interview")}>
+            <S.StartButton
+              type="button"
+              onClick={() => navigate("/main/setting/interview")}
+            >
               {MAIN_PAGE_DASHBOARD_CONTENT.startButton}
             </S.StartButton>
           </S.RightCopy>

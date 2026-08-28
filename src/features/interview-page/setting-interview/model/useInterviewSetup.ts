@@ -2,15 +2,23 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  getTailoredQuestions,
+  normalizeTailoredQuestions,
+} from "@/features/feedback-page/api/tailorQuestions";
+import {
   createInterview,
+  prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
   type CreateInterviewPersonaType,
   type InterviewPersonaGender,
   type InterviewLevel,
   type InterviewPersonaMajor,
+  type InterviewPersonaRole,
   type PersonaType,
+  type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
@@ -49,6 +57,7 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
 
 const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
 const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
+const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
 
 const buildUniquePersonaName = (personaName: string) =>
   `${personaName}-${Date.now().toString(36)}`;
@@ -99,8 +108,10 @@ export const useInterviewSetup = () => {
       return;
     }
 
-    const personaPayload = {
+    const personaPayload: SavePersonaParams = {
       personaName: buildUniquePersonaName(selectedInterviewer.personaName),
+      role: DEFAULT_INTERVIEW_ROLE,
+      level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       major: DEFAULT_INTERVIEW_MAJOR,
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
@@ -121,10 +132,19 @@ export const useInterviewSetup = () => {
     }
 
     console.log("[persona/save] response data", savedPersona);
-    console.log("[interviews/create] request payload", personaPayload);
+
+    const interviewPayload = {
+      personaName: personaPayload.personaName,
+      major: personaPayload.major,
+      type: personaPayload.type,
+      career: personaPayload.career,
+      gender: personaPayload.gender,
+    };
+
+    console.log("[interviews/create] request payload", interviewPayload);
 
     const { data, errorMessage: createErrorMessage } =
-      await createInterview(personaPayload);
+      await createInterview(interviewPayload);
 
     if (createErrorMessage || !data) {
       setIsSubmitting(false);
@@ -135,8 +155,54 @@ export const useInterviewSetup = () => {
     console.log("[interviews/create] response data", data);
     console.log("[interviews/create] server sessionId", data.sessionId);
 
+    const {
+      data: preparedInterviewRecord,
+      errorMessage: prepareInterviewErrorMessage,
+    } = await prepareInterviewRecord(data.interviewId);
+
+    if (prepareInterviewErrorMessage || !preparedInterviewRecord) {
+      setIsSubmitting(false);
+      setErrorMessage(
+        prepareInterviewErrorMessage ?? "면접 준비에 실패했습니다.",
+      );
+      return;
+    }
+
+    console.log("[interviews/prepare] response data", preparedInterviewRecord);
+
     const personaId =
       data.personaId > 0 ? data.personaId : savedPersona.personaId;
+    let tailoredQuestions = preparedInterviewRecord.questions;
+
+    try {
+      const tailorResponse = await getTailoredQuestions(
+        preparedInterviewRecord.interviewId,
+      );
+      const normalizedTailoredQuestions = normalizeTailoredQuestions(
+        tailorResponse,
+        personaId,
+      );
+
+      if (normalizedTailoredQuestions.length > 0) {
+        tailoredQuestions = normalizedTailoredQuestions;
+      }
+
+      console.log("[questions/tailor] questions saved", {
+        interviewId: preparedInterviewRecord.interviewId,
+        questionCount: tailoredQuestions.length,
+        questions: tailoredQuestions,
+      });
+    } catch (error) {
+      setIsSubmitting(false);
+      setErrorMessage(
+        extractErrorMessage(error, "맞춤 질문을 불러오지 못했습니다."),
+      );
+      return;
+    }
+
+    console.log("[questions/tailor] completed before SSE", {
+      interviewId: preparedInterviewRecord.interviewId,
+    });
 
     setActiveInterviewSessionId(data.sessionId);
 
@@ -146,15 +212,21 @@ export const useInterviewSetup = () => {
       state: {
         preparedInterview: {
           sessionId: data.sessionId,
-          interviewId: data.interviewId,
+          interviewId: preparedInterviewRecord.interviewId,
           userId: data.userId,
           personaId,
+          personaName: personaPayload.personaName,
+          role: personaPayload.role,
+          major: personaPayload.major,
+          type: personaPayload.type,
           personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
           level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
+          career: personaPayload.career,
+          gender: personaPayload.gender,
           jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: data.questions,
+          questions: tailoredQuestions,
         },
         interviewSetting: {
           style: selectedStyle,

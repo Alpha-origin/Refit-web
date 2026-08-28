@@ -266,6 +266,19 @@ export const StartButton = styled.button`
     box-shadow: 0 0.35rem 0.8rem rgba(0, 65, 150, 0.22);
   }
 
+  &:disabled {
+    background-color: #9bb7dd;
+    box-shadow: none;
+    cursor: wait;
+    transform: none;
+  }
+
+  &:disabled:hover {
+    background-color: #9bb7dd;
+    box-shadow: none;
+    transform: none;
+  }
+
   @media (max-width: 72rem) {
     height: 3.1rem;
   }

@@ -92,14 +92,15 @@ const FeedbackList = ({
           </S.StateCard>
         ) : (
           <S.List>
-            {sortedItems.map((item) => {
+            {sortedItems.map((item, index) => {
               const isComplete = getNormalizedStatusLabel(
                 item.statusLabel,
               ).includes("완료");
+              const itemKey = `${item.sessionId ?? item.id ?? "feedback"}-${index}`;
 
               return (
                 <S.FeedbackCard
-                  key={item.id}
+                  key={itemKey}
                   type="button"
                   onClick={() => {
                     if (onItemClick) {
@@ -116,19 +117,36 @@ const FeedbackList = ({
                   />
                   <S.CardBody>
                     <S.CardTitle>{item.title}</S.CardTitle>
+                    {item.totalScore !== undefined ? (
+                      <S.ScoreLine>
+                        종합 점수 <S.ScoreValue>{item.totalScore}점</S.ScoreValue>
+                      </S.ScoreLine>
+                    ) : null}
                     <S.MetaGroup>
                       <S.MetaLabel>스타일/난이도</S.MetaLabel>
                       <S.TagGroup>
-                        <S.Tag>{item.styleLabel}</S.Tag>
-                        <S.Tag>{item.levelLabel}</S.Tag>
+                        <S.Tag key={`${item.id}-style`}>{item.styleLabel}</S.Tag>
+                        <S.Tag key={`${item.id}-level`}>{item.levelLabel}</S.Tag>
                       </S.TagGroup>
                     </S.MetaGroup>
                     <S.MetaGroup>
                       <S.MetaLabel>면접관</S.MetaLabel>
                       <S.TagGroup>
-                        <S.Tag>{item.interviewerName}</S.Tag>
+                        <S.Tag key={`${item.id}-interviewer`}>
+                          {item.interviewerName}
+                        </S.Tag>
                       </S.TagGroup>
                     </S.MetaGroup>
+                    {item.summary ? (
+                      <S.CardSummary>{item.summary}</S.CardSummary>
+                    ) : null}
+                    {item.answeredCount !== undefined ||
+                    item.questionCount !== undefined ? (
+                      <S.AnswerCount>
+                        답변 문항 {item.answeredCount ?? 0} /{" "}
+                        {item.questionCount ?? 0}
+                      </S.AnswerCount>
+                    ) : null}
                     <S.CardDate>{item.date}</S.CardDate>
                   </S.CardBody>
                   <S.StatusBadge $complete={isComplete}>
