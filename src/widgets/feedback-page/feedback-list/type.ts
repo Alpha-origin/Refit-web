@@ -8,6 +8,10 @@ export interface FeedbackListItem {
   interviewerName: string;
   statusLabel: string;
   sessionId?: string;
+  totalScore?: number;
+  summary?: string;
+  answeredCount?: number;
+  questionCount?: number;
 }
 
 export interface FeedbackListProps {

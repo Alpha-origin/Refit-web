@@ -137,6 +137,16 @@ export const InterviewStage = styled.div<VoiceLayoutProps & TextLayoutProps>`
   }
 `;
 
+export const PreparationMessage = styled.p`
+  width: 100%;
+  margin: 0;
+  color: #5d6b86;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+`;
+
 export const InterviewBody = styled.div<VoiceLayoutProps & TextLayoutProps>`
   width: 100%;
   height: 100%;
@@ -426,6 +436,19 @@ export const PrimaryAction = styled(actionButtonBase)`
 
   &:hover {
     background: #2a79e5;
+  }
+
+  &:disabled {
+    background: #b9c8dc;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.9;
+    transform: none;
+  }
+
+  &:disabled:hover {
+    background: #b9c8dc;
+    transform: none;
   }
 `;
 

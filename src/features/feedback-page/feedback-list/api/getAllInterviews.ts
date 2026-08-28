@@ -1,7 +1,11 @@
-import { apiInstance } from "@/shared/api/axiosInstance";
+import {
+  apiInstance,
+  ensureAccessToken,
+} from "@/shared/api/axiosInstance";
 
 export interface InterviewPersona {
   id?: number;
+  personaRole?: string;
   personaName?: string;
   major?: string;
   type?: string;
@@ -11,6 +15,7 @@ export interface InterviewPersona {
 
 export interface InterviewSummary {
   id: number;
+  interviewId?: number;
   userId?: number;
   persona?: InterviewPersona | null;
   sessionId?: string;
@@ -24,7 +29,7 @@ interface ApiResponse<T> {
 }
 
 const GET_ALL_INTERVIEWS_URL = "/api/interviews/getAll";
-const GET_FEEDBACK_URL = "/api/answer";
+const GET_FEEDBACK_URL = "/api/feedbacks";
 
 export interface FrequentWord {
   word: string;
@@ -33,6 +38,7 @@ export interface FrequentWord {
 
 export interface QuestionFeedback {
   questionId?: string;
+  personaId?: number;
   questionContent?: string;
   intention?: string;
   userAnswer?: string;
@@ -40,6 +46,17 @@ export interface QuestionFeedback {
   strengths?: string[];
   improvements?: string[];
   comment?: string;
+}
+
+export interface FeedbackPersona {
+  personaId?: number;
+  personaRole?: string;
+  score?: number;
+  comment?: string;
+  strengths?: string[];
+  improvements?: string[];
+  answeredCount?: number;
+  questionCount?: number;
 }
 
 export interface FeedbackData {
@@ -57,6 +74,7 @@ export interface FeedbackData {
   answeredCount?: number;
   questionCount?: number;
   errorMessage?: string;
+  personas?: FeedbackPersona[];
   feedbacks?: QuestionFeedback[];
   createdAt?: string;
 }
@@ -87,9 +105,28 @@ export const getAllInterviews = async () => {
   return normalizeInterviews(response.data);
 };
 
-export const getFeedback = async (sessionId: string) => {
+export const getFeedback = async (interviewId: number) => {
+  if (!Number.isInteger(interviewId) || interviewId <= 0) {
+    throw new Error("피드백을 조회할 interviewId가 없습니다.");
+  }
+
+  const authorizationHeader = await ensureAccessToken();
+  const requestUrl = `${GET_FEEDBACK_URL}?interviewId=${encodeURIComponent(
+    interviewId,
+  )}`;
+
+  console.log("[feedbacks] GET request", {
+    method: "GET",
+    url: requestUrl,
+    interviewId,
+    hasAuthorization: Boolean(authorizationHeader),
+  });
+
   const response = await apiInstance.get<FeedbackApiResponse>(GET_FEEDBACK_URL, {
-    params: { sessionId },
+    params: { interviewId },
+    headers: {
+      Authorization: authorizationHeader,
+    },
   });
 
   return response.data?.data ?? null;

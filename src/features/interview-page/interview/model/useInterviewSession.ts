@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
   clearActiveInterviewSessionId,
-  completeInterview,
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
@@ -100,7 +99,9 @@ export const useInterviewSession = (
     buildQuestionKey(initialQuestion),
   );
   const canSubmitAnswer =
-    interviewStatus === "IN_PROGRESS" && currentQuestion !== null;
+    isChatSessionReady &&
+    interviewStatus === "IN_PROGRESS" &&
+    currentQuestion !== null;
   const getInterviewExitPath = useCallback(
     (reason: InterviewCloseReason) =>
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
@@ -180,12 +181,18 @@ export const useInterviewSession = (
 
       isSessionClosedRef.current = true;
       clearActiveInterviewSessionId();
-      disconnectInterviewSocket(activeSessionId);
-      if (reason === "completed") {
-        await completeInterview(activeSessionId);
-      } else {
-        await quitInterview(activeSessionId);
+      if (reason === "quit") {
+        const closeResult = await quitInterview(activeSessionId);
+
+        if (closeResult.errorMessage) {
+          console.error("[interview] quit request failed", {
+            sessionId: activeSessionId,
+            message: closeResult.errorMessage,
+          });
+        }
       }
+
+      disconnectInterviewSocket(activeSessionId);
 
       if (shouldNavigateToMain) {
         navigate(nextPath, {
@@ -249,8 +256,14 @@ export const useInterviewSession = (
         interviewId: preparedInterview.interviewId,
         userId: preparedInterview.userId,
         personaId: preparedInterview.personaId,
+        personaName: preparedInterview.personaName,
+        role: preparedInterview.role,
+        major: preparedInterview.major,
+        type: preparedInterview.type,
         personaType: preparedInterview.personaType,
         level: preparedInterview.level,
+        career: preparedInterview.career,
+        gender: preparedInterview.gender,
         jobId: preparedInterview.jobId,
         questions: preparedInterview.questions,
       });
@@ -337,6 +350,11 @@ export const useInterviewSession = (
   };
 
   const handleStartVoice = () => {
+    if (!isChatSessionReady) {
+      console.info("[interview] start voice blocked until SSE preparation completes");
+      return;
+    }
+
     if (isSubmitting || !canSubmitAnswer) {
       console.warn("[interview] start voice blocked", {
         canSubmitAnswer,
@@ -431,6 +449,8 @@ export const useInterviewSession = (
     cameraState,
     currentQuestion,
     displayQuestionNumber,
+    isInterviewReady: isChatSessionReady,
+    isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
     questionAudioStatus: questionTts.status,

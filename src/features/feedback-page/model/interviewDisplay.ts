@@ -1,5 +1,8 @@
 import type { InterviewSummary } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 
+export const getInterviewId = (interview: InterviewSummary) =>
+  interview.interviewId ?? interview.id;
+
 const MAJOR_LABELS: Record<string, string> = {
   BACKEND: "백엔드",
   FRONTEND: "프론트엔드",

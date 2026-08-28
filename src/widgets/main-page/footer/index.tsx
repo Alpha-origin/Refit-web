@@ -8,6 +8,7 @@ const MainPageFooter = () => {
         <S.ActionButton type="button">Ai 모의면접 알아보기</S.ActionButton>
       </S.BannerCard>
     </S.Section>
+    //피드백 연결
   );
 };
 
