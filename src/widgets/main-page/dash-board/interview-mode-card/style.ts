@@ -47,7 +47,11 @@ export const Banner = styled.div<ReversedProps>`
 
   @media (max-width: 72rem) {
     order: 1;
-    min-height: 14rem;
+    height: 18rem;
+  }
+
+  @media (max-width: 48rem) {
+    height: 14rem;
   }
 `;
 
