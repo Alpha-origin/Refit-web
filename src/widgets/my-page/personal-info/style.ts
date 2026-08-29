@@ -1,149 +1,152 @@
 import styled from "styled-components";
 
 export const PersonalInfoWrapper = styled.section`
-  position: relative;
-  width: 80%;
-  min-height: 18.5em;
-  padding: 1.9rem 2.3rem 2rem;
-  background-color: #ffffff;
-  border-radius: 1.25rem;
-  box-shadow: 0 1.1rem 2.8rem rgba(169, 181, 205, 0.14);
-  margin: 0 auto;
-  margin-top: -1.65rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 18.25rem;
+  padding: 1.55rem 1.5rem 1.25rem;
+  border: 0.0625rem solid #dce2ec;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.94);
 
-  @media (max-width: 48rem) {
+  @media (min-width: 90rem) {
+    min-height: 19.125rem;
+  }
+
+  @media (max-width: 56rem) {
     min-height: auto;
-    padding: 1.5rem 1.4rem 1.75rem;
+  }
+`;
+
+export const Form = styled.form`
+  position: relative;
+  min-height: 15.4rem;
+
+  @media (min-width: 90rem) {
+    min-height: 16.15rem;
   }
 `;
 
 export const Title = styled.h2`
-  margin: 0 0 2.6rem;
+  margin: 0 0 1.7rem;
   color: #46506a;
-  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   line-height: 1.2;
+
+  @media (min-width: 90rem) {
+    font-size: 1.125rem;
+  }
 `;
 
 export const InfoList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin-left: 2.25rem;
-  margin-top: -0.5rem;
+  gap: 1.25rem;
+  margin-left: 0.5rem;
 
-  @media (max-width: 48rem) {
-    margin-left: 0;
-    gap: 1.2rem;
-  }
-`;
-
-export const StatusText = styled.p`
-  margin: -0.5rem 0 0 2.25rem;
-  color: #55607b;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.5;
-
-  @media (max-width: 48rem) {
-    margin-left: 0;
+  @media (min-width: 90rem) {
+    gap: 1.5rem;
   }
 `;
 
 export const InfoRow = styled.div`
   display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr);
+  grid-template-columns: 3.4rem minmax(0, 1fr);
   align-items: center;
-  column-gap: 0.65rem;
+  column-gap: 0.35rem;
 
-  @media (max-width: 36rem) {
-    grid-template-columns: 6rem minmax(0, 1fr);
+  @media (min-width: 90rem) {
+    grid-template-columns: 5.1rem minmax(0, 1fr);
   }
 `;
 
-export const Label = styled.span`
-  color: #4c91f3;
-  font-size: clamp(1.05rem, 1.9vw, 1.4rem);
+export const Label = styled.label`
+  color: #0875ef;
+  font-size: 0.95rem;
   font-weight: 600;
-  line-height: 1;
-`;
+  line-height: 1.2;
 
-export const Value = styled.span`
-  color: #55607b;
-  font-size: clamp(0.95rem, 1.6vw, 1.25rem);
-  font-weight: 700;
-  line-height: 1.35;
-  word-break: break-all;
+  @media (min-width: 90rem) {
+    font-size: 0.875rem;
+  }
 `;
 
 export const EditInput = styled.input`
   width: 100%;
-  max-width: 20rem;
-  height: 2.4rem;
-  padding: 0 0.75rem;
-  border: 0.0625rem solid #c8d6f0;
-  border-radius: 0.5rem;
+  min-width: 0;
+  height: 1.85rem;
+  padding: 0 0.8rem;
+  border: 0.0625rem solid #e0e4ec;
+  border-radius: 0.38rem;
   outline: none;
-  color: #33415c;
-  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
-  font-weight: 600;
   background-color: #ffffff;
+  color: #525c72;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-  &:focus {
-    border-color: #1976e8;
+  @media (min-width: 90rem) {
+    font-size: 0.75rem;
+  }
+
+  &:focus-visible {
+    border-color: #247bed;
+    box-shadow: 0 0 0 0.15rem rgba(36, 123, 237, 0.13);
   }
 
   &:disabled {
-    opacity: 0.7;
     cursor: not-allowed;
+    opacity: 0.65;
   }
 `;
 
-export const ErrorText = styled.p`
-  margin: 0.4rem 0 0 2.25rem;
-  color: #e14d4d;
-  font-size: 0.85rem;
-  font-weight: 600;
-`;
-
-export const EditButton = styled.button`
-  position: absolute;
-  right: 1.7rem;
-  bottom: 1rem;
-  min-width: 7.4rem;
-  height: 2.4rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0 1rem;
-
-  background-color: #1976e8;
-  color: #ffffff;
-
+export const StatusText = styled.p`
+  color: #68738a;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 600;
+  line-height: 1.5;
+`;
+
+export const ResultMessage = styled.p<{ $isError: boolean }>`
+  position: absolute;
+  right: 0;
+  bottom: 1.7rem;
+  left: 0;
+  overflow: hidden;
+  color: ${({ $isError }) => ($isError ? "#d64f4f" : "#1976e8")};
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const SaveButton = styled.button`
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+  color: #0875ef;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: color 0.2s ease;
 
-  box-shadow: 0 0.25rem 0.6rem rgba(25, 118, 232, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  &:hover:not(:disabled) {
+    color: #005ec9;
+  }
 
-  &:hover {
-    background-color: #0f67d6;
-    transform: translateY(-0.0625rem);
+  &:focus-visible {
+    border-radius: 0.2rem;
+    outline: 0.125rem solid rgba(36, 123, 237, 0.45);
+    outline-offset: 0.2rem;
   }
 
   &:disabled {
-    background-color: #9db8e3;
     cursor: not-allowed;
-    transform: none;
-  }
-
-  @media (max-width: 48rem) {
-    position: static;
-    display: inline-flex;
-    margin-top: 1.8rem;
+    opacity: 0.5;
   }
 `;
