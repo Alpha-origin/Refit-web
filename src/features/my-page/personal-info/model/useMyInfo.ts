@@ -1,91 +1,119 @@
-    import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-    import { getMyInfo } from "@/features/my-page/personal-info/api/getMyInfo";
-    import { updateMyInfo } from "@/features/my-page/personal-info/api/updateMyInfo";
-    import { useUserStore } from "@/shared/store/userStore";
+import { getMyInfo } from "@/features/my-page/personal-info/api/getMyInfo";
+import { updateMyInfo } from "@/features/my-page/personal-info/api/updateMyInfo";
+import { useUserStore } from "@/shared/store/userStore";
 
-    interface PersonalInfoDraft {
-    name: string;
-    nickname: string;
-    email: string;
+export interface PersonalInfoDraft {
+  name: string;
+  nickname: string;
+  email: string;
+}
+
+export const useMyInfo = () => {
+  const name = useUserStore((state) => state.name);
+  const nickname = useUserStore((state) => state.nickname);
+  const email = useUserStore((state) => state.email);
+  const isLoaded = useUserStore((state) => state.isLoaded);
+  const setUser = useUserStore((state) => state.setUser);
+
+  const [draftOverrides, setDraftOverrides] = useState<
+    Partial<PersonalInfoDraft>
+  >({});
+  const [isFetching, setIsFetching] = useState(!isLoaded);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+  const draft = useMemo<PersonalInfoDraft>(
+    () => ({
+      name: draftOverrides.name ?? name,
+      nickname: draftOverrides.nickname ?? nickname,
+      email: draftOverrides.email ?? email,
+    }),
+    [draftOverrides, email, name, nickname],
+  );
+  const isLoading = isFetching && !isLoaded;
+
+  useEffect(() => {
+    if (isLoaded) {
+      return;
     }
 
-    export const useMyInfo = () => {
-    const name = useUserStore((state) => state.name);
-    const nickname = useUserStore((state) => state.nickname);
-    const email = useUserStore((state) => state.email);
-    const isLoaded = useUserStore((state) => state.isLoaded);
-    const setUser = useUserStore((state) => state.setUser);
+    let isActive = true;
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [isLoading, setIsLoading] = useState(!isLoaded);
-    const [isSaving, setIsSaving] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [draft, setDraft] = useState<PersonalInfoDraft>({ name, nickname, email });
-
-    const loadMyInfo = useCallback(async () => {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const { data, errorMessage: loadErrorMessage } = await getMyInfo();
-
-        if (loadErrorMessage || !data) {
-        setErrorMessage(loadErrorMessage || "회원 정보를 불러오지 못했습니다.");
-        setIsLoading(false);
+    void getMyInfo().then(({ data, errorMessage: loadErrorMessage }) => {
+      if (!isActive) {
         return;
-        }
+      }
 
-        setUser(data);
-        setIsLoading(false);
-    }, [setUser]);
+      if (loadErrorMessage || !data) {
+        setErrorMessage(
+          loadErrorMessage || "회원 정보를 불러오지 못했습니다.",
+        );
+        setIsFetching(false);
+        return;
+      }
 
-    useEffect(() => {
-        if (!isLoaded) {
-        void loadMyInfo();
-        }
-    }, [isLoaded, loadMyInfo]);
+      setUser(data);
+      setIsFetching(false);
+    });
 
-    useEffect(() => {
-        if (!isEditing) {
-        setDraft({ name, nickname, email });
-        }
-    }, [name, nickname, email, isEditing]);
+    return () => {
+      isActive = false;
+    };
+  }, [isLoaded, setUser]);
 
-    const handleFieldChange = (field: keyof PersonalInfoDraft, value: string) => {
-        setDraft((previousDraft) => ({ ...previousDraft, [field]: value }));
+  const handleFieldChange = (field: keyof PersonalInfoDraft, value: string) => {
+    setDraftOverrides((previousDraft) => ({
+      ...previousDraft,
+      [field]: value,
+    }));
+    setErrorMessage("");
+    setSaveMessage("");
+  };
+
+  const handleSave = useCallback(async () => {
+    if (isSaving) {
+      return;
+    }
+
+    const nextDraft = {
+      name: draft.name.trim(),
+      nickname: draft.nickname.trim(),
+      email: draft.email.trim(),
     };
 
-    const handleToggleEdit = useCallback(async () => {
-        if (!isEditing) {
-        setErrorMessage("");
-        setDraft({ name, nickname, email });
-        setIsEditing(true);
-        return;
-        }
+    if (!nextDraft.name || !nextDraft.nickname || !nextDraft.email) {
+      setErrorMessage("이름, 닉네임, 이메일을 모두 입력해주세요.");
+      setSaveMessage("");
+      return;
+    }
 
-        setIsSaving(true);
-        setErrorMessage("");
+    setIsSaving(true);
+    setErrorMessage("");
+    setSaveMessage("");
 
-        const { errorMessage: saveErrorMessage } = await updateMyInfo(draft);
+    const { errorMessage: saveErrorMessage } = await updateMyInfo(nextDraft);
 
-        setIsSaving(false);
+    setIsSaving(false);
 
-        if (saveErrorMessage) {
-        setErrorMessage(saveErrorMessage);
-        return;
-        }
+    if (saveErrorMessage) {
+      setErrorMessage(saveErrorMessage);
+      return;
+    }
 
-        setUser(draft);
-        setIsEditing(false);
-    }, [isEditing, draft, name, nickname, email, setUser]);
+    setUser(nextDraft);
+    setDraftOverrides({});
+    setSaveMessage("개인정보가 저장되었습니다.");
+  }, [draft, isSaving, setUser]);
 
-    return {
-        draft,
-        errorMessage,
-        isEditing,
-        isLoading,
-        isSaving,
-        onFieldChange: handleFieldChange,
-        onToggleEdit: handleToggleEdit,
-    };
-    };
+  return {
+    draft,
+    errorMessage,
+    isLoading,
+    isSaving,
+    onFieldChange: handleFieldChange,
+    onSave: handleSave,
+    saveMessage,
+  };
+};
