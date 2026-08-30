@@ -43,7 +43,7 @@ export const MAIN_PAGE_INTERVIEW_MODE_CARDS = [
       },
     ],
     startButton: "면접 시작하기",
-    isComingSoon: true,
+    isComingSoon: false,
   },
 ] as const;
 
