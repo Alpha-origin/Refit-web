@@ -9,6 +9,7 @@ import { extractErrorMessage } from "@/shared/api/errorMessage";
 
 interface UsePortfolioFormOptions {
   initialGitUrls?: string[];
+  initialJobRole?: string;
   onUploadSuccess?: (metaData: MyPageMetaData) => void;
 }
 
@@ -26,6 +27,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const isGitListEditedRef = useRef(false);
+  const isJobRoleEditedRef = useRef(false);
 
   useEffect(() => {
     if (!options.initialGitUrls?.length || isGitListEditedRef.current) {
@@ -38,6 +40,14 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
 
     setGitUrls(nextGitUrls);
   }, [options.initialGitUrls]);
+
+  useEffect(() => {
+    if (!options.initialJobRole || isJobRoleEditedRef.current) {
+      return;
+    }
+
+    setJobRole(options.initialJobRole);
+  }, [options.initialJobRole]);
 
   const clearSaveStatus = () => {
     setSaveMessage("");
@@ -114,6 +124,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
   };
 
   const handleJobRoleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    isJobRoleEditedRef.current = true;
     setJobRole(event.target.value);
     setJobRoleError("");
     clearSaveStatus();
@@ -157,6 +168,7 @@ export const usePortfolioForm = (options: UsePortfolioFormOptions = {}) => {
       const nextMetaData = await uploadMyPageMetaData({
         file: portfolioFile,
         gitUrls,
+        jobRole,
       });
 
       options.onUploadSuccess?.(nextMetaData);
