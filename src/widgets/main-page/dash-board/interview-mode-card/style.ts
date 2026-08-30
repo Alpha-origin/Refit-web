@@ -10,10 +10,6 @@ interface ReversedProps {
   $isReversed: boolean;
 }
 
-interface ClickableProps {
-  $isClickable: boolean;
-}
-
 export const Card = styled.article`
   position: relative;
   width: 100%;
@@ -79,18 +75,24 @@ export const BannerCopy = styled.div`
   }
 `;
 
-export const BannerBadge = styled.span<VariantProps & ClickableProps>`
+export const BannerBadge = styled.button<VariantProps>`
   min-width: 6rem;
   height: 2.35rem;
   padding: 0 1.2rem;
   display: inline-flex;
   justify-content: center;
   align-items: center;
+  border: 0;
   border-radius: 0.5rem;
+  font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
   line-height: 1;
-  cursor: ${({ $isClickable }) => ($isClickable ? "pointer" : "default")};
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
 
   ${({ $variant }) =>
     $variant === "dark"

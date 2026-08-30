@@ -26,9 +26,11 @@ const InterviewModeCard = ({
 
           <S.BannerCopy>
             <S.BannerBadge
+              type="button"
               $variant={variant}
-              $isClickable={isStartEnabled}
-              onClick={isStartEnabled ? onStart : undefined}
+              disabled={!isStartEnabled}
+              title={isComingSoon ? MAIN_PAGE_COMING_SOON_LABEL : undefined}
+              onClick={onStart}
             >
               {badge}
             </S.BannerBadge>
