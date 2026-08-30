@@ -26,6 +26,11 @@ const InterviewPage = lazy(() => import("@/pages/interview-page/interview"));
 const SettingInterview = lazy(
   () => import("@/pages/interview-page/setting-interview")
 );
+// This lazy route is a module-level route definition, not a Fast Refresh component export.
+// eslint-disable-next-line react-refresh/only-export-components
+const SettingMultiInterview = lazy(
+  () => import("@/pages/interview-page/setting-multi-interview")
+);
 
 // Feedback
 const FeedbackListPage = lazy(
@@ -103,6 +108,10 @@ const router = createBrowserRouter([
       {
         path: "setting/interview",
         element: <SettingInterview />,
+      },
+      {
+        path: "setting/interview/multi",
+        element: <SettingMultiInterview />,
       },
     ],
   },

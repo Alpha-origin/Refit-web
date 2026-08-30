@@ -19,11 +19,14 @@ export { submitInterviewAnswer } from "./submit-answer";
 
 export type {
   CreateInterviewParams,
+  CreateMultiInterviewParams,
   CreateInterviewPersonaType,
+  CreateSoloInterviewParams,
   CreatedInterviewData,
   CreateAnswerRequest,
   CurrentInterviewQuestion,
   InterviewLifecycleStatus,
+  InterviewMode,
   InterviewLevel,
   InterviewPersonaGender,
   InterviewPersonaMajor,

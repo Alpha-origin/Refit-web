@@ -84,6 +84,7 @@ export const useInterviewSession = (
   const [isChatSessionReady, setIsChatSessionReady] = useState(
     () => !preparedInterview,
   );
+  const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
@@ -274,6 +275,7 @@ export const useInterviewSession = (
 
       if (errorMessage || !data) {
         preparedChatSessionIdRef.current = null;
+        setPreparationError(errorMessage ?? "면접 준비에 실패했습니다.");
         return;
       }
 
@@ -453,6 +455,7 @@ export const useInterviewSession = (
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
+    preparationError,
     questionAudioStatus: questionTts.status,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,
