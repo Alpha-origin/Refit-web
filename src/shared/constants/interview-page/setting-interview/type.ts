@@ -24,6 +24,7 @@ export interface InterviewSettingStyleMeta {
 }
 
 export interface InterviewSettingInterviewer {
+  career: number;
   description: string;
   id: InterviewerId;
   name: string;

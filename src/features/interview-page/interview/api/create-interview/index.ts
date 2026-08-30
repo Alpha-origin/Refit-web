@@ -8,6 +8,7 @@ import {
 } from "../shared";
 import type {
   CreateInterviewParams,
+  InterviewMode,
   CreatedInterviewData,
   InterviewLifecycleStatus,
   PrepareInterviewQuestion,
@@ -24,7 +25,31 @@ const isInterviewLifecycleStatus = (
   value: unknown,
 ): value is InterviewLifecycleStatus =>
   typeof value === "string" &&
-  INTERVIEW_LIFECYCLE_STATUSES.includes(value as InterviewLifecycleStatus);
+    INTERVIEW_LIFECYCLE_STATUSES.includes(value as InterviewLifecycleStatus);
+
+const isInterviewMode = (value: unknown): value is InterviewMode =>
+  value === "SOLO" || value === "MULTI";
+
+const getPersonaIds = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.reduce<number[]>((personaIds, item) => {
+    const personaId = getNumericValue(item);
+
+    if (personaId !== null && personaId > 0 && !personaIds.includes(personaId)) {
+      personaIds.push(personaId);
+    }
+
+    return personaIds;
+  }, []);
+};
+
+const isMultiInterviewParams = (
+  params: CreateInterviewParams,
+): params is Extract<CreateInterviewParams, { personaIds: number[] }> =>
+  "personaIds" in params;
 
 const normalizeQuestion = (
   value: unknown,
@@ -66,7 +91,10 @@ const normalizeQuestions = (value: unknown) => {
   }, []);
 };
 
-const normalizeCreatedInterview = (payload: unknown) => {
+const normalizeCreatedInterview = (
+  payload: unknown,
+  fallbackParams: CreateInterviewParams,
+) => {
   const responseRecord = getRecord(payload);
   const responseDataRecord = getRecord(responseRecord?.data);
   const sourceRecord = responseDataRecord ?? responseRecord;
@@ -74,6 +102,17 @@ const normalizeCreatedInterview = (payload: unknown) => {
   const interviewId = getNumericValue(sourceRecord?.interviewId);
   const userId = getNumericValue(sourceRecord?.userId);
   const personaId = getNumericValue(sourceRecord?.personaId);
+  const fallbackPersonaIds = isMultiInterviewParams(fallbackParams)
+    ? fallbackParams.personaIds
+    : [];
+  const responsePersonaIds = getPersonaIds(sourceRecord?.personaIds);
+  const personaIds =
+    responsePersonaIds.length > 0 ? responsePersonaIds : fallbackPersonaIds;
+  const mode = isInterviewMode(sourceRecord?.mode)
+    ? sourceRecord.mode
+    : personaIds.length > 1
+      ? "MULTI"
+      : "SOLO";
   const questions = normalizeQuestions(
     sourceRecord?.questions ?? sourceRecord?.interviewQuestions,
   );
@@ -82,15 +121,23 @@ const normalizeCreatedInterview = (payload: unknown) => {
     !sessionId ||
     interviewId === null ||
     userId === null ||
-    personaId === null
+    (mode === "SOLO" && personaId === null) ||
+    (mode === "MULTI" && personaIds.length === 0)
   ) {
     return null;
   }
+
+  const normalizedPersonaIds =
+    mode === "SOLO" && personaId !== null && personaIds.length === 0
+      ? [personaId]
+      : personaIds;
 
   return {
     interviewId,
     userId,
     personaId,
+    personaIds: normalizedPersonaIds,
+    mode,
     sessionId,
     status: isInterviewLifecycleStatus(sourceRecord?.status)
       ? sourceRecord.status
@@ -119,7 +166,7 @@ export const createInterview = async (params: CreateInterviewParams) => {
       };
     }
 
-    const createdInterview = normalizeCreatedInterview(response.data);
+    const createdInterview = normalizeCreatedInterview(response.data, params);
 
     if (!createdInterview) {
       return {

@@ -16,6 +16,7 @@ import {
   type InterviewPersonaMajor,
   type InterviewPersonaRole,
   type PersonaType,
+  type PrepareInterviewQuestion,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
@@ -43,15 +44,9 @@ const CREATE_PERSONA_TYPE_BY_STYLE: Record<
   압박: "STRESS",
 };
 
-const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
-  쉬움: 0,
-  보통: 3,
-  어려움: 5,
-};
-
 const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   쉬움: "EASY",
-  보통: "MEDIUM",
+  보통: "NORMAL",
   어려움: "HARD",
 };
 
@@ -114,7 +109,7 @@ export const useInterviewSetup = () => {
       level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       major: DEFAULT_INTERVIEW_MAJOR,
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
-      career: CAREER_BY_DIFFICULTY[selectedDifficulty],
+      career: selectedInterviewer.career,
       gender: DEFAULT_INTERVIEW_GENDER,
     };
 
@@ -171,8 +166,10 @@ export const useInterviewSetup = () => {
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
     const personaId =
-      data.personaId > 0 ? data.personaId : savedPersona.personaId;
-    let tailoredQuestions = preparedInterviewRecord.questions;
+      data.personaId !== null && data.personaId > 0
+        ? data.personaId
+        : savedPersona.personaId;
+    let tailoredQuestions: PrepareInterviewQuestion[] = [];
 
     try {
       const tailorResponse = await getTailoredQuestions(

@@ -1,8 +1,11 @@
 export type {
   CreateInterviewParams,
+  CreateMultiInterviewParams,
   CreateInterviewPersonaType,
+  CreateSoloInterviewParams,
   CreatedInterviewData,
   InterviewLifecycleStatus,
+  InterviewMode,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,

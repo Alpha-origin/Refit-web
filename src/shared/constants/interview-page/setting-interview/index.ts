@@ -38,6 +38,7 @@ export const INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE = '면접관';
 
 export const INTERVIEW_SETTING_INTERVIEWERS = [
   {
+    career: 5,
     id: 1,
     name: '면접관1',
     personaName: '면접관1',
@@ -45,6 +46,7 @@ export const INTERVIEW_SETTING_INTERVIEWERS = [
     description: '기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.',
   },
   {
+    career: 7,
     id: 2,
     name: '면접관2',
     personaName: '면접관2',
@@ -52,6 +54,7 @@ export const INTERVIEW_SETTING_INTERVIEWERS = [
     description: '문제 해결 프로세스와 데이터 기반의 의사결정 능력을 평가합니다.',
   },
   {
+    career: 4,
     id: 3,
     name: '면접관3',
     personaName: '면접관3',
@@ -59,6 +62,7 @@ export const INTERVIEW_SETTING_INTERVIEWERS = [
     description: '사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.',
   },
   {
+    career: 6,
     id: 4,
     name: '면접관4',
     personaName: '면접관4',
