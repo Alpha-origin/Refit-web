@@ -190,7 +190,8 @@ export const useMultiInterviewSetup = () => {
     setIsSubmitting(true);
 
     try {
-      const personaIds: number[] = [];
+      const savedPersonaIds: number[] = [];
+      const savedPersonaLabels: string[] = [];
 
       for (const template of selectedSlots) {
         const personaPayload: SavePersonaParams = {
@@ -206,17 +207,30 @@ export const useMultiInterviewSetup = () => {
           await savePersona(personaPayload);
 
         if (savePersonaError || !savedPersona) {
-          throw new Error(savePersonaError ?? "페르소나 저장에 실패했습니다.");
+          const failureMessage = `${template.roleLabel} 면접관 저장에 실패했습니다.`;
+          const savedPersonaMessage =
+            savedPersonaIds.length > 0
+              ? ` 이미 저장된 ${savedPersonaIds.length}명은 서버에 남아있을 수 있습니다.`
+              : "";
+
+          throw new Error(
+            `${failureMessage}${savedPersonaMessage}${
+              savePersonaError ? ` (${savePersonaError})` : ""
+            }`,
+          );
         }
 
-        personaIds.push(savedPersona.personaId);
+        savedPersonaIds.push(savedPersona.personaId);
+        savedPersonaLabels.push(template.roleLabel);
       }
 
       const { data: createdInterview, errorMessage: createError } =
-        await createInterview({ personaIds });
+        await createInterview({ personaIds: savedPersonaIds });
 
       if (createError || !createdInterview) {
-        throw new Error(createError ?? "MULTI 면접 생성에 실패했습니다.");
+        throw new Error(
+          `${createError ?? "MULTI 면접 생성에 실패했습니다."} (저장된 페르소나 ${savedPersonaIds.length}명: ${savedPersonaLabels.join(", ")})`,
+        );
       }
 
       const { data: preparedInterviewRecord, errorMessage: prepareError } =
@@ -231,13 +245,16 @@ export const useMultiInterviewSetup = () => {
       );
       const tailoredQuestions: PrepareInterviewQuestion[] = normalizeTailoredQuestions(
         tailorResponse,
-        personaIds[0],
+        savedPersonaIds[0],
       );
 
       if (tailoredQuestions.length === 0) {
         throw new Error("질문 준비에 실패했습니다.");
       }
 
+      // 채팅 준비 API는 personaId 하나만 받으므로 MVP에서는 slot 1의 TECH
+      // 면접관을 대표 페르소나로 사용한다. 다중 personaId 질문 합성 API가
+      // 제공되면 이 대표값 의존성을 제거한다.
       const representative = selectedSlots[0];
       setActiveInterviewSessionId(createdInterview.sessionId);
 
@@ -247,7 +264,7 @@ export const useMultiInterviewSetup = () => {
             sessionId: createdInterview.sessionId,
             interviewId: preparedInterviewRecord.interviewId,
             userId: createdInterview.userId,
-            personaId: personaIds[0],
+            personaId: savedPersonaIds[0],
             personaName: representative.name,
             role: representative.role,
             major: representative.major ?? null,
