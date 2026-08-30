@@ -305,6 +305,13 @@ export const QuestionLabel = styled.span`
   }
 `;
 
+export const QuestionSpeaker = styled.span`
+  color: #5d6b86;
+  font-size: clamp(0.75rem, 0.88vw, 0.86rem);
+  font-weight: 700;
+  line-height: 1.25;
+`;
+
 export const QuestionBody = styled.div`
   flex: 1;
   min-height: 0;
