@@ -15,10 +15,10 @@ import {
   sortInterviewsByCreatedAt,
 } from "@/features/feedback-page/model/interviewDisplay";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
-import InterviewerImage1 from "@/shared/img/interview-page/ interviewer1.svg?url";
-import InterviewerImage2 from "@/shared/img/interview-page/ interviewer2.svg?url";
-import InterviewerImage3 from "@/shared/img/interview-page/ interviewer3.svg?url";
-import InterviewerImage4 from "@/shared/img/interview-page/ interviewer4.svg?url";
+import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
+import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
+import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
 import type { FeedbackListItem } from "@/widgets/feedback-page/feedback-list/type";
 
 const INTERVIEWER_IMAGES = [

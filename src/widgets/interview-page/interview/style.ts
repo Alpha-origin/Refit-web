@@ -667,3 +667,38 @@ export const TextAnswerCount = styled.p`
     font-size: 0.9rem;
   }
 `;
+
+export const PreparationErrorScreen = styled.div`
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  box-sizing: border-box;
+  text-align: center;
+`;
+
+export const PreparationErrorMessage = styled.p`
+  margin: 0;
+  color: #c93d3d;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+`;
+
+export const PreparationErrorAction = styled.button`
+  min-width: 10rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #257ee8;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+`;
