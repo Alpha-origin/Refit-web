@@ -71,6 +71,22 @@ const InterviewPageContent = () => {
     };
   }, [isTimerRunning]);
 
+  if (interviewSession.preparationError) {
+    return (
+      <S.PreparationErrorScreen role="alert">
+        <S.PreparationErrorMessage>
+          {interviewSession.preparationError}
+        </S.PreparationErrorMessage>
+        <S.PreparationErrorAction
+          type="button"
+          onClick={() => void interviewSession.onQuitInterview()}
+        >
+          메인으로 돌아가기
+        </S.PreparationErrorAction>
+      </S.PreparationErrorScreen>
+    );
+  }
+
   if (interviewSession.isPreparingInterview) {
     return <Loading message="포트폴리오 분석 및 면접 준비 중입니다..." />;
   }
