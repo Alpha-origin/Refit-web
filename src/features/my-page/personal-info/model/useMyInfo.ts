@@ -23,33 +23,38 @@
     const [errorMessage, setErrorMessage] = useState("");
     const [draft, setDraft] = useState<PersonalInfoDraft>({ name, nickname, email });
 
-    const loadMyInfo = useCallback(async () => {
-        setIsLoading(true);
-        setErrorMessage("");
+    useEffect(() => {
+        if (isLoaded) {
+        return;
+        }
 
+        let isCancelled = false;
+
+        const loadMyInfo = async () => {
         const { data, errorMessage: loadErrorMessage } = await getMyInfo();
 
+        if (isCancelled) {
+            return;
+        }
+
         if (loadErrorMessage || !data) {
-        setErrorMessage(loadErrorMessage || "회원 정보를 불러오지 못했습니다.");
-        setIsLoading(false);
-        return;
+            setErrorMessage(loadErrorMessage || "회원 정보를 불러오지 못했습니다.");
+            setIsLoading(false);
+            return;
         }
 
         setUser(data);
         setIsLoading(false);
-    }, [setUser]);
+        };
 
-    useEffect(() => {
-        if (!isLoaded) {
         void loadMyInfo();
-        }
-    }, [isLoaded, loadMyInfo]);
 
-    useEffect(() => {
-        if (!isEditing) {
-        setDraft({ name, nickname, email });
-        }
-    }, [name, nickname, email, isEditing]);
+        return () => {
+        isCancelled = true;
+        };
+    }, [isLoaded, setUser]);
+
+    const currentDraft: PersonalInfoDraft = isEditing ? draft : { name, nickname, email };
 
     const handleFieldChange = (field: keyof PersonalInfoDraft, value: string) => {
         setDraft((previousDraft) => ({ ...previousDraft, [field]: value }));
@@ -80,7 +85,7 @@
     }, [isEditing, draft, name, nickname, email, setUser]);
 
     return {
-        draft,
+        draft: currentDraft,
         errorMessage,
         isEditing,
         isLoading,
