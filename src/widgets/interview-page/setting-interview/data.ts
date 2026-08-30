@@ -4,10 +4,10 @@ import {
   INTERVIEW_SETTING_STYLE_META,
   type InterviewerId,
 } from '@/shared/constants/interview-page/setting-interview';
-import InterviewerImage1 from '@/shared/img/interview-page/ interviewer1.svg?url';
-import InterviewerImage2 from '@/shared/img/interview-page/ interviewer2.svg?url';
-import InterviewerImage3 from '@/shared/img/interview-page/ interviewer3.svg?url';
-import InterviewerImage4 from '@/shared/img/interview-page/ interviewer4.svg?url';
+import InterviewerImage1 from '@/shared/img/interview-page/interviewer1.svg?url';
+import InterviewerImage2 from '@/shared/img/interview-page/interviewer2.svg?url';
+import InterviewerImage3 from '@/shared/img/interview-page/interviewer3.svg?url';
+import InterviewerImage4 from '@/shared/img/interview-page/interviewer4.svg?url';
 import DifficultyEasyImage from '@/shared/img/interview-page/easy.svg?url';
 import DifficultyNormalImage from '@/shared/img/interview-page/normal.svg?url';
 import DifficultyHardImage from '@/shared/img/interview-page/hard.svg?url';

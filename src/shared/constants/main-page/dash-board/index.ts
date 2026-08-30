@@ -19,7 +19,6 @@ export const MAIN_PAGE_DASHBOARD_CONTENT = {
   description: "돌발 상황에도 유연하게 대응하고 싶은 취업 준비생",
   aiBadge: "Ai",
   startButton: "면접 시작하기",
-  multiBadge: "실전체험",
-  multiTitle: "N:1 면접하기",
-  multiStartButton: "N:1 면접 시작하기",
+  readyBadge: "준비중...",
+  bottomTitle: "아직 공개되지 않은 서비스입니다.",
 } as const;

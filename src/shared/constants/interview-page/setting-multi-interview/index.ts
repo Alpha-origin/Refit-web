@@ -1,7 +1,7 @@
-import InterviewerImage1 from "@/shared/img/interview-page/ interviewer1.svg?url";
-import InterviewerImage2 from "@/shared/img/interview-page/ interviewer2.svg?url";
-import InterviewerImage3 from "@/shared/img/interview-page/ interviewer3.svg?url";
-import InterviewerImage4 from "@/shared/img/interview-page/ interviewer4.svg?url";
+import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
+import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
+import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
 
 import type {
   InterviewerTemplate,
@@ -159,7 +159,11 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
   },
 ] as const satisfies readonly InterviewerTemplate[];
 
-export const MULTI_INTERVIEW_SLOT_LABELS = ["기술", "인사·리더십", "인사·리더십"] as const;
+export const MULTI_INTERVIEW_SLOT_LABELS = [
+  "기술",
+  "직무·조직 적합성",
+  "리더십·비즈니스",
+] as const;
 
 export const getInterviewerCandidatesForSlot = (slot: SlotIndex) =>
   MULTI_INTERVIEWER_TEMPLATES.filter((interviewer) =>

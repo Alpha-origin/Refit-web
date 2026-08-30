@@ -328,19 +328,3 @@ export const BottomTitle = styled.h2`
   line-height: 1.18;
   letter-spacing: -0.06rem;
 `;
-
-export const MultiStartButton = styled(StartButton)`
-  width: min(100%, 15rem);
-  margin-top: 1.15rem;
-  background-color: #ffffff;
-  color: #1d68cf;
-
-  &:hover {
-    background-color: #eef5ff;
-  }
-
-  @media (max-width: 72rem) {
-    width: min(100%, 12.5rem);
-    margin-top: 0.85rem;
-  }
-`;

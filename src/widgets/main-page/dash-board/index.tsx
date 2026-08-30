@@ -70,17 +70,11 @@ const DashboardMain = () => {
 
           <S.BottomOverlay>
             <S.ReadyBadge>
-              {MAIN_PAGE_DASHBOARD_CONTENT.multiBadge}
+              {MAIN_PAGE_DASHBOARD_CONTENT.readyBadge}
             </S.ReadyBadge>
             <S.BottomTitle>
-              {MAIN_PAGE_DASHBOARD_CONTENT.multiTitle}
+              {MAIN_PAGE_DASHBOARD_CONTENT.bottomTitle}
             </S.BottomTitle>
-            <S.MultiStartButton
-              type="button"
-              onClick={() => navigate("/main/setting/interview/multi")}
-            >
-              {MAIN_PAGE_DASHBOARD_CONTENT.multiStartButton}
-            </S.MultiStartButton>
           </S.BottomOverlay>
         </S.BottomCardInner>
       </S.BottomCard>

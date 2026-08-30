@@ -44,9 +44,15 @@ const CREATE_PERSONA_TYPE_BY_STYLE: Record<
   압박: "STRESS",
 };
 
+const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
+  쉬움: 0,
+  보통: 3,
+  어려움: 5,
+};
+
 const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   쉬움: "EASY",
-  보통: "NORMAL",
+  보통: "MEDIUM",
   어려움: "HARD",
 };
 
@@ -109,7 +115,7 @@ export const useInterviewSetup = () => {
       level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       major: DEFAULT_INTERVIEW_MAJOR,
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
-      career: selectedInterviewer.career,
+      career: CAREER_BY_DIFFICULTY[selectedDifficulty],
       gender: DEFAULT_INTERVIEW_GENDER,
     };
 
