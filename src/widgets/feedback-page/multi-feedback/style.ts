@@ -1,0 +1,47 @@
+import styled from "styled-components";
+
+const surface = `background: rgba(255,255,255,.94); border: 1px solid #dce3ee; border-radius: 12px; box-shadow: 0 8px 20px rgba(46, 78, 124, .06);`;
+
+export const Page = styled.section`
+  min-height: 100%; padding: 1.5rem clamp(1rem, 3vw, 3rem) 2.5rem; box-sizing: border-box;
+  background: linear-gradient(135deg, #f8faff, #eef4ff);
+`;
+export const Shell = styled.div`width:min(100%, 106rem); margin:0 auto;`;
+export const Header = styled.div`display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem;`;
+export const Title = styled.h1`margin:0; color:#202938; font-size:1.35rem;`;
+export const Tabs = styled.div`${surface} display:flex; overflow:hidden;`;
+export const Tab = styled.button<{ $active: boolean }>`border:0; padding:.65rem 1rem; background:${p=>p.$active ? "#fff" : "#f2f4f7"}; color:${p=>p.$active ? "#2377ea" : "#555"}; font-weight:800; cursor:pointer;`;
+export const OverallGrid = styled.div`display:grid; grid-template-columns:minmax(15rem,.78fr) minmax(0,1.75fr); gap:1rem; @media(max-width:58rem){grid-template-columns:1fr;}`;
+export const Card = styled.section`${surface} padding:1.35rem; box-sizing:border-box;`;
+export const ScoreCard = styled(Card)`min-height:21rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;`;
+export const Donut = styled.div<{ $score: number }>`width:10.5rem; aspect-ratio:1; border-radius:50%; display:grid; place-items:center; background:conic-gradient(#2578e8 ${p=>p.$score}%, #e5e7eb 0); &::before{content:""; position:absolute; width:8.4rem; aspect-ratio:1; border-radius:50%; background:white;} position:relative;`;
+export const DonutText = styled.div`position:relative; z-index:1; display:grid; gap:.2rem; font-weight:800; color:#222; span{color:#2478e9; font-size:2.4rem;}`;
+export const Summary = styled.p`margin:1.3rem 0 0; line-height:1.5; color:#374151;`;
+export const Stack = styled.div`display:grid; gap:1rem;`;
+export const BarCard = styled(Card)`padding:1.25rem 1.5rem;`;
+export const BarRow = styled.div`display:grid; gap:.45rem; &:not(:last-child){margin-bottom:1rem;}`;
+export const BarTitle = styled.div`display:flex; justify-content:space-between; color:#394150; font-size:.92rem; font-weight:700; strong{color:#2277e8;}`;
+export const Track = styled.div`height:.75rem; border-radius:99px; background:#e4e6e9; overflow:hidden;`;
+export const Fill = styled.div<{ $score:number; $muted?:boolean }>`height:100%; width:${p=>p.$score}%; border-radius:inherit; background:${p=>p.$muted ? "#a8abb0" : "#2879e8"};`;
+export const IntentCard = styled(Card)`min-height:11.7rem; h2{margin:0 0 .9rem; color:#2478e9; font-size:1.2rem;} p{margin:0; line-height:1.55; color:#303846;}`;
+export const InsightGrid = styled.div`display:grid; grid-template-columns:1fr 1fr .8fr; gap:1rem; margin-top:1rem; @media(max-width:62rem){grid-template-columns:1fr;}`;
+export const Insight = styled(Card)<{ $tone:"positive"|"negative"|"neutral" }>`background:${p=>p.$tone==="positive"?"#edf6ff":p.$tone==="negative"?"#fff3f2":"#fff"}; h2{margin:0 0 1rem; color:${p=>p.$tone==="negative"?"#ef5335":"#2478e9"}; font-size:1.15rem;} ol{margin:0;padding-left:1.3rem;display:grid;gap:.75rem;color:#344052;line-height:1.4;}`;
+export const PersonaList = styled.div`display:grid; gap:.8rem; margin-top:1rem;`;
+export const PersonaCard = styled.article`${surface} padding: .8rem; display:grid; grid-template-columns:4.5rem 1fr auto; gap:1rem; align-items:center; @media(max-width:38rem){grid-template-columns:3.5rem 1fr;}`;
+export const PersonaImage = styled.img`width:4.5rem; aspect-ratio:1; object-fit:cover; border-radius:.45rem; @media(max-width:38rem){width:3.5rem;}`;
+export const PersonaName = styled.strong`display:block; color:#2578e8;`; export const PersonaComment = styled.p`margin:.35rem 0 0; line-height:1.45; color:#303846;`;
+export const ScoreBadge = styled.span`padding:.5rem .7rem; color:#fff; background:#2478e9; border-radius:.5rem; font-weight:800; @media(max-width:38rem){display:none;}`;
+export const KeywordWrap = styled.div`display:flex; min-height:10rem; flex-wrap:wrap; gap:.65rem; align-content:center; justify-content:center;`;
+export const Keyword = styled.span<{ $index:number }>`color:#2879e8; font-size:${p=>1 + (p.$index%4)*.45}rem; font-weight:${p=>p.$index%3===0?800:600};`;
+export const DetailGrid = styled.div`display:grid; grid-template-columns:17rem minmax(0,1fr); gap:1rem; @media(max-width:58rem){grid-template-columns:1fr;}`;
+export const Sidebar = styled.aside`${surface} padding:.8rem; display:flex; flex-direction:column; gap:.75rem;`;
+export const SideTitle = styled.h2`margin:.35rem .4rem; color:#2478e9; font-size:1.12rem;`;
+export const QuestionButton = styled.button<{ $active:boolean }>`text-align:left; border:1px solid ${p=>p.$active?"#71aeff":"#d7e2f3"}; border-radius:.65rem; padding:.85rem; background:${p=>p.$active?"#f2f7ff":"#fbfcff"}; color:${p=>p.$active?"#2478e9":"#333"}; cursor:pointer; display:grid; gap:.38rem; strong{font-size:.9rem;} span{font-size:.82rem; line-height:1.32;}`;
+export const DetailContent = styled.div`display:grid; gap:.8rem;`;
+export const QuestionCard = styled(Card)`h2{margin:.25rem 0 1.35rem; font-size:1.32rem; line-height:1.45;} h3{display:inline-block; margin:0 0 .7rem; padding:.42rem .8rem; border-radius:.45rem; color:white; background:#2478e9;} p{margin:0;line-height:1.55;color:#303846;}`;
+export const Answers = styled.div`display:grid; grid-template-columns:1fr 1fr; gap:.8rem; @media(max-width:48rem){grid-template-columns:1fr;}`;
+export const AnswerCard = styled(Card)`min-height:10rem; h2{margin:0 0 .75rem;color:#2478e9;font-size:1.2rem;} p{margin:0;line-height:1.52;color:#2f3743;}`;
+export const FeedbackRow = styled.div`display:grid;grid-template-columns:1fr 1fr;gap:.8rem;@media(max-width:48rem){grid-template-columns:1fr;}`;
+export const Coach = styled(Card)`color:#2478e9; font-size:1.15rem; font-weight:700; line-height:1.55;`;
+export const Actions = styled.div`display:flex; gap:.7rem; margin-top:auto;`;
+export const Action = styled.button<{ $primary?:boolean }>`border:1px solid #2478e9; border-radius:.45rem; padding:.7rem 1rem; background:${p=>p.$primary?"#2478e9":"#fff"}; color:${p=>p.$primary?"#fff":"#2478e9"}; font-weight:800; cursor:pointer;`;
