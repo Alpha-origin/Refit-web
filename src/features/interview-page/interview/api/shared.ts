@@ -86,10 +86,11 @@ export const getInterviewQuestion = (
     questionId,
     parentId: getNumericValue(questionRecord?.parentId) ?? 0,
     type: getTrimmedString(questionRecord?.type) ?? "ORIGINAL",
-    intention:
-      getTrimmedString(questionRecord?.intention ?? questionRecord?.purpose) ??
-      "",
+    intention: getTrimmedString(
+      questionRecord?.intention ?? questionRecord?.purpose ?? questionRecord?.category,
+    ) ?? "",
     content,
+    personaId: getNumericValue(questionRecord?.personaId) ?? undefined,
   };
 };
 

@@ -2,15 +2,10 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  getTailoredQuestions,
-  normalizeTailoredQuestions,
-} from "@/features/feedback-page/api/tailorQuestions";
-import {
   createInterview,
   prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
-  type PrepareInterviewQuestion,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
@@ -240,21 +235,6 @@ export const useMultiInterviewSetup = () => {
         throw new Error(prepareError ?? "질문 준비에 실패했습니다.");
       }
 
-      const tailorResponse = await getTailoredQuestions(
-        preparedInterviewRecord.interviewId,
-      );
-      const tailoredQuestions: PrepareInterviewQuestion[] = normalizeTailoredQuestions(
-        tailorResponse,
-        savedPersonaIds[0],
-      );
-
-      if (tailoredQuestions.length === 0) {
-        throw new Error("질문 준비에 실패했습니다.");
-      }
-
-      // 채팅 준비 API는 personaId 하나만 받으므로 MVP에서는 slot 1의 TECH
-      // 면접관을 대표 페르소나로 사용한다. 다중 personaId 질문 합성 API가
-      // 제공되면 이 대표값 의존성을 제거한다.
       const representative = selectedSlots[0];
       setActiveInterviewSessionId(createdInterview.sessionId);
 
@@ -277,7 +257,14 @@ export const useMultiInterviewSetup = () => {
             status:
               createdInterview.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
             currentQuestionIndex: createdInterview.currentQuestionIndex,
-            questions: tailoredQuestions,
+            questions: [],
+            mode: "MULTI",
+            interviewers: selectedSlots.map((interviewer, index) => ({
+              personaId: savedPersonaIds[index],
+              name: interviewer.name,
+              roleLabel: interviewer.roleLabel,
+              image: interviewer.image,
+            })),
           },
           multiInterview: {
             interviewId: createdInterview.interviewId,

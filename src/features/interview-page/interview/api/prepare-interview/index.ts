@@ -220,6 +220,7 @@ const buildPrepareInterviewRequest = (
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
+    mode: "SOLO",
   };
 };
 
@@ -286,6 +287,14 @@ const normalizePreparedInterview = (
       : fallbackData.status,
     currentQuestionIndex,
     questions: normalizedQuestions,
+    mode: "SOLO",
+    interviewers: [
+      {
+        personaId: getNumericValue(sourceRecord?.personaId) ?? fallbackData.personaId,
+        name: getTrimmedString(sourceRecord?.personaName) ?? fallbackData.personaName,
+        roleLabel: "기술 면접관",
+      },
+    ],
   };
 };
 

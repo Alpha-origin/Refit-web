@@ -2,10 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  getTailoredQuestions,
-  normalizeTailoredQuestions,
-} from "@/features/feedback-page/api/tailorQuestions";
-import {
   createInterview,
   prepareInterviewRecord,
   savePersona,
@@ -16,10 +12,8 @@ import {
   type InterviewPersonaMajor,
   type InterviewPersonaRole,
   type PersonaType,
-  type PrepareInterviewQuestion,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
-import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
@@ -175,43 +169,11 @@ export const useInterviewSetup = () => {
       data.personaId !== null && data.personaId > 0
         ? data.personaId
         : savedPersona.personaId;
-    let tailoredQuestions: PrepareInterviewQuestion[] = [];
-
-    try {
-      const tailorResponse = await getTailoredQuestions(
-        preparedInterviewRecord.interviewId,
-      );
-      const normalizedTailoredQuestions = normalizeTailoredQuestions(
-        tailorResponse,
-        personaId,
-      );
-
-      if (normalizedTailoredQuestions.length > 0) {
-        tailoredQuestions = normalizedTailoredQuestions;
-      }
-
-      console.log("[questions/tailor] questions saved", {
-        interviewId: preparedInterviewRecord.interviewId,
-        questionCount: tailoredQuestions.length,
-        questions: tailoredQuestions,
-      });
-    } catch (error) {
-      setIsSubmitting(false);
-      setErrorMessage(
-        extractErrorMessage(error, "맞춤 질문을 불러오지 못했습니다."),
-      );
-      return;
-    }
-
-    console.log("[questions/tailor] completed before SSE", {
-      interviewId: preparedInterviewRecord.interviewId,
-    });
-
     setActiveInterviewSessionId(data.sessionId);
 
     setIsSubmitting(false);
 
-    navigate("/main/interview/1", {
+    navigate(`/main/interview/${data.interviewId}`, {
       state: {
         preparedInterview: {
           sessionId: data.sessionId,
@@ -229,7 +191,15 @@ export const useInterviewSetup = () => {
           jobId,
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: tailoredQuestions,
+          questions: [],
+          mode: "SOLO",
+          interviewers: [
+            {
+              personaId,
+              name: selectedInterviewer.personaName,
+              roleLabel: "기술 면접관",
+            },
+          ],
         },
         interviewSetting: {
           style: selectedStyle,
