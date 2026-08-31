@@ -84,22 +84,26 @@ export const useFeedbackList = () => {
 
     try {
       const interviews = await getAllInterviews();
-      const latestInterview = sortInterviewsByCreatedAt(interviews).find(
+      const validInterviews = interviews.filter(
         (interview) => getInterviewId(interview) > 0,
       );
 
-      if (!latestInterview) {
+      if (validInterviews.length === 0) {
         setItems([]);
         return;
       }
 
-      const latestInterviewId = getInterviewId(latestInterview);
-      const feedback = await getFeedback(latestInterviewId).catch(() => null);
-      const feedbackByInterviewId = new Map([
-        [latestInterviewId, feedback],
-      ]);
+      const feedbackEntries = await Promise.all(
+        validInterviews.map(async (interview) => {
+          const interviewId = getInterviewId(interview);
+          const feedback = await getFeedback(interviewId).catch(() => null);
 
-      setItems(getListItems([latestInterview], feedbackByInterviewId));
+          return [interviewId, feedback] as const;
+        }),
+      );
+      const feedbackByInterviewId = new Map(feedbackEntries);
+
+      setItems(getListItems(validInterviews, feedbackByInterviewId));
     } catch (error) {
       setItems([]);
       setErrorMessage(
