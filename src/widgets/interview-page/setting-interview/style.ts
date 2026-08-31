@@ -166,7 +166,8 @@ export const StyleOptionButton = styled.button<SelectedProps>`
   grid-template-columns: 2.2rem minmax(0, 1fr) 1.5rem;
   align-items: center;
   gap: 0.95rem;
-  padding: 0.6rem 1.65rem 0.6rem 1.2rem;
+  padding: var(--setting-option-padding-y, 0.6rem) 1.65rem
+    var(--setting-option-padding-y, 0.6rem) 1.2rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;
@@ -252,7 +253,7 @@ export const StyleTextGroup = styled.span`
 
 export const OptionLabel = styled.span`
   color: #171717;
-  font-size: 1.14rem;
+  font-size: var(--setting-option-label-size, 1.14rem);
   font-weight: 800;
   line-height: 1.2;
 
@@ -263,7 +264,7 @@ export const OptionLabel = styled.span`
 
 export const OptionDescription = styled.span`
   color: #262626;
-  font-size: 1rem;
+  font-size: var(--setting-option-description-size, 1rem);
   font-weight: 500;
   line-height: 1.35;
 
@@ -310,7 +311,8 @@ export const DifficultyButton = styled.button<SelectedProps>`
   grid-template-columns: 2.2rem minmax(0, 1fr) 1.5rem;
   align-items: center;
   gap: 0.95rem;
-  padding: 0.6rem 1.65rem 0.6rem 1.2rem;
+  padding: var(--setting-option-padding-y, 0.6rem) 1.65rem
+    var(--setting-option-padding-y, 0.6rem) 1.2rem;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
   border-radius: 0.5rem;

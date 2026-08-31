@@ -40,8 +40,15 @@ export const Content = styled.div`
 `;
 
 export const MainGrid = styled.div`
+  --setting-column-gap: clamp(1rem, 2vh, 1.5rem);
+  --setting-group-height: clamp(14rem, 24vh, 16rem);
+  --style-option-gap: clamp(0.45rem, 1vh, 0.7rem);
+  --setting-option-label-size: 1rem;
+  --setting-option-description-size: 0.84rem;
+  --setting-option-padding-y: 0.35rem;
+
   display: grid;
-  grid-template-columns: minmax(14.5rem, 18rem) minmax(0, 1fr);
+  grid-template-columns: minmax(15.5rem, 18rem) minmax(0, 1fr);
   gap: clamp(1.25rem, 3vw, 2.5rem);
   align-items: start;
 
@@ -161,18 +168,18 @@ export const SlotPrompt = styled.span`
 
 export const CandidateScroller = styled.div`
   display: grid;
-  grid-auto-columns: minmax(10.75rem, 12.5rem);
+  grid-auto-columns: minmax(10.5rem, 1fr);
   grid-auto-flow: column;
   gap: 0.7rem;
   overflow-x: auto;
-  padding: 0.1rem 0.1rem 0.8rem;
+  padding: 0;
   scroll-snap-type: x proximity;
   scrollbar-color: #abb4c2 transparent;
   scrollbar-width: thin;
 `;
 
 export const CandidateCard = styled.button<CandidateCardProps>`
-  min-height: 15.25rem;
+  min-height: clamp(15.5rem, 25vh, 17.5rem);
   overflow: hidden;
   padding: 0;
   border: 0.1rem solid
@@ -196,11 +203,20 @@ export const CandidateCard = styled.button<CandidateCardProps>`
   ${focusRing}
 `;
 
+export const CandidateImageFrame = styled.div`
+  width: 100%;
+  height: clamp(6.25rem, 11vh, 7rem);
+  overflow: hidden;
+  flex: 0 0 auto;
+`;
+
 export const CandidateImage = styled.img`
   width: 100%;
-  height: 6.3rem;
+  height: 100%;
   display: block;
   object-fit: cover;
+  transform: scale(1.25);
+  transform-origin: center;
 `;
 
 export const CandidateBody = styled.div`

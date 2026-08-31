@@ -165,9 +165,31 @@ export const MULTI_INTERVIEW_SLOT_LABELS = [
   "리더십·비즈니스",
 ] as const;
 
+const MULTI_INTERVIEW_CANDIDATE_KEYS_BY_SLOT: readonly (readonly string[])[] = [
+  [
+    "tech-backend-architect",
+    "tech-frontend-lead",
+    "tech-platform-engineer",
+  ],
+  [
+    "hr-people-partner",
+    "hr-talent-manager",
+    "pm-product-strategist",
+    "pm-growth-lead",
+    "design-product-designer",
+  ],
+  [
+    "hr-talent-manager",
+    "ceo-founder",
+    "ceo-business-leader",
+    "pm-product-strategist",
+    "design-product-designer",
+  ],
+];
+
 export const getInterviewerCandidatesForSlot = (slot: SlotIndex) =>
   MULTI_INTERVIEWER_TEMPLATES.filter((interviewer) =>
-    slot === 0 ? interviewer.role === "TECH" : interviewer.role !== "TECH",
+    MULTI_INTERVIEW_CANDIDATE_KEYS_BY_SLOT[slot].includes(interviewer.key),
   );
 
 export const getRoleLabel = (role: InterviewerTemplateRole) =>
