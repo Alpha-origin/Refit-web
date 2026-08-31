@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 5173,
-      strictPort: true,
+      strictPort: false,
       proxy: {
         "/api/supertone/tts": {
           target: "https://supertoneapi.com",

@@ -25,35 +25,82 @@ const spin = keyframes`
 
 export const Container = styled.div`
   width: 100%;
+  height: auto;
   min-height: 100%;
-  padding: clamp(1rem, 3.2vh, 2rem) clamp(1rem, 5vw, 5rem) 1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: clamp(1.65rem, 4.2vh, 2.15rem) clamp(1.25rem, 6.8vw, 6.5rem)
+    clamp(1.25rem, 3vh, 1.55rem);
   box-sizing: border-box;
+
+  @media (max-width: 52rem) {
+    align-items: flex-start;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  @media (max-height: 44rem) {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
 `;
 
 export const Content = styled.div`
-  width: min(100%, 76rem);
+  width: min(100%, 82rem);
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.8rem, 1.8vh, 1.25rem);
+  gap: clamp(0.7rem, 1.8vh, 1.35rem);
   margin: 0 auto;
 `;
 
 export const MainGrid = styled.div`
-  --setting-column-gap: clamp(1rem, 2vh, 1.5rem);
-  --setting-group-height: clamp(14rem, 24vh, 16rem);
-  --style-option-gap: clamp(0.45rem, 1vh, 0.7rem);
-  --setting-option-label-size: 1rem;
-  --setting-option-description-size: 0.84rem;
-  --setting-option-padding-y: 0.35rem;
+  --interviewer-card-height: clamp(16rem, 30vh, 18rem);
+  --setting-group-height: clamp(14rem, 30vh, 16rem);
+  --interviewer-image-height: clamp(7.5rem, 18vh, 10rem);
+  --setting-column-gap: clamp(1.5rem, 4vh, 2.75rem);
+  --style-option-gap: clamp(0.65rem, 1.3vh, 0.85rem);
 
   display: grid;
-  grid-template-columns: minmax(15.5rem, 18rem) minmax(0, 1fr);
-  gap: clamp(1.25rem, 3vw, 2.5rem);
-  align-items: start;
+  grid-template-columns: minmax(21rem, 28rem) minmax(0, 1fr);
+  gap: clamp(1.7rem, 2.8vw, 2.75rem);
+  align-items: stretch;
+
+  @media (max-width: 64rem) {
+    --interviewer-card-height: clamp(13.5rem, 28vh, 16rem);
+    --setting-group-height: clamp(12.25rem, 27vh, 14rem);
+    --interviewer-image-height: clamp(6.5rem, 16vh, 8.5rem);
+
+    grid-template-columns: minmax(18.5rem, 23rem) minmax(0, 1fr);
+    gap: 1.35rem;
+  }
+
+  @media (max-height: 52rem) {
+    --interviewer-card-height: clamp(12rem, 26vh, 13.5rem);
+    --setting-group-height: clamp(11.25rem, 25vh, 13rem);
+    --interviewer-image-height: clamp(5.75rem, 14vh, 7rem);
+    --setting-column-gap: clamp(1.25rem, 3.4vh, 2rem);
+    --style-option-gap: 0.45rem;
+  }
+
+  @media (max-height: 44rem) {
+    --interviewer-card-height: clamp(10.25rem, 25vh, 11.5rem);
+    --setting-group-height: clamp(10.25rem, 24vh, 11.5rem);
+    --interviewer-image-height: clamp(5rem, 12vh, 5.5rem);
+    --setting-column-gap: 0.75rem;
+    --style-option-gap: 0.4rem;
+  }
 
   @media (max-width: 52rem) {
+    --interviewer-card-height: 14.5rem;
+    --setting-group-height: 13rem;
+    --interviewer-image-height: 7.5rem;
+    --setting-column-gap: 1.5rem;
+
     grid-template-columns: 1fr;
+    align-items: start;
   }
 `;
 
@@ -183,7 +230,7 @@ export const CandidateCard = styled.button<CandidateCardProps>`
   display: flex;
   min-width: 0;
   flex-direction: column;
-  min-height: clamp(15.5rem, 25vh, 17.5rem);
+  min-height: var(--interviewer-card-height);
   overflow: hidden;
   padding: 0;
   border: 0.1rem solid
@@ -210,7 +257,7 @@ export const CandidateCard = styled.button<CandidateCardProps>`
 export const CandidateImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: clamp(6.25rem, 11vh, 7rem);
+  height: var(--interviewer-image-height);
   overflow: hidden;
   margin: 0;
   flex: 0 0 auto;
