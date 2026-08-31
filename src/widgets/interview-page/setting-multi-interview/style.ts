@@ -168,10 +168,15 @@ export const SlotPrompt = styled.span`
 
 export const CandidateScroller = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.75rem;
   overflow: hidden;
   padding: 0;
+
+  @media (max-width: 52rem) {
+    grid-template-columns: repeat(5, minmax(10rem, 1fr));
+    overflow-x: auto;
+  }
 `;
 
 export const CandidateCard = styled.button<CandidateCardProps>`
