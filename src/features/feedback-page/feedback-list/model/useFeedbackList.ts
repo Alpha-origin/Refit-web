@@ -10,7 +10,7 @@ import {
   getFormattedDate,
   getInterviewStatusLabel,
   getInterviewStyleLabel,
-  getInterviewTitle,
+  getInterviewModeLabel,
   getInterviewId,
   getInterviewerName,
   sortInterviewsByCreatedAt,
@@ -61,11 +61,15 @@ const getListItems = (
         interviewerName,
         interview.persona?.id,
       ),
-      title: getInterviewTitle(interview.persona?.major),
+      title: getInterviewModeLabel(interview),
       styleLabel: getInterviewStyleLabel(interview.persona?.type),
       levelLabel: getCareerLabel(interview.persona?.career),
       interviewerName,
-      statusLabel: getInterviewStatusLabel(feedback?.status ?? interview.status),
+      statusLabel: feedback
+        ? getInterviewStatusLabel(feedback.status)
+        : interview.status === "COMPLETED"
+          ? "분석 대기"
+          : getInterviewStatusLabel(interview.status),
       sessionId: interview.sessionId,
       totalScore: feedback?.totalScore,
       summary: feedback?.summary,
@@ -102,16 +106,12 @@ export const useFeedbackList = () => {
         }
       });
 
-      const interviewsWithFeedback = interviews.filter(
-        (interview) => feedbackByInterviewId.has(getInterviewId(interview)),
-      );
-
-      if (interviewsWithFeedback.length === 0) {
+      if (interviews.length === 0) {
         setItems([]);
         return;
       }
 
-      setItems(getListItems(interviewsWithFeedback, feedbackByInterviewId));
+      setItems(getListItems(interviews, feedbackByInterviewId));
     } catch (error) {
       setItems([]);
       setErrorMessage(

@@ -14,9 +14,12 @@ export interface InterviewPersona {
 }
 
 export interface InterviewSummary {
-  id: number;
+  id?: number;
   interviewId?: number;
   userId?: number;
+  mode?: "SOLO" | "MULTI";
+  personaId?: number | null;
+  personaIds?: number[];
   persona?: InterviewPersona | null;
   sessionId?: string;
   status?: string;
