@@ -214,6 +214,7 @@ const buildPrepareInterviewRequest = (
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
+    mode: "SOLO",
   };
 };
 

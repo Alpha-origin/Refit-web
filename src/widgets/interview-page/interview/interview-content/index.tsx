@@ -36,6 +36,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
     currentQuestion,
     displayQuestionNumber,
     isVoiceStarted,
+    isSubmitting,
     mode,
     onAnswerTextChange,
     onSubmitText,
@@ -49,6 +50,9 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
   const totalQuestionCount =
     preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
   const currentQuestionNumber = Math.max(displayQuestionNumber, 1);
+  const activeInterviewer = preparedInterview?.interviewers?.find(
+    (interviewer) => interviewer.personaId === currentQuestion?.personaId,
+  );
   const question = {
     id: formatQuestionLabel({
       currentQuestionNumber,
@@ -66,6 +70,11 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
         <S.QuestionBody>
           <S.QuestionContentStack>
             <S.QuestionLabel>{question.id}</S.QuestionLabel>
+            {activeInterviewer ? (
+              <S.QuestionSpeaker>
+                현재 면접관 · {activeInterviewer.name} ({activeInterviewer.roleLabel})
+              </S.QuestionSpeaker>
+            ) : null}
             <S.QuestionText>{question.text}</S.QuestionText>
 
             {isVoiceMode ? (
@@ -104,8 +113,12 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
               </S.TextModeButton>
             </S.TextModeControl>
 
-            <S.TextSubmitButton type="button" onClick={onSubmitText}>
-              제출하기
+            <S.TextSubmitButton
+              type="button"
+              onClick={onSubmitText}
+              disabled={isSubmitting || !answerText.trim() || isQuestionLoading}
+            >
+              {isSubmitting ? "제출 중..." : "제출하기"}
             </S.TextSubmitButton>
           </S.TextAnswerHeader>
 

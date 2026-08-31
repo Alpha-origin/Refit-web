@@ -6,7 +6,7 @@ import {
   disconnectInterviewSocket,
   getActiveInterviewSessionId,
   getCurrentInterviewQuestion,
-  prepareInterview,
+  getInterviewPreparation,
   quitInterview,
   setActiveInterviewSessionId,
   submitInterviewAnswer,
@@ -26,6 +26,8 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
+const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
+const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -62,6 +64,7 @@ const buildInitialQuestion = (
     type: "ORIGINAL",
     intention: nextQuestion.intention,
     content: nextQuestion.content,
+    personaId: nextQuestion.personaId,
   };
 };
 
@@ -70,11 +73,13 @@ interface InterviewSessionState {
   displayQuestionNumber: number;
   interviewStatus: InterviewProgressStatus;
   isChatSessionReady: boolean;
+  totalQuestionCount: number;
 }
 
 type InterviewSessionAction =
   | { type: "RESET_SESSION"; preparedInterview?: PreparedInterviewData | null }
   | { type: "APPLY_QUESTION"; question: CurrentInterviewQuestion }
+  | { type: "SET_QUESTION_COUNT"; count: number }
   | { type: "SET_INTERVIEW_STATUS"; status: InterviewProgressStatus }
   | { type: "SET_CHAT_SESSION_READY" };
 
@@ -88,6 +93,7 @@ const buildInterviewSessionState = (
     displayQuestionNumber: initialQuestion ? 1 : 0,
     interviewStatus: preparedInterview?.status ?? "IN_PROGRESS",
     isChatSessionReady: !preparedInterview,
+    totalQuestionCount: preparedInterview?.questions.length ?? 0,
   };
 };
 
@@ -134,6 +140,13 @@ const interviewSessionReducer = (
 
       return { ...state, interviewStatus: action.status };
     }
+    case "SET_QUESTION_COUNT": {
+      const count = Math.max(0, action.count);
+
+      return state.totalQuestionCount === count
+        ? state
+        : { ...state, totalQuestionCount: count };
+    }
     case "SET_CHAT_SESSION_READY": {
       if (state.isChatSessionReady) {
         return state;
@@ -158,6 +171,7 @@ export const useInterviewSession = (
     displayQuestionNumber,
     interviewStatus,
     isChatSessionReady,
+    totalQuestionCount,
   } = session;
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -169,10 +183,11 @@ export const useInterviewSession = (
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const hasPreparedChatSessionRef = useRef(false);
-  const preparedChatSessionIdRef = useRef<string | null>(null);
+  const preparingSessionIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
   const autoPlayedQuestionKeyRef = useRef<string | null>(null);
+  const questionStartedAtRef = useRef(0);
   const canSubmitAnswer =
     isChatSessionReady &&
     interviewStatus === "IN_PROGRESS" &&
@@ -194,7 +209,7 @@ export const useInterviewSession = (
   useEffect(() => {
     dispatch({ type: "RESET_SESSION", preparedInterview });
     isSessionClosedRef.current = false;
-    hasPreparedChatSessionRef.current = !preparedInterview;
+    hasPreparedChatSessionRef.current = false;
   }, [preparedInterview]);
 
   useEffect(() => {
@@ -214,6 +229,7 @@ export const useInterviewSession = (
 
   const applyCurrentQuestion = useCallback(
     (nextQuestion: CurrentInterviewQuestion) => {
+      questionStartedAtRef.current = Date.now();
       dispatch({ type: "APPLY_QUESTION", question: nextQuestion });
     },
     [dispatch],
@@ -305,77 +321,83 @@ export const useInterviewSession = (
       return;
     }
 
-    if (preparedChatSessionIdRef.current === sessionId) {
+    if (preparingSessionIdRef.current === sessionId) {
       return;
     }
 
-    preparedChatSessionIdRef.current = sessionId;
+    preparingSessionIdRef.current = sessionId;
     let isCancelled = false;
+    let attemptCount = 0;
+    let timeoutId: number | null = null;
+    let lastErrorMessage: string | null = null;
 
-    const startInterviewSession = async () => {
-      const { data, errorMessage } = await prepareInterview({
-        sessionId,
-        interviewId: preparedInterview.interviewId,
-        userId: preparedInterview.userId,
-        personaId: preparedInterview.personaId,
-        personaName: preparedInterview.personaName,
-        role: preparedInterview.role,
-        major: preparedInterview.major,
-        type: preparedInterview.type,
-        personaType: preparedInterview.personaType,
-        level: preparedInterview.level,
-        career: preparedInterview.career,
-        gender: preparedInterview.gender,
-        jobId: preparedInterview.jobId,
-        questions: preparedInterview.questions,
-      });
+    const waitForChatSession = async () => {
+      attemptCount += 1;
+      const { data, errorMessage } = await getInterviewPreparation(
+        preparedInterview.interviewId,
+      );
 
       if (isCancelled) {
         return;
       }
 
       if (errorMessage || !data) {
-        preparedChatSessionIdRef.current = null;
-        setPreparationError(errorMessage ?? "면접 준비에 실패했습니다.");
+        lastErrorMessage =
+          errorMessage ?? "면접 준비 상태를 확인하지 못했습니다.";
+      }
+
+      // 질문 생성 실패 뒤에도 SOLO는 원본 질문으로 채팅 전달이 성공할 수 있다.
+      // 따라서 생성 상태보다 실제 채팅 전달 여부를 먼저 확인한다.
+      if (data?.chatDelivered) {
+        preparingSessionIdRef.current = null;
+        setActiveInterviewSessionId(sessionId);
+        sessionIdRef.current = sessionId;
+        hasPreparedChatSessionRef.current = true;
+
+        const firstQuestion = data.questions[0];
+
+        if (firstQuestion) {
+          applyCurrentQuestion(firstQuestion);
+        }
+
+        dispatch({ type: "SET_QUESTION_COUNT", count: data.questions.length });
+        dispatch({ type: "SET_CHAT_SESSION_READY" });
         return;
       }
 
-      setActiveInterviewSessionId(data.sessionId);
-      sessionIdRef.current = data.sessionId;
-      hasPreparedChatSessionRef.current = true;
-
-      if (data.status) {
-        dispatch({ type: "SET_INTERVIEW_STATUS", status: data.status });
+      // MULTI 질문 생성 실패에는 현재 서버 측 원본 질문 fallback이 없다.
+      if (data?.status === "FAILED" && preparedInterview.mode === "MULTI") {
+        preparingSessionIdRef.current = null;
+        setPreparationError(data.errorMessage ?? "면접 질문 준비에 실패했습니다.");
+        return;
       }
 
-      const firstQuestion = buildInitialQuestion(data);
-
-      if (firstQuestion) {
-        applyCurrentQuestion(firstQuestion);
+      if (attemptCount >= INTERVIEW_PREPARATION_MAX_ATTEMPTS) {
+        preparingSessionIdRef.current = null;
+        setPreparationError(
+          data?.errorMessage ??
+            lastErrorMessage ??
+            "면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
+        );
+        return;
       }
 
-      if (!firstQuestion) {
-        const { data: nextQuestion } = await getCurrentInterviewQuestion(data.sessionId);
-
-        if (isCancelled) {
-          return;
-        }
-
-        if (nextQuestion) {
-          applyCurrentQuestion(nextQuestion);
-        }
-      }
-
-      dispatch({ type: "SET_CHAT_SESSION_READY" });
+      timeoutId = window.setTimeout(() => {
+        void waitForChatSession();
+      }, INTERVIEW_PREPARATION_POLL_INTERVAL_MS);
     };
 
-    void startInterviewSession();
+    void waitForChatSession();
 
     return () => {
       isCancelled = true;
 
-      if (preparedChatSessionIdRef.current === sessionId) {
-        preparedChatSessionIdRef.current = null;
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+
+      if (preparingSessionIdRef.current === sessionId) {
+        preparingSessionIdRef.current = null;
       }
     };
   }, [applyCurrentQuestion, preparedInterview, sessionId]);
@@ -414,7 +436,7 @@ export const useInterviewSession = (
 
   const handleStartVoice = () => {
     if (!isChatSessionReady) {
-      console.info("[interview] start voice blocked until SSE preparation completes");
+      console.info("[interview] start voice blocked until chat delivery completes");
       return;
     }
 
@@ -456,7 +478,13 @@ export const useInterviewSession = (
     const { data, errorMessage } = await submitInterviewAnswer({
       sessionId: activeSessionId,
       questionId: currentQuestion.questionId,
-      responseTime: 0,
+      responseTime:
+        questionStartedAtRef.current > 0
+          ? Math.max(
+              0,
+              Math.round((Date.now() - questionStartedAtRef.current) / 1_000),
+            )
+          : 0,
       content: trimmedContent,
     });
 
@@ -512,6 +540,7 @@ export const useInterviewSession = (
     cameraState,
     currentQuestion,
     displayQuestionNumber,
+    isSubmitting,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
@@ -528,5 +557,6 @@ export const useInterviewSession = (
     onToggleQuestionAudio: questionTts.onToggle,
     videoRef,
     voiceLevel: voiceAnswer.voiceLevel,
+    totalQuestionCount,
   };
 };
