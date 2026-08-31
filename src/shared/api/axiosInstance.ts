@@ -152,7 +152,15 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
       ) {
         originalRequest._retry = true;
         const refreshed = await tryRefreshSession();
-        if (refreshed) return instance(originalRequest);
+        if (refreshed) {
+          const nextHeaders = axios.AxiosHeaders.from(
+            originalRequest.headers,
+          ) as AxiosHeaders;
+          nextHeaders.delete("Authorization");
+          originalRequest.headers = nextHeaders;
+
+          return instance(originalRequest);
+        }
       }
 
       if (error.response?.status === 401) {
