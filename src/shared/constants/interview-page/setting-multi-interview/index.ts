@@ -173,17 +173,13 @@ const MULTI_INTERVIEW_CANDIDATE_KEYS_BY_SLOT: readonly (readonly string[])[] = [
   ],
   [
     "hr-people-partner",
-    "hr-talent-manager",
     "pm-product-strategist",
-    "pm-growth-lead",
     "design-product-designer",
   ],
   [
     "hr-talent-manager",
     "ceo-founder",
     "ceo-business-leader",
-    "pm-product-strategist",
-    "design-product-designer",
   ],
 ];
 

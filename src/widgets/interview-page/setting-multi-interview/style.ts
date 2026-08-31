@@ -168,17 +168,16 @@ export const SlotPrompt = styled.span`
 
 export const CandidateScroller = styled.div`
   display: grid;
-  grid-auto-columns: minmax(10.5rem, 1fr);
-  grid-auto-flow: column;
-  gap: 0.7rem;
-  overflow-x: auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  overflow: hidden;
   padding: 0;
-  scroll-snap-type: x proximity;
-  scrollbar-color: #abb4c2 transparent;
-  scrollbar-width: thin;
 `;
 
 export const CandidateCard = styled.button<CandidateCardProps>`
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
   min-height: clamp(15.5rem, 25vh, 17.5rem);
   overflow: hidden;
   padding: 0;
@@ -204,22 +203,28 @@ export const CandidateCard = styled.button<CandidateCardProps>`
 `;
 
 export const CandidateImageFrame = styled.div`
+  position: relative;
   width: 100%;
   height: clamp(6.25rem, 11vh, 7rem);
   overflow: hidden;
+  margin: 0;
   flex: 0 0 auto;
+  background: #d8d3ce;
 `;
 
 export const CandidateImage = styled.img`
+  position: absolute;
+  top: -15%;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 130%;
   display: block;
   object-fit: cover;
-  transform: scale(1.25);
-  transform-origin: center;
 `;
 
 export const CandidateBody = styled.div`
+  min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.42rem;
