@@ -235,9 +235,10 @@ export const CandidateCard = styled.button<CandidateCardProps>`
   padding: 0;
   border: 0.1rem solid
     ${({ $selected, $disabled }) =>
-      $selected ? "#3388f7" : $disabled ? "#e1e5eb" : "#cfd7e4"};
+      $selected ? "#aeb7c6" : $disabled ? "#e1e5eb" : "#cfd7e4"};
   border-radius: 0.5rem;
-  background: ${({ $disabled }) => ($disabled ? "#f8f9fb" : "#ffffff")};
+  background: ${({ $selected, $disabled }) =>
+    $selected ? "#e5e7eb" : $disabled ? "#f8f9fb" : "#ffffff"};
   color: #171717;
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   opacity: ${({ $disabled }) => ($disabled ? 0.56 : 1)};

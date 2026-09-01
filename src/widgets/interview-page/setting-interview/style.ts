@@ -69,9 +69,9 @@ export const ContentWrapper = styled.div`
   }
 
   @media (max-height: 52rem) {
-    --interviewer-card-height: clamp(12rem, 26vh, 13.5rem);
+    --interviewer-card-height: clamp(11.5rem, 24vh, 13rem);
     --setting-group-height: clamp(11.25rem, 25vh, 13rem);
-    --interviewer-image-height: clamp(5.75rem, 14vh, 7rem);
+    --interviewer-image-height: clamp(5rem, 11vh, 6rem);
     --interviewer-grid-offset: 2.35rem;
     --setting-column-gap: clamp(1.25rem, 3.4vh, 2rem);
     --style-option-gap: 0.45rem;
@@ -389,6 +389,7 @@ export const InterviewerCard = styled.button<SelectedProps>`
   overflow: hidden;
   min-width: 0;
   height: var(--interviewer-card-height);
+  box-sizing: border-box;
   padding: 0;
   border: 0.0625rem solid
     ${({ $selected }) => ($selected ? '#3388f7' : '#d5d9e2')};
@@ -422,19 +423,27 @@ export const InterviewerImage = styled.img`
 `;
 
 export const InterviewerBody = styled.div<SelectedProps>`
-  min-height: 0;
-  flex: 1 1 auto;
+  position: relative;
+  z-index: 1;
+  min-height: 6rem;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: clamp(0.35rem, 1vh, 0.7rem);
   padding: clamp(0.75rem, 1.7vh, 1.1rem) clamp(1.1rem, 3vw, 2.9rem)
     clamp(0.85rem, 2vh, 1.35rem);
-  overflow: hidden;
+  overflow: visible;
+  box-sizing: border-box;
   background: ${({ $selected }) => ($selected ? '#eef6ff' : '#ffffff')};
 
   @media (max-height: 44rem) {
     gap: 0.28rem;
     padding: 0.5rem 0.9rem 0.6rem;
+  }
+
+  @media (max-height: 52rem) {
+    gap: 0.35rem;
+    padding: 0.6rem 0.85rem 0.7rem;
   }
 `;
 
@@ -462,6 +471,8 @@ export const InterviewerSelectedBadge = styled.span`
 `;
 
 export const InterviewerTitle = styled.h3`
+  position: relative;
+  z-index: 1;
   margin: 0;
   color: #3c3c3c;
   font-size: 1.32rem;
@@ -471,14 +482,24 @@ export const InterviewerTitle = styled.h3`
   @media (max-height: 44rem) {
     font-size: 0.95rem;
   }
+
+  @media (max-height: 52rem) {
+    font-size: 1.2rem;
+  }
 `;
 
 export const TagList = styled.div`
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 
   @media (max-height: 44rem) {
+    gap: 0.25rem;
+  }
+
+  @media (max-height: 52rem) {
     gap: 0.25rem;
   }
 `;
@@ -501,9 +522,17 @@ export const Tag = styled.span`
     padding: 0.04rem 0.25rem;
     font-size: 0.6rem;
   }
+
+  @media (max-height: 52rem) {
+    min-height: 1rem;
+    padding: 0.06rem 0.3rem;
+    font-size: 0.7rem;
+  }
 `;
 
 export const InterviewerDescription = styled.p`
+  position: relative;
+  z-index: 1;
   margin: 0;
   color: #4b4b4b;
   font-size: 0.88rem;
@@ -517,6 +546,11 @@ export const InterviewerDescription = styled.p`
   @media (max-height: 44rem) {
     font-size: 0.68rem;
     -webkit-line-clamp: 1;
+  }
+
+  @media (max-height: 52rem) {
+    font-size: 0.8rem;
+    -webkit-line-clamp: 2;
   }
 `;
 

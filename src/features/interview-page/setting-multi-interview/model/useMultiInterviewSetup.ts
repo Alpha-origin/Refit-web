@@ -59,14 +59,6 @@ const getValidation = (
   };
 };
 
-const getNextEmptySlot = (
-  slots: MultiInterviewSelection["slots"],
-): SlotIndex | null => {
-  const slot = slots.findIndex((interviewer) => interviewer === null);
-
-  return slot === -1 ? null : (slot as SlotIndex);
-};
-
 const getCandidateConflictMessage = (
   candidate: InterviewerTemplate,
   activeSlot: SlotIndex,
@@ -142,12 +134,6 @@ export const useMultiInterviewSetup = () => {
     nextSlots[activeSlot] = candidate;
     setSlots(nextSlots);
     setErrorMessage("");
-
-    const nextEmptySlot = getNextEmptySlot(nextSlots);
-
-    if (nextEmptySlot !== null) {
-      setActiveSlot(nextEmptySlot);
-    }
   };
 
   const handleNext = async () => {
