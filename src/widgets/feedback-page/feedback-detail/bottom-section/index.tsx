@@ -1,5 +1,4 @@
 import RobotImageAsset from "@/shared/img/feedback-page/Repit-feedback.svg?url";
-import { useNavigate } from "react-router-dom";
 import * as S from "../style";
 import type { FeedbackDetailBottomSectionProps } from "../type";
 
@@ -8,8 +7,6 @@ const FeedbackDetailBottomSection = ({
   isDownloadingPdf,
   onDownloadPdf,
 }: FeedbackDetailBottomSectionProps) => {
-  const navigate = useNavigate();
-
   return (
     <S.BottomBlock>
       <S.CoachCard>
@@ -34,9 +31,10 @@ const FeedbackDetailBottomSection = ({
         </S.SecondaryActionButton>
         <S.PrimaryActionButton
           type="button"
-          onClick={() => navigate("/main/interview")}
+          disabled
+          title="면접 기록 조회 API의 소유권 검증과 다시보기 화면이 준비된 뒤 제공됩니다."
         >
-          {content.primaryActionLabel}
+          {content.primaryActionLabel} (준비 중)
         </S.PrimaryActionButton>
       </S.ActionRow>
     </S.BottomBlock>

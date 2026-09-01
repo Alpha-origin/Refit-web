@@ -138,6 +138,15 @@ export const QuestionPreview = styled.span`
   -webkit-box-orient: vertical;
 `;
 
+export const QuestionPersona = styled.span`
+  display: block;
+  width: fit-content;
+  margin: 0 0 0.32rem;
+  color: #2b74e3;
+  font-size: 0.82rem;
+  font-weight: 700;
+`;
+
 export const DetailColumn = styled.div`
   display: grid;
   grid-template-rows: auto auto auto minmax(8.5rem, 1fr);
@@ -417,4 +426,10 @@ export const PrimaryActionButton = styled.button`
   border: none;
   background: linear-gradient(180deg, #2f75e7, #2667da);
   color: #ffffff;
+
+  &:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.35);
+    opacity: 0.62;
+  }
 `;

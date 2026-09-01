@@ -13,6 +13,15 @@ export type InterviewProgressStatus =
   | "READY"
   | "ABANDONED";
 
+export type PreparedInterviewMode = "SOLO" | "MULTI";
+
+export interface PreparedInterviewer {
+  personaId: number;
+  name: string;
+  roleLabel: string;
+  image?: string;
+}
+
 export interface PrepareInterviewQuestion {
   questionId: number;
   intention: string;
@@ -56,4 +65,6 @@ export interface PreparedInterviewData {
   status: InterviewProgressStatus;
   currentQuestionIndex: number;
   questions: PrepareInterviewQuestion[];
+  mode: PreparedInterviewMode;
+  interviewers?: PreparedInterviewer[];
 }

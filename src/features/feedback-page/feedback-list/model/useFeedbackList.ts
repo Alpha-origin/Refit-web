@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 
 import {
+  getAllFeedbacks,
   getAllInterviews,
-  getFeedback,
+  type FeedbackData,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import {
   getCareerLabel,
   getFormattedDate,
   getInterviewStatusLabel,
   getInterviewStyleLabel,
-  getInterviewTitle,
+  getInterviewModeLabel,
   getInterviewId,
   getInterviewerName,
   sortInterviewsByCreatedAt,
@@ -45,7 +46,7 @@ const getInterviewerImageUrl = (
 
 const getListItems = (
   items: Awaited<ReturnType<typeof getAllInterviews>>,
-  feedbackByInterviewId: Map<number, Awaited<ReturnType<typeof getFeedback>>>,
+  feedbackByInterviewId: Map<number, FeedbackData>,
 ): FeedbackListItem[] =>
   sortInterviewsByCreatedAt(items).map<FeedbackListItem>((interview) => {
     const interviewerName = getInterviewerName(interview);
@@ -60,18 +61,22 @@ const getListItems = (
         interviewerName,
         interview.persona?.id,
       ),
-      title: getInterviewTitle(interview.persona?.major),
+      title: getInterviewModeLabel(interview),
       styleLabel: getInterviewStyleLabel(interview.persona?.type),
       levelLabel: getCareerLabel(interview.persona?.career),
       interviewerName,
-      statusLabel: getInterviewStatusLabel(feedback?.status ?? interview.status),
+      statusLabel: feedback
+        ? getInterviewStatusLabel(feedback.status)
+        : interview.status === "COMPLETED"
+          ? "분석 대기"
+          : getInterviewStatusLabel(interview.status),
       sessionId: interview.sessionId,
       totalScore: feedback?.totalScore,
       summary: feedback?.summary,
       answeredCount: feedback?.answeredCount,
       questionCount: feedback?.questionCount,
     };
-    });
+  });
 
 export const useFeedbackList = () => {
   const [items, setItems] = useState<FeedbackListItem[]>([]);
@@ -83,23 +88,30 @@ export const useFeedbackList = () => {
     setErrorMessage(null);
 
     try {
-      const interviews = await getAllInterviews();
-      const latestInterview = sortInterviewsByCreatedAt(interviews).find(
-        (interview) => getInterviewId(interview) > 0,
-      );
+      const [interviews, feedbacks] = await Promise.all([
+        getAllInterviews(),
+        getAllFeedbacks(),
+      ]);
+      const feedbackByInterviewId = new Map<number, FeedbackData>();
 
-      if (!latestInterview) {
+      feedbacks.forEach((feedback) => {
+        const interviewId = feedback.interviewId;
+
+        if (
+          typeof interviewId === "number" &&
+          Number.isInteger(interviewId) &&
+          interviewId > 0
+        ) {
+          feedbackByInterviewId.set(interviewId, feedback);
+        }
+      });
+
+      if (interviews.length === 0) {
         setItems([]);
         return;
       }
 
-      const latestInterviewId = getInterviewId(latestInterview);
-      const feedback = await getFeedback(latestInterviewId).catch(() => null);
-      const feedbackByInterviewId = new Map([
-        [latestInterviewId, feedback],
-      ]);
-
-      setItems(getListItems([latestInterview], feedbackByInterviewId));
+      setItems(getListItems(interviews, feedbackByInterviewId));
     } catch (error) {
       setItems([]);
       setErrorMessage(

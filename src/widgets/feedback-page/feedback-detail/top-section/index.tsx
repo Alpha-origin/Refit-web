@@ -21,7 +21,12 @@ const QuestionItem = ({ isActive, item, onSelect }: QuestionItemProps) => {
       onClick={() => onSelect(item.id)}
     >
       <S.QuestionNumber>{item.label}</S.QuestionNumber>
-      <S.QuestionPreview>{item.preview}</S.QuestionPreview>
+      <span>
+        {item.personaLabel ? (
+          <S.QuestionPersona>{item.personaLabel}</S.QuestionPersona>
+        ) : null}
+        <S.QuestionPreview>{item.preview}</S.QuestionPreview>
+      </span>
     </S.QuestionItemButton>
   );
 };
@@ -89,6 +94,9 @@ const FeedbackDetailTopSection = ({
           <S.DetailColumn>
             <S.DetailCard>
               <S.DetailCardTitle>{content.questionTitle}</S.DetailCardTitle>
+              {selectedQuestion.personaLabel ? (
+                <S.QuestionPersona>{selectedQuestion.personaLabel} 질문</S.QuestionPersona>
+              ) : null}
               <S.QuestionContent>
                 <S.DetailCardText>{selectedQuestion.question}</S.DetailCardText>
               </S.QuestionContent>

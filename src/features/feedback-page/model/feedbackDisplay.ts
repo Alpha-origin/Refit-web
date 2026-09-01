@@ -22,13 +22,27 @@ const getText = (value?: string, fallback = "내용이 아직 없습니다.") =>
 const getListText = (items?: string[], fallback = "내용이 아직 없습니다.") =>
   items && items.length > 0 ? items.join(" ") : fallback;
 
+const getReliabilityLevel = (score: number) => {
+  if (score >= 80) {
+    return "높음";
+  }
+
+  if (score >= 50) {
+    return "보통";
+  }
+
+  return "낮음";
+};
+
 const getFeedbackQuestion = (
   item: QuestionFeedback,
   index: number,
+  personaLabel?: string,
 ) => ({
   id: index + 1,
   label: `Q${index + 1}`,
   preview: getText(item.questionContent),
+  personaLabel,
   question: getText(item.questionContent),
   intention: getText(item.intention),
   myAnswer: getText(item.userAnswer, "작성된 답변이 없습니다."),
@@ -40,7 +54,7 @@ const getFeedbackQuestion = (
 });
 
 export const getFeedbackStatusLabel = (status?: string) => {
-  if (status === "COMPLETED") {
+  if (status === "SUCCEEDED" || status === "COMPLETED") {
     return "분석 완료";
   }
 
@@ -65,6 +79,7 @@ export const buildFeedbackOverallContent = (
   const totalScore = getScore(feedback.totalScore);
   const personaCards = feedback.personas?.map((persona, index) => ({
     title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
+    highlightText: persona.comment?.trim() || undefined,
     bars: [
       {
         label: "내 점수",
@@ -131,7 +146,7 @@ export const buildFeedbackOverallContent = (
       reliability: {
         title: "응답 신뢰성",
         scoreLabel: `${getScore(feedback.reliabilityScore)}점`,
-        levelLabel: getFeedbackStatusLabel(feedback.status),
+        levelLabel: getReliabilityLevel(getScore(feedback.reliabilityScore)),
       },
       questionFit: {
         title: "질문 의도 적합도",
@@ -155,41 +170,59 @@ export const buildFeedbackDetailContent = (
   topSection: FeedbackDetailTopSectionData;
   middleSection: FeedbackDetailMiddleSectionData;
   bottomSection: FeedbackDetailBottomSectionData;
-} => ({
-  topSection: {
-    tabs: {
-      overallLabel: "종합피드백",
-      detailLabel: "상세피드백",
-      activeTab: "detail",
-    },
-    questionListTitle: "질문별 피드백",
-    questionTitle: "질문",
-    intentionTitle: "질문 의도",
-    myAnswerTitle: "내 답변",
-    showMyAnswerLabel: "내 답변 보기",
-    hideMyAnswerLabel: "내 답변 숨기기",
-    modelAnswerTitle: "모범 답변",
-    followUpTitle: "개선 포인트",
-    questions: (feedback.feedbacks ?? []).map(getFeedbackQuestion),
-  },
-  middleSection: {
-    cards: [
-      {
-        title: "강점",
-        paragraphs: feedback.strengths ?? ["강점 분석 결과가 아직 없습니다."],
-      },
-      {
-        title: "보완점",
-        paragraphs: feedback.improvements ?? ["보완점 분석 결과가 아직 없습니다."],
-      },
-    ],
-  },
-  bottomSection: {
-    coachComment: getText(
-      feedback.summary,
-      "종합 피드백 분석이 완료되면 코멘트가 표시됩니다.",
+} => {
+  const personaRoleById = new Map(
+    (feedback.personas ?? []).flatMap((persona, index) =>
+      typeof persona.personaId === "number"
+        ? [[persona.personaId, persona.personaRole?.trim() || `면접관 ${index + 1}`] as const]
+        : [],
     ),
-    secondaryActionLabel: "PDF로 저장",
-    primaryActionLabel: "면접 다시보기",
-  },
-});
+  );
+
+  return {
+    topSection: {
+      tabs: {
+        overallLabel: "종합피드백",
+        detailLabel: "상세피드백",
+        activeTab: "detail",
+      },
+      questionListTitle: "질문별 피드백",
+      questionTitle: "질문",
+      intentionTitle: "질문 의도",
+      myAnswerTitle: "내 답변",
+      showMyAnswerLabel: "내 답변 보기",
+      hideMyAnswerLabel: "내 답변 숨기기",
+      modelAnswerTitle: "모범 답변",
+      followUpTitle: "개선 포인트",
+      questions: (feedback.feedbacks ?? []).map((item, index) =>
+        getFeedbackQuestion(
+          item,
+          index,
+          typeof item.personaId === "number"
+            ? personaRoleById.get(item.personaId) ?? "면접관"
+            : undefined,
+        ),
+      ),
+    },
+    middleSection: {
+      cards: [
+        {
+          title: "강점",
+          paragraphs: feedback.strengths ?? ["강점 분석 결과가 아직 없습니다."],
+        },
+        {
+          title: "보완점",
+          paragraphs: feedback.improvements ?? ["보완점 분석 결과가 아직 없습니다."],
+        },
+      ],
+    },
+    bottomSection: {
+      coachComment: getText(
+        feedback.summary,
+        "종합 피드백 분석이 완료되면 코멘트가 표시됩니다.",
+      ),
+      secondaryActionLabel: "PDF로 저장",
+      primaryActionLabel: "면접 다시보기",
+    },
+  };
+};

@@ -14,9 +14,12 @@ export interface InterviewPersona {
 }
 
 export interface InterviewSummary {
-  id: number;
+  id?: number;
   interviewId?: number;
   userId?: number;
+  mode?: "SOLO" | "MULTI";
+  personaId?: number | null;
+  personaIds?: number[];
   persona?: InterviewPersona | null;
   sessionId?: string;
   status?: string;
@@ -30,6 +33,7 @@ interface ApiResponse<T> {
 
 const GET_ALL_INTERVIEWS_URL = "/api/interviews/getAll";
 const GET_FEEDBACK_URL = "/api/feedbacks";
+const GET_ALL_FEEDBACKS_URL = "/api/feedbacks/getAll";
 
 export interface FrequentWord {
   word: string;
@@ -97,12 +101,33 @@ const normalizeInterviews = (
   return [];
 };
 
+const normalizeFeedbacks = (
+  payload: FeedbackData[] | ApiResponse<FeedbackData[]>,
+) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  if (Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  return [];
+};
+
 export const getAllInterviews = async () => {
   const response = await apiInstance.get<
     InterviewSummary[] | ApiResponse<InterviewSummary[]>
   >(GET_ALL_INTERVIEWS_URL);
 
   return normalizeInterviews(response.data);
+};
+
+export const getAllFeedbacks = async () => {
+  const response = await apiInstance.get<
+    FeedbackData[] | ApiResponse<FeedbackData[]>
+  >(GET_ALL_FEEDBACKS_URL);
+
+  return normalizeFeedbacks(response.data);
 };
 
 export const getFeedback = async (interviewId: number) => {
