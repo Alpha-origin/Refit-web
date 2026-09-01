@@ -39,7 +39,10 @@ export const apiInstance = axios.create({
 export const chatInstance = axios.create({
   baseURL: CHAT_URL,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
+  },
 });
 
 const refreshInstance = axios.create({
