@@ -91,12 +91,25 @@ const InterviewDashboard = () => {
         <S.MainGrid>
           <S.LeftColumn>
             <S.QuestionPanel aria-live="polite">
-              <S.QuestionTag>
-                Question {String(Math.max(interview.displayQuestionNumber, 1)).padStart(2, "0")}
-                {interview.totalQuestionCount > 0
-                  ? ` · 기본 질문 ${interview.totalQuestionCount}개`
-                  : ""}
-              </S.QuestionTag>
+              <S.QuestionMetaRow>
+                <S.QuestionTag>
+                  Question {String(Math.max(interview.displayQuestionNumber, 1)).padStart(2, "0")}
+                  {interview.totalQuestionCount > 0
+                    ? ` · 기본 질문 ${interview.totalQuestionCount}개`
+                    : ""}
+                </S.QuestionTag>
+                <S.QuestionAudioButton
+                  type="button"
+                  disabled={isQuestionLoading || interview.questionAudioStatus === "loading"}
+                  onClick={interview.onToggleQuestionAudio}
+                >
+                  {interview.questionAudioStatus === "loading"
+                    ? "음성 생성 중..."
+                    : interview.questionAudioStatus === "playing"
+                      ? "질문 멈추기"
+                      : "질문 듣기"}
+                </S.QuestionAudioButton>
+              </S.QuestionMetaRow>
               {activeInterviewer ? (
                 <S.QuestionSpeaker>
                   {activeInterviewer.name} · {activeInterviewer.roleLabel}

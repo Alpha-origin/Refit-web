@@ -7,7 +7,7 @@ export const Page = styled.section`
   overflow: auto;
   padding: clamp(1rem, 2.4vw, 2.2rem);
   box-sizing: border-box;
-  background: linear-gradient(135deg, #f7f9ff 0%, #eef4ff 100%);
+  background: transparent;
 `;
 
 export const Content = styled.div`
@@ -86,6 +86,13 @@ export const QuestionPanel = styled.article`
   gap: 1rem;
 `;
 
+export const QuestionMetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+`;
+
 export const QuestionTag = styled.span`
   width: fit-content;
   padding: 0.25rem 0.55rem;
@@ -94,6 +101,28 @@ export const QuestionTag = styled.span`
   color: #1874e8;
   font-size: 0.76rem;
   font-weight: 800;
+`;
+
+export const QuestionAudioButton = styled.button`
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.65rem;
+  border: 0.0625rem solid #9ac5ff;
+  border-radius: 999rem;
+  background: #f5f9ff;
+  color: #2179ed;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.58;
+  }
+
+  &:hover:not(:disabled) {
+    background: #eaf3ff;
+  }
 `;
 
 export const QuestionSpeaker = styled.span`
