@@ -19,6 +19,7 @@ import {
 } from "@/shared/constants/interview-page/interview";
 
 import type { InterviewMode } from "@/widgets/interview-page/interview/type";
+import { useElevenLabsTts } from "./useElevenLabsTts";
 import { useSupertoneTts } from "./useSupertoneTts";
 import { useInterviewCamera } from "./useInterviewCamera";
 import { useInterviewSocket } from "./useInterviewSocket";
@@ -28,6 +29,8 @@ type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
 const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
 const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
+
+export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -177,6 +180,7 @@ const interviewSessionReducer = (
 
 export const useInterviewSession = (
   preparedInterview?: PreparedInterviewData | null,
+  ttsProvider: InterviewTtsProvider = "elevenlabs",
 ) => {
   const navigate = useNavigate();
   const [session, dispatch] = useReducer(
@@ -197,7 +201,9 @@ export const useInterviewSession = (
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
-  const questionTts = useSupertoneTts(currentQuestion?.content ?? "");
+  const elevenLabsTts = useElevenLabsTts(currentQuestion?.content ?? "");
+  const supertoneTts = useSupertoneTts(currentQuestion?.content ?? "");
+  const questionTts = ttsProvider === "elevenlabs" ? elevenLabsTts : supertoneTts;
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
   const isSessionClosedRef = useRef(false);
   const hasPreparedChatSessionRef = useRef(false);
@@ -233,7 +239,7 @@ export const useInterviewSession = (
   useEffect(() => {
     const nextQuestionKey = buildQuestionKey(currentQuestion);
 
-    if (!currentQuestion || !nextQuestionKey) {
+    if (!isChatSessionReady || !currentQuestion || !nextQuestionKey) {
       return;
     }
 
@@ -244,7 +250,7 @@ export const useInterviewSession = (
     autoPlayedQuestionKeyRef.current = nextQuestionKey;
     questionStartedAtRef.current = Date.now();
     void questionTts.onPlay();
-  }, [currentQuestion, questionTts]);
+  }, [currentQuestion, isChatSessionReady, questionTts]);
 
   const syncCurrentQuestion = useCallback(
     (nextQuestion: CurrentInterviewQuestion) => {

@@ -23,12 +23,28 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
+const isMultiInterviewState = (state: unknown) =>
+  Boolean(state && typeof state === "object" && "multiInterview" in state);
+
+const formatElapsedTime = (elapsedSeconds: number) => {
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const seconds = elapsedSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+};
+
 const InterviewPage = () => {
   const location = useLocation();
   const preparedInterview = getPreparedInterviewFromState(location.state);
+  const ttsProvider = isMultiInterviewState(location.state)
+    ? "supertone"
+    : "elevenlabs";
 
   return (
-    <InterviewSessionProvider preparedInterview={preparedInterview}>
+    <InterviewSessionProvider
+      preparedInterview={preparedInterview}
+      ttsProvider={ttsProvider}
+    >
       <InterviewPageContent />
     </InterviewSessionProvider>
   );
