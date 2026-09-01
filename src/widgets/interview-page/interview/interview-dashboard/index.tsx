@@ -37,7 +37,11 @@ const InterviewDashboard = () => {
     !interview.isInterviewReady || isQuestionLoading || interview.isSubmitting;
 
   useEffect(() => {
-    if (!interview.isInterviewReady || !isTimerRunning) {
+    if (
+      !interview.isInterviewReady ||
+      !isTimerRunning ||
+      interview.isWaitingForNextQuestion
+    ) {
       return;
     }
 
@@ -46,7 +50,20 @@ const InterviewDashboard = () => {
     }, 1_000);
 
     return () => window.clearInterval(intervalId);
-  }, [interview.isInterviewReady, isTimerRunning]);
+  }, [
+    interview.isInterviewReady,
+    interview.isWaitingForNextQuestion,
+    isTimerRunning,
+  ]);
+
+  useEffect(() => {
+    if (!interview.isWaitingForNextQuestion) {
+      return;
+    }
+
+    setElapsedSeconds(0);
+    setIsTimerRunning(false);
+  }, [interview.isWaitingForNextQuestion]);
 
   useEffect(() => {
     setMemo(memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "");
@@ -220,6 +237,15 @@ const InterviewDashboard = () => {
             </S.MemoPanel>
           </S.RightColumn>
         </S.MainGrid>
+
+        {interview.isWaitingForNextQuestion ? (
+          <S.LoadingOverlay role="status" aria-live="polite">
+            <S.LoadingModal>
+              <S.LoadingSpinner aria-hidden="true" />
+              <S.LoadingMessage>다음 질문을 준비하고 있습니다</S.LoadingMessage>
+            </S.LoadingModal>
+          </S.LoadingOverlay>
+        ) : null}
       </S.Content>
     </S.Page>
   );

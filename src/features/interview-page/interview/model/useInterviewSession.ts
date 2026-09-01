@@ -197,6 +197,7 @@ export const useInterviewSession = (
   } = session;
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isWaitingForNextQuestion, setIsWaitingForNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
@@ -497,70 +498,73 @@ export const useInterviewSession = (
     }
 
     setIsSubmitting(true);
+    setIsWaitingForNextQuestion(true);
 
-    const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
+    try {
+      const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
 
-    if (!activeSessionId) {
-      setIsSubmitting(false);
-      console.warn("[interview] missing sessionId when submitting answer");
-      return;
-    }
-
-    const submittedQuestion = currentQuestion;
-
-    const { data, errorMessage } = await submitInterviewAnswer({
-      sessionId: activeSessionId,
-      questionId: currentQuestion.questionId,
-      responseTime:
-        questionStartedAtRef.current > 0
-          ? Math.max(
-              0,
-              Math.round((Date.now() - questionStartedAtRef.current) / 1_000),
-            )
-          : 0,
-      content: trimmedContent,
-    });
-
-    setIsSubmitting(false);
-
-    if (errorMessage) {
-      return;
-    }
-
-    questionTts.onStop();
-    voiceAnswer.onClearAnswer();
-
-    if (data?.status) {
-      dispatch({ type: "SET_INTERVIEW_STATUS", status: data.status });
-
-      if (data.status === "COMPLETED") {
-        await endInterviewSession(true, "completed");
+      if (!activeSessionId) {
+        console.warn("[interview] missing sessionId when submitting answer");
         return;
       }
-    }
 
-    const responseQuestion = data?.question ?? null;
-    const hasNextResponseQuestion =
-      responseQuestion !== null &&
-      !isSameQuestionPrompt(responseQuestion, submittedQuestion);
+      const submittedQuestion = currentQuestion;
 
-    if (responseQuestion) {
-      if (hasNextResponseQuestion) {
-        advanceCurrentQuestion(responseQuestion);
-      } else {
-        syncCurrentQuestion(responseQuestion);
+      const { data, errorMessage } = await submitInterviewAnswer({
+        sessionId: activeSessionId,
+        questionId: currentQuestion.questionId,
+        responseTime:
+          questionStartedAtRef.current > 0
+            ? Math.max(
+                0,
+                Math.round((Date.now() - questionStartedAtRef.current) / 1_000),
+              )
+            : 0,
+        content: trimmedContent,
+      });
+
+      if (errorMessage) {
+        return;
       }
-    }
 
-    if (!hasNextResponseQuestion) {
-      const { data: nextQuestion } = await getCurrentInterviewQuestion(activeSessionId);
+      questionTts.onStop();
+      voiceAnswer.onClearAnswer();
 
-      if (
-        nextQuestion &&
-        !isSameQuestionPrompt(nextQuestion, submittedQuestion)
-      ) {
-        advanceCurrentQuestion(nextQuestion);
+      if (data?.status) {
+        dispatch({ type: "SET_INTERVIEW_STATUS", status: data.status });
+
+        if (data.status === "COMPLETED") {
+          await endInterviewSession(true, "completed");
+          return;
+        }
       }
+
+      const responseQuestion = data?.question ?? null;
+      const hasNextResponseQuestion =
+        responseQuestion !== null &&
+        !isSameQuestionPrompt(responseQuestion, submittedQuestion);
+
+      if (responseQuestion) {
+        if (hasNextResponseQuestion) {
+          advanceCurrentQuestion(responseQuestion);
+        } else {
+          syncCurrentQuestion(responseQuestion);
+        }
+      }
+
+      if (!hasNextResponseQuestion) {
+        const { data: nextQuestion } = await getCurrentInterviewQuestion(activeSessionId);
+
+        if (
+          nextQuestion &&
+          !isSameQuestionPrompt(nextQuestion, submittedQuestion)
+        ) {
+          advanceCurrentQuestion(nextQuestion);
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+      setIsWaitingForNextQuestion(false);
     }
   };
 
@@ -586,6 +590,7 @@ export const useInterviewSession = (
     currentQuestion,
     displayQuestionNumber,
     isSubmitting,
+    isWaitingForNextQuestion,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
