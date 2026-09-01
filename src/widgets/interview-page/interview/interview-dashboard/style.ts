@@ -257,6 +257,7 @@ export const Button = styled.button<{ $secondary?: boolean }>`
 
 export const Interviewers = styled.section`
   ${panel}
+  min-height: 0;
   padding: 0.65rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
@@ -265,15 +266,19 @@ export const Interviewers = styled.section`
 
 export const InterviewerCard = styled.article<{ $active: boolean }>`
   min-width: 0;
+  min-height: 0;
   padding: 0.65rem;
   border: 0.0625rem solid ${({ $active }) => ($active ? "#4d98ff" : "#dce2ea")};
   border-radius: 0.6rem;
   background: ${({ $active }) => ($active ? "#f4f9ff" : "#fff")};
+  display: flex;
+  flex-direction: column;
 `;
 
 export const InterviewerImage = styled.img`
   width: 100%;
-  aspect-ratio: 1 / 0.82;
+  min-height: 0;
+  flex: 1 1 auto;
   border-radius: 0.36rem;
   object-fit: cover;
   background: #e9edf4;
@@ -281,7 +286,8 @@ export const InterviewerImage = styled.img`
 
 export const InterviewerFallback = styled.div`
   width: 100%;
-  aspect-ratio: 1 / 0.82;
+  min-height: 0;
+  flex: 1 1 auto;
   border-radius: 0.36rem;
   display: grid;
   place-items: center;
