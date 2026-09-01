@@ -95,6 +95,10 @@ export const QuestionMetaRow = styled.div`
 
 export const QuestionTag = styled.span`
   width: fit-content;
+  height: 2rem;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
   padding: 0.25rem 0.55rem;
   border: 0.0625rem solid #93c0ff;
   border-radius: 999rem;
@@ -105,7 +109,8 @@ export const QuestionTag = styled.span`
 
 export const QuestionAudioButton = styled.button`
   flex: 0 0 auto;
-  min-height: 2rem;
+  height: 2rem;
+  box-sizing: border-box;
   padding: 0.25rem 0.65rem;
   border: 0.0625rem solid #9ac5ff;
   border-radius: 999rem;
