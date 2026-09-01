@@ -15,6 +15,8 @@ export type { CurrentInterviewQuestion } from "./current-question";
 export type {
   InterviewLevel,
   InterviewProgressStatus,
+  PreparedInterviewer,
+  PreparedInterviewMode,
   PersonaType,
   PrepareInterviewParams,
   PrepareInterviewQuestion,
