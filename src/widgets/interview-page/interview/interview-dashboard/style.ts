@@ -44,29 +44,39 @@ export const MainGrid = styled.main`
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.95fr);
+  grid-template-rows: minmax(11rem, 0.72fr) minmax(23rem, 1.28fr);
   gap: clamp(0.85rem, 1.5vw, 1.2rem);
 
   @media (max-width: 58rem) {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
   }
 `;
 
 export const LeftColumn = styled.div`
   min-width: 0;
+  grid-row: 1 / -1;
   display: grid;
-  grid-template-rows: minmax(11rem, 0.72fr) minmax(23rem, 1.28fr);
-  gap: 0.85rem;
+  grid-template-rows: subgrid;
 
   @media (max-width: 58rem) {
+    grid-row: auto;
     grid-template-rows: auto auto;
+    gap: 0.85rem;
   }
 `;
 
 export const RightColumn = styled.aside`
   min-width: 0;
   display: grid;
-  grid-template-rows: auto minmax(16rem, 1fr);
-  gap: 0.85rem;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+
+  @media (max-width: 58rem) {
+    grid-row: auto;
+    grid-template-rows: auto minmax(16rem, 1fr);
+    gap: 0.85rem;
+  }
 `;
 
 const panel = `
@@ -95,10 +105,6 @@ export const QuestionMetaRow = styled.div`
 
 export const QuestionTag = styled.span`
   width: fit-content;
-  height: 2rem;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
   padding: 0.25rem 0.55rem;
   border: 0.0625rem solid #93c0ff;
   border-radius: 999rem;
@@ -109,8 +115,7 @@ export const QuestionTag = styled.span`
 
 export const QuestionAudioButton = styled.button`
   flex: 0 0 auto;
-  height: 2rem;
-  box-sizing: border-box;
+  min-height: 2rem;
   padding: 0.25rem 0.65rem;
   border: 0.0625rem solid #9ac5ff;
   border-radius: 999rem;
