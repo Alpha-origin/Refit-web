@@ -109,7 +109,7 @@ export const QuestionTag = styled.span`
   border: 0.0625rem solid #93c0ff;
   border-radius: 999rem;
   color: #1874e8;
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   font-weight: 800;
 `;
 
@@ -137,16 +137,16 @@ export const QuestionAudioButton = styled.button`
 
 export const QuestionSpeaker = styled.span`
   color: #4f6b91;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 700;
 `;
 
 export const QuestionText = styled.h1`
   margin: 0;
   color: #151a23;
-  font-size: clamp(1.18rem, 2vw, 1.55rem);
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
   font-weight: 650;
-  line-height: 1.55;
+  line-height: 1.48;
   word-break: keep-all;
 `;
 
@@ -302,7 +302,7 @@ export const InterviewerName = styled.strong`
   margin-top: 0.55rem;
   overflow: hidden;
   color: #1f2937;
-  font-size: 0.83rem;
+  font-size: 0.76rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
@@ -311,7 +311,7 @@ export const InterviewerRole = styled.span`
   display: block;
   margin-top: 0.25rem;
   color: #5e779c;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
 `;
 
