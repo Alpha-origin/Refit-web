@@ -28,26 +28,6 @@ const getPreparedInterviewFromState = (state: unknown) => {
 const isMultiInterviewState = (state: unknown) =>
   Boolean(state && typeof state === "object" && "multiInterview" in state);
 
-const getSelectedInterviewerId = (state: unknown) => {
-  if (!state || typeof state !== "object" || !("interviewSetting" in state)) {
-    return null;
-  }
-
-  const interviewSetting = (state as { interviewSetting?: unknown }).interviewSetting;
-
-  if (
-    !interviewSetting ||
-    typeof interviewSetting !== "object" ||
-    !("interviewerId" in interviewSetting)
-  ) {
-    return null;
-  }
-
-  const interviewerId = (interviewSetting as { interviewerId?: unknown }).interviewerId;
-
-  return typeof interviewerId === "number" ? interviewerId : null;
-};
-
 const getPreparedInterviewForDisplay = (state: unknown) => {
   const preparedInterview = getPreparedInterviewFromState(state);
 
@@ -55,9 +35,8 @@ const getPreparedInterviewForDisplay = (state: unknown) => {
     return preparedInterview;
   }
 
-  const selectedInterviewerId = getSelectedInterviewerId(state);
   const selectedInterviewer = SETTING_INTERVIEWER_CARDS.find(
-    (interviewer) => interviewer.id === selectedInterviewerId,
+    (interviewer) => interviewer.id === 4,
   );
 
   if (!selectedInterviewer) {

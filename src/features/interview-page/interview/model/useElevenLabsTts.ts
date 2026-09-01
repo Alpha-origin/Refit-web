@@ -6,6 +6,7 @@ const ELEVENLABS_VOICES_API_URL = "/api/elevenlabs/voices";
 const ELEVENLABS_CONFIGURED_VOICE_ID =
   import.meta.env.VITE_ELEVENLABS_VOICE_ID?.trim();
 const ELEVENLABS_VOICE_NAME = "Kelee K - Seoul Narrator";
+const ELEVENLABS_FALLBACK_VOICE_NAME = "Sarah - Mature, Reassuring, Confident";
 const ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";
 const ELEVENLABS_OUTPUT_FORMAT = "mp3_44100_128";
 const ELEVENLABS_SPEECH_SPEED = 1.1;
@@ -13,11 +14,13 @@ const ELEVENLABS_SPEECH_SPEED = 1.1;
 const isPlaceholderVoiceId = (voiceId: string | undefined) =>
   !voiceId || voiceId === "Kelee_K_Voice_ID";
 
-const getVoiceIdFromAccount = async (signal: AbortSignal) => {
-  const searchParams = new URLSearchParams({
-    search: ELEVENLABS_VOICE_NAME,
-    page_size: "100",
-  });
+const getVoiceIdFromAccount = async (
+  signal: AbortSignal,
+  voiceName = ELEVENLABS_VOICE_NAME,
+) => {
+  // ElevenLabs의 search 파라미터에 Kelee 이름을 넣으면 다른 음성이 응답에서
+  // 제외되므로, 계정 음성 목록 전체에서 지정 음성과 대체 음성을 찾는다.
+  const searchParams = new URLSearchParams({ page_size: "100" });
   const response = await fetch(`${ELEVENLABS_VOICES_API_URL}?${searchParams}`, {
     headers: {
       Accept: "application/json",
@@ -40,7 +43,7 @@ const getVoiceIdFromAccount = async (signal: AbortSignal) => {
       return false;
     }
 
-    return (voice as { name?: unknown }).name === ELEVENLABS_VOICE_NAME;
+    return (voice as { name?: unknown }).name === voiceName;
   });
 
   const voiceId =
@@ -48,13 +51,36 @@ const getVoiceIdFromAccount = async (signal: AbortSignal) => {
       ? (matchedVoice as { voice_id?: unknown }).voice_id
       : null;
 
-  if (typeof voiceId !== "string" || !voiceId.trim()) {
-    throw new Error(
-      `ElevenLabs voice not found: ${ELEVENLABS_VOICE_NAME}. Add the voice to your account or set VITE_ELEVENLABS_VOICE_ID.`,
-    );
+  if (typeof voiceId === "string" && voiceId.trim()) {
+    return voiceId.trim();
   }
 
-  return voiceId.trim();
+  if (voiceName !== ELEVENLABS_VOICE_NAME) {
+    throw new Error(`ElevenLabs voice not found: ${voiceName}.`);
+  }
+
+  const fallbackVoice = voices.find((voice) => {
+    if (!voice || typeof voice !== "object") {
+      return false;
+    }
+
+    return (voice as { name?: unknown }).name === ELEVENLABS_FALLBACK_VOICE_NAME;
+  });
+  const fallbackVoiceId =
+    fallbackVoice && typeof fallbackVoice === "object"
+      ? (fallbackVoice as { voice_id?: unknown }).voice_id
+      : null;
+
+  if (typeof fallbackVoiceId === "string" && fallbackVoiceId.trim()) {
+    console.warn(
+      `${ELEVENLABS_VOICE_NAME}를 찾지 못해 ${ELEVENLABS_FALLBACK_VOICE_NAME} 음성을 사용합니다.`,
+    );
+    return fallbackVoiceId.trim();
+  }
+
+  throw new Error(
+    `ElevenLabs voice not found: ${ELEVENLABS_VOICE_NAME}. Set VITE_ELEVENLABS_VOICE_ID.`,
+  );
 };
 
 const createSpeechRequest = (text: string) =>
@@ -66,10 +92,36 @@ const createSpeechRequest = (text: string) =>
     },
   });
 
+const requestSpeech = (voiceId: string, text: string, signal: AbortSignal) =>
+  fetch(
+    `${ELEVENLABS_TTS_API_URL}/${encodeURIComponent(voiceId)}?output_format=${ELEVENLABS_OUTPUT_FORMAT}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: createSpeechRequest(text),
+      signal,
+    },
+  );
+
+const isVoiceAccessRestricted = async (response: Response) => {
+  if (response.status !== 400) {
+    return false;
+  }
+
+  const body = await response.clone().text();
+  return (
+    body.includes("free_users_not_allowed") ||
+    body.includes("creator tier or above")
+  );
+};
+
 export const useElevenLabsTts = (text: string) => {
   const [status, setStatus] = useState<QuestionAudioStatus>("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
+  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const resolvedVoiceIdRef = useRef<string | null>(null);
   const voiceIdRequestRef = useRef<Promise<string> | null>(null);
@@ -92,10 +144,20 @@ export const useElevenLabsTts = (text: string) => {
     audioRef.current = null;
   };
 
+  const releaseSpeech = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    speechRef.current = null;
+  };
+
   const stop = () => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
     releaseAudio();
+    releaseSpeech();
     clearAudioUrl();
     setStatus("idle");
   };
@@ -104,9 +166,54 @@ export const useElevenLabsTts = (text: string) => {
     return () => {
       abortControllerRef.current?.abort();
       releaseAudio();
+      releaseSpeech();
       clearAudioUrl();
     };
   }, []);
+
+  const playWithBrowserSpeech = (speechText: string, signal: AbortSignal) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      throw new Error("브라우저 음성 기능을 사용할 수 없습니다.");
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const utterance = new SpeechSynthesisUtterance(speechText);
+      utterance.lang = "ko-KR";
+      utterance.rate = ELEVENLABS_SPEECH_SPEED;
+      speechRef.current = utterance;
+
+      const finish = () => {
+        speechRef.current = null;
+        setStatus("idle");
+        resolve();
+      };
+
+      utterance.onend = finish;
+      utterance.onerror = (event) => {
+        speechRef.current = null;
+
+        if (signal.aborted || event.error === "canceled") {
+          resolve();
+          return;
+        }
+
+        setStatus("idle");
+        reject(new Error(`브라우저 음성 재생 실패: ${event.error}`));
+      };
+
+      signal.addEventListener(
+        "abort",
+        () => {
+          window.speechSynthesis.cancel();
+          finish();
+        },
+        { once: true },
+      );
+
+      window.speechSynthesis.speak(utterance);
+      setStatus("playing");
+    });
+  };
 
   const play = async () => {
     if (!text.trim() || status === "loading") {
@@ -137,19 +244,43 @@ export const useElevenLabsTts = (text: string) => {
         }
       }
 
-      const response = await fetch(
-        `${ELEVENLABS_TTS_API_URL}/${encodeURIComponent(resolvedVoiceIdRef.current)}?output_format=${ELEVENLABS_OUTPUT_FORMAT}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: createSpeechRequest(text),
-          signal: controller.signal,
-        },
+      let response = await requestSpeech(
+        resolvedVoiceIdRef.current,
+        text,
+        controller.signal,
       );
 
+      if (
+        (await isVoiceAccessRestricted(response)) &&
+        resolvedVoiceIdRef.current !== ELEVENLABS_FALLBACK_VOICE_NAME
+      ) {
+        const fallbackVoiceId = await getVoiceIdFromAccount(
+          controller.signal,
+          ELEVENLABS_FALLBACK_VOICE_NAME,
+        );
+
+        if (fallbackVoiceId !== resolvedVoiceIdRef.current) {
+          console.warn(
+            `${ELEVENLABS_VOICE_NAME}는 현재 요금제에서 사용할 수 없어 ${ELEVENLABS_FALLBACK_VOICE_NAME} 음성으로 재생합니다.`,
+          );
+          resolvedVoiceIdRef.current = fallbackVoiceId;
+          response = await requestSpeech(
+            fallbackVoiceId,
+            text,
+            controller.signal,
+          );
+        }
+      }
+
       if (!response.ok) {
+        if (response.status === 401) {
+          console.warn(
+            "ElevenLabs API 키를 인증할 수 없어 브라우저 음성으로 재생합니다.",
+          );
+          await playWithBrowserSpeech(text, controller.signal);
+          return;
+        }
+
         throw new Error(`ElevenLabs TTS failed with ${response.status}`);
       }
 
