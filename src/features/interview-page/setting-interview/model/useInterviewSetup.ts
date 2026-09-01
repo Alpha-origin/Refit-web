@@ -18,6 +18,9 @@ import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
   type InterviewDifficultyOption,
+  type InterviewerPersonalityOption,
+  type InterviewerSpecialtyOption,
+  type InterviewerToneOption,
   type InterviewSettingSelectHandlers,
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
@@ -50,9 +53,13 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   어려움: "HARD",
 };
 
-const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
 const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
+
+const MAJOR_BY_SPECIALTY: Record<InterviewerSpecialtyOption, InterviewPersonaMajor> = {
+  프론트엔드: "FRONTEND",
+  백엔드: "BACKEND",
+};
 
 const buildUniquePersonaName = (personaName: string) =>
   `${personaName}-${Date.now().toString(36)}`;
@@ -70,6 +77,18 @@ export const useInterviewSetup = () => {
 
   const [selectedInterviewerId, setSelectedInterviewerId] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId,
+  );
+
+  const [selectedPersonality, setSelectedPersonality] = useState<InterviewerPersonalityOption>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.personality,
+  );
+
+  const [selectedTone, setSelectedTone] = useState<InterviewerToneOption>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.tone,
+  );
+
+  const [selectedSpecialty, setSelectedSpecialty] = useState<InterviewerSpecialtyOption>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.specialty,
   );
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -107,7 +126,7 @@ export const useInterviewSetup = () => {
       personaName: buildUniquePersonaName(selectedInterviewer.personaName),
       role: DEFAULT_INTERVIEW_ROLE,
       level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
-      major: DEFAULT_INTERVIEW_MAJOR,
+      major: MAJOR_BY_SPECIALTY[selectedSpecialty],
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
       gender: DEFAULT_INTERVIEW_GENDER,
@@ -205,6 +224,9 @@ export const useInterviewSetup = () => {
           style: selectedStyle,
           difficulty: selectedDifficulty,
           interviewerId: selectedInterviewerId,
+          personality: selectedPersonality,
+          tone: selectedTone,
+          specialty: selectedSpecialty,
         },
       },
     });
@@ -213,7 +235,13 @@ export const useInterviewSetup = () => {
   const select: InterviewSettingSelectHandlers = {
     difficulty: setSelectedDifficulty,
     interviewer: setSelectedInterviewerId,
+    personality: setSelectedPersonality,
+    specialty: (value) => {
+      setSelectedSpecialty(value);
+      setSelectedInterviewerId(value === "프론트엔드" ? 2 : 1);
+    },
     style: setSelectedStyle,
+    tone: setSelectedTone,
   };
 
   return {
@@ -226,7 +254,10 @@ export const useInterviewSetup = () => {
     selection: {
       difficulty: selectedDifficulty,
       interviewerId: selectedInterviewerId,
+      personality: selectedPersonality,
+      specialty: selectedSpecialty,
       style: selectedStyle,
+      tone: selectedTone,
     },
   };
 };
