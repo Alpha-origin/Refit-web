@@ -8,11 +8,13 @@ const spin = keyframes`
 
 
 export const Container = styled.div`
-    position: relative;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
     width: 100%;
-    min-height: 100dvh;
+    height: 100dvh;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     background-color: #f2f3f5;
     box-sizing: border-box;
     overflow: hidden;
@@ -28,45 +30,6 @@ export const BackgroundImage = styled.img`
     object-fit: cover;
 `;
 
-export const Header = styled.header`
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    min-height: 4.25rem;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: center;
-    padding: 0 2.5rem;
-    margin-top: 0.6rem;
-    box-sizing: border-box;
-
-    @media (max-width: 72rem) {
-        padding: 0 1.5rem;
-    }
-
-    @media (max-width: 56rem) {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1rem 0;
-    }
-`;
-
-export const Logo = styled.img`
-    width: auto;
-    height: 3.75rem;
-    display: block;
-    flex-shrink: 0;
-    justify-self: start;
-    margin-left: -1rem;
-
-    @media (max-width: 56rem) {
-        height: 3.1rem;
-        justify-self: center;
-        margin-left: 0;
-    }
-`;
-
 export const LoadingBox = styled.div`
     position: relative;
     z-index: 1;
@@ -76,7 +39,6 @@ export const LoadingBox = styled.div`
     justify-content: center;
     gap: 16px;
     min-height: 0;
-    padding-bottom: 4.85rem;
     box-sizing: border-box;
 `;
 
