@@ -19,6 +19,7 @@ const getMemoKey = (sessionId?: string) =>
 const InterviewDashboard = () => {
   const interview = useInterviewSessionContext();
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
   const sessionId = interview.preparedInterview?.sessionId;
   const memoKey = useMemo(() => getMemoKey(sessionId), [sessionId]);
@@ -36,7 +37,7 @@ const InterviewDashboard = () => {
     !interview.isInterviewReady || isQuestionLoading || interview.isSubmitting;
 
   useEffect(() => {
-    if (!interview.isInterviewReady) {
+    if (!interview.isInterviewReady || !isTimerRunning) {
       return;
     }
 
@@ -45,7 +46,7 @@ const InterviewDashboard = () => {
     }, 1_000);
 
     return () => window.clearInterval(intervalId);
-  }, [interview.isInterviewReady]);
+  }, [interview.isInterviewReady, isTimerRunning]);
 
   useEffect(() => {
     setMemo(memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "");
@@ -66,6 +67,7 @@ const InterviewDashboard = () => {
   };
 
   const handleStartVoice = () => {
+    setIsTimerRunning(true);
     setIsVoiceAnswering(true);
     interview.onStartVoice();
   };
