@@ -26,6 +26,7 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
+const AWAITING_RESPONSE_TIMEOUT_MS = 30_000;
 
 const buildQuestionKey = (question: CurrentInterviewQuestion | null) => {
   if (!question) {
@@ -72,6 +73,7 @@ export const useInterviewSession = (
   const initialQuestion = buildInitialQuestion(preparedInterview);
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAwaitingNextQuestion, setIsAwaitingNextQuestion] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<CurrentInterviewQuestion | null>(
     () => initialQuestion,
   );
@@ -95,6 +97,8 @@ export const useInterviewSession = (
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
   const autoPlayedQuestionKeyRef = useRef<string | null>(null);
+  const awaitingResponseTimeoutRef = useRef<number | null>(null);
+  const isCompletingVoiceRef = useRef(false);
   const currentQuestionKeyRef = useRef<string | null>(
     buildQuestionKey(initialQuestion),
   );
@@ -107,6 +111,26 @@ export const useInterviewSession = (
       reason === "completed" ? INTERVIEW_COMPLETED_PATH : "/main",
     [],
   );
+  const clearAwaitingResponseTimeout = useCallback(() => {
+    if (awaitingResponseTimeoutRef.current !== null) {
+      window.clearTimeout(awaitingResponseTimeoutRef.current);
+      awaitingResponseTimeoutRef.current = null;
+    }
+  }, []);
+  const scheduleAwaitingResponseTimeout = useCallback(() => {
+    clearAwaitingResponseTimeout();
+    awaitingResponseTimeoutRef.current = window.setTimeout(() => {
+      awaitingResponseTimeoutRef.current = null;
+      setIsAwaitingNextQuestion(false);
+      console.warn("[interview] timed out waiting for the next question");
+    }, AWAITING_RESPONSE_TIMEOUT_MS);
+  }, [clearAwaitingResponseTimeout]);
+
+  useEffect(() => {
+    return () => {
+      clearAwaitingResponseTimeout();
+    };
+  }, [clearAwaitingResponseTimeout]);
 
   useEffect(() => {
     sessionIdRef.current = sessionId;
@@ -144,6 +168,9 @@ export const useInterviewSession = (
   }, [currentQuestion, questionTts]);
 
   const applyCurrentQuestion = useCallback((nextQuestion: CurrentInterviewQuestion) => {
+    clearAwaitingResponseTimeout();
+    setIsAwaitingNextQuestion(false);
+
     const nextQuestionKey = buildQuestionKey(nextQuestion);
 
     if (currentQuestionKeyRef.current === nextQuestionKey) {
@@ -155,7 +182,7 @@ export const useInterviewSession = (
     setDisplayQuestionNumber((previousNumber) =>
       previousNumber > 0 ? previousNumber + 1 : 1,
     );
-  }, []);
+  }, [clearAwaitingResponseTimeout]);
 
   const endInterviewSession = useCallback(
     async (
@@ -355,11 +382,12 @@ export const useInterviewSession = (
       return;
     }
 
-    if (isSubmitting || !canSubmitAnswer) {
+    if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
       console.warn("[interview] start voice blocked", {
         canSubmitAnswer,
         currentQuestion,
         interviewStatus,
+        isAwaitingNextQuestion,
         isSubmitting,
       });
       return;
@@ -370,7 +398,7 @@ export const useInterviewSession = (
   };
 
   const submitAnswer = async (content: string) => {
-    if (isSubmitting || !canSubmitAnswer) {
+    if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
       return;
     }
 
@@ -381,11 +409,15 @@ export const useInterviewSession = (
     }
 
     setIsSubmitting(true);
+    setIsAwaitingNextQuestion(true);
+    scheduleAwaitingResponseTimeout();
 
     const activeSessionId = sessionIdRef.current ?? getActiveInterviewSessionId();
 
     if (!activeSessionId) {
       setIsSubmitting(false);
+      clearAwaitingResponseTimeout();
+      setIsAwaitingNextQuestion(false);
       console.warn("[interview] missing sessionId when submitting answer");
       return;
     }
@@ -400,6 +432,8 @@ export const useInterviewSession = (
     setIsSubmitting(false);
 
     if (errorMessage) {
+      clearAwaitingResponseTimeout();
+      setIsAwaitingNextQuestion(false);
       return;
     }
 
@@ -414,6 +448,8 @@ export const useInterviewSession = (
       setInterviewStatus(data.status);
 
       if (data.status === "COMPLETED") {
+        clearAwaitingResponseTimeout();
+        setIsAwaitingNextQuestion(false);
         await endInterviewSession(true, "completed");
         return;
       }
@@ -429,8 +465,18 @@ export const useInterviewSession = (
   };
 
   const handleCompleteVoice = async () => {
-    const voiceContent = await voiceAnswer.onCompleteVoice();
-    await submitAnswer(voiceContent || voiceAnswer.answerText);
+    if (isCompletingVoiceRef.current || isSubmitting || isAwaitingNextQuestion) {
+      return;
+    }
+
+    isCompletingVoiceRef.current = true;
+
+    try {
+      const voiceContent = await voiceAnswer.onCompleteVoice();
+      await submitAnswer(voiceContent || voiceAnswer.answerText);
+    } finally {
+      isCompletingVoiceRef.current = false;
+    }
   };
 
   const handleSubmitText = async () => {
@@ -449,8 +495,11 @@ export const useInterviewSession = (
     cameraState,
     currentQuestion,
     displayQuestionNumber,
+    isAwaitingNextQuestion,
+    isAwaitingResponse: isSubmitting || isAwaitingNextQuestion,
     isInterviewReady: isChatSessionReady,
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
+    isSubmitting,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
     questionAudioStatus: questionTts.status,

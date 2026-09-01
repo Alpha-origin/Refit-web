@@ -54,8 +54,11 @@ const InterviewPageContent = () => {
   const isTextMode = interviewSession.mode === "text";
   const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
   const isQuestionLoading = interviewSession.currentQuestion === null;
+  const isAwaitingResponse = interviewSession.isAwaitingResponse;
   const isStartActionDisabled =
-    !interviewSession.isInterviewReady || isQuestionLoading;
+    !interviewSession.isInterviewReady ||
+    isQuestionLoading ||
+    isAwaitingResponse;
 
   useEffect(() => {
     if (!isTimerRunning) {
@@ -76,12 +79,20 @@ const InterviewPageContent = () => {
   }
 
   const handleStartVoice = () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
     setIsVoiceAnswering(true);
     setIsTimerRunning(true);
     interviewSession.onStartVoice();
   };
 
   const handleCompleteVoice = async () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
     try {
       await interviewSession.onCompleteVoice();
     } finally {
@@ -113,6 +124,7 @@ const InterviewPageContent = () => {
                   type="button"
                   $active={interviewSession.mode === "text"}
                   aria-pressed={interviewSession.mode === "text"}
+                  disabled={isAwaitingResponse}
                   onClick={() => handleModeChange("text")}
                 >
                   텍스트
@@ -121,6 +133,7 @@ const InterviewPageContent = () => {
                   type="button"
                   $active={interviewSession.mode === "voice"}
                   aria-pressed={interviewSession.mode === "voice"}
+                  disabled={isAwaitingResponse}
                   onClick={() => handleModeChange("voice")}
                 >
                   음성
@@ -171,8 +184,13 @@ const InterviewPageContent = () => {
                 />
               </S.IconActionButton>
               {isVoiceActionStarted ? (
-                <S.PrimaryAction type="button" onClick={handleCompleteVoice}>
-                  끝내기
+                <S.PrimaryAction
+                  type="button"
+                  onClick={handleCompleteVoice}
+                  disabled={isAwaitingResponse}
+                  aria-busy={isAwaitingResponse}
+                >
+                  {isAwaitingResponse ? "응답 대기중..." : "끝내기"}
                 </S.PrimaryAction>
               ) : (
                 <S.PrimaryAction
@@ -180,14 +198,18 @@ const InterviewPageContent = () => {
                   onClick={handleStartVoice}
                   disabled={isStartActionDisabled}
                   aria-disabled={isStartActionDisabled}
-                  aria-busy={interviewSession.isPreparingInterview}
+                  aria-busy={interviewSession.isPreparingInterview || isAwaitingResponse}
                   title={
-                    isStartActionDisabled
+                    isStartActionDisabled && !isAwaitingResponse
                       ? "포트폴리오를 등록하고 잠시 기다려주세요."
                       : undefined
                   }
                 >
-                  {interviewSession.isPreparingInterview ? "준비 중..." : "시작하기"}
+                  {isAwaitingResponse
+                    ? "응답 대기중..."
+                    : interviewSession.isPreparingInterview
+                      ? "준비 중..."
+                      : "시작하기"}
                 </S.PrimaryAction>
               )}
             </>
