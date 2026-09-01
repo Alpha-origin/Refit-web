@@ -16,6 +16,7 @@ import {
   type InterviewPersonaMajor,
   type InterviewPersonaRole,
   type PersonaType,
+  type PrepareInterviewQuestion,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
@@ -171,8 +172,10 @@ export const useInterviewSetup = () => {
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
     const personaId =
-      data.personaId > 0 ? data.personaId : savedPersona.personaId;
-    let tailoredQuestions = preparedInterviewRecord.questions;
+      data.personaId !== null && data.personaId > 0
+        ? data.personaId
+        : savedPersona.personaId;
+    let tailoredQuestions: PrepareInterviewQuestion[] = [];
 
     try {
       const tailorResponse = await getTailoredQuestions(

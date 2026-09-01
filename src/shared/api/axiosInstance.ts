@@ -39,7 +39,10 @@ export const apiInstance = axios.create({
 export const chatInstance = axios.create({
   baseURL: CHAT_URL,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
+  },
 });
 
 const refreshInstance = axios.create({
@@ -152,7 +155,15 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
       ) {
         originalRequest._retry = true;
         const refreshed = await tryRefreshSession();
-        if (refreshed) return instance(originalRequest);
+        if (refreshed) {
+          const nextHeaders = axios.AxiosHeaders.from(
+            originalRequest.headers,
+          ) as AxiosHeaders;
+          nextHeaders.delete("Authorization");
+          originalRequest.headers = nextHeaders;
+
+          return instance(originalRequest);
+        }
       }
 
       if (error.response?.status === 401) {

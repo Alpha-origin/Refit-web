@@ -83,8 +83,10 @@ export const normalizeTailoredQuestions = (
     }
 
     questions.push({
-      questionId: getNumber(record?.id ?? record?.questionId, index + 1),
-      intention: getString(record?.category ?? record?.intention ?? record?.purpose),
+      questionId: getNumber(record?.questionId ?? record?.id, index + 1),
+      intention: getString(
+        record?.intention ?? record?.category ?? record?.purpose,
+      ),
       content,
       expectedAnswer: getString(record?.expectedAnswer ?? record?.answer),
       basedOn: getStringArray(record?.basedOn),

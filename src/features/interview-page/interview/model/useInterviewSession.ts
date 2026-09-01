@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -65,25 +65,121 @@ const buildInitialQuestion = (
   };
 };
 
+interface InterviewSessionState {
+  currentQuestion: CurrentInterviewQuestion | null;
+  displayQuestionNumber: number;
+  interviewStatus: InterviewProgressStatus;
+  isChatSessionReady: boolean;
+}
+
+type InterviewSessionAction =
+  | { type: "RESET_SESSION"; preparedInterview?: PreparedInterviewData | null }
+  | { type: "SYNC_QUESTION"; question: CurrentInterviewQuestion }
+  | { type: "ADVANCE_QUESTION"; question: CurrentInterviewQuestion }
+  | { type: "SET_INTERVIEW_STATUS"; status: InterviewProgressStatus }
+  | { type: "SET_CHAT_SESSION_READY" };
+
+const buildInterviewSessionState = (
+  preparedInterview?: PreparedInterviewData | null,
+): InterviewSessionState => {
+  const initialQuestion = buildInitialQuestion(preparedInterview);
+
+  return {
+    currentQuestion: initialQuestion,
+    displayQuestionNumber: initialQuestion ? 1 : 0,
+    interviewStatus: preparedInterview?.status ?? "IN_PROGRESS",
+    isChatSessionReady: !preparedInterview,
+  };
+};
+
+const isSameQuestion = (
+  left: CurrentInterviewQuestion | null,
+  right: CurrentInterviewQuestion | null,
+) => buildQuestionKey(left) === buildQuestionKey(right);
+
+const isSameQuestionPrompt = (
+  left: CurrentInterviewQuestion | null,
+  right: CurrentInterviewQuestion | null,
+) =>
+  left !== null &&
+  right !== null &&
+  left.intention === right.intention &&
+  left.content === right.content;
+
+const interviewSessionReducer = (
+  state: InterviewSessionState,
+  action: InterviewSessionAction,
+): InterviewSessionState => {
+  switch (action.type) {
+    case "RESET_SESSION": {
+      const nextState = buildInterviewSessionState(action.preparedInterview);
+
+      if (
+        nextState.displayQuestionNumber === state.displayQuestionNumber &&
+        nextState.interviewStatus === state.interviewStatus &&
+        nextState.isChatSessionReady === state.isChatSessionReady &&
+        isSameQuestion(nextState.currentQuestion, state.currentQuestion)
+      ) {
+        return state;
+      }
+
+      return nextState;
+    }
+    case "SYNC_QUESTION": {
+      if (isSameQuestion(state.currentQuestion, action.question)) {
+        return state;
+      }
+
+      return {
+        ...state,
+        currentQuestion: action.question,
+        displayQuestionNumber:
+          state.displayQuestionNumber > 0 ? state.displayQuestionNumber : 1,
+      };
+    }
+    case "ADVANCE_QUESTION": {
+      return {
+        ...state,
+        currentQuestion: action.question,
+        displayQuestionNumber:
+          state.displayQuestionNumber > 0 ? state.displayQuestionNumber + 1 : 1,
+      };
+    }
+    case "SET_INTERVIEW_STATUS": {
+      if (state.interviewStatus === action.status) {
+        return state;
+      }
+
+      return { ...state, interviewStatus: action.status };
+    }
+    case "SET_CHAT_SESSION_READY": {
+      if (state.isChatSessionReady) {
+        return state;
+      }
+
+      return { ...state, isChatSessionReady: true };
+    }
+  }
+};
+
 export const useInterviewSession = (
   preparedInterview?: PreparedInterviewData | null,
 ) => {
   const navigate = useNavigate();
-  const initialQuestion = buildInitialQuestion(preparedInterview);
+  const [session, dispatch] = useReducer(
+    interviewSessionReducer,
+    preparedInterview,
+    buildInterviewSessionState,
+  );
+  const {
+    currentQuestion,
+    displayQuestionNumber,
+    interviewStatus,
+    isChatSessionReady,
+  } = session;
   const [mode, setMode] = useState<InterviewMode>("voice");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState<CurrentInterviewQuestion | null>(
-    () => initialQuestion,
-  );
-  const [displayQuestionNumber, setDisplayQuestionNumber] = useState(
-    () => (initialQuestion ? 1 : 0),
-  );
-  const [interviewStatus, setInterviewStatus] = useState<InterviewProgressStatus>(
-    preparedInterview?.status ?? "IN_PROGRESS",
-  );
-  const [isChatSessionReady, setIsChatSessionReady] = useState(
-    () => !preparedInterview,
-  );
+  const [preparationError, setPreparationError] = useState<string | null>(null);
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
@@ -95,9 +191,6 @@ export const useInterviewSession = (
   const sessionIdRef = useRef<string | null>(sessionId);
   const displayQuestionNumberRef = useRef(displayQuestionNumber);
   const autoPlayedQuestionKeyRef = useRef<string | null>(null);
-  const currentQuestionKeyRef = useRef<string | null>(
-    buildQuestionKey(initialQuestion),
-  );
   const canSubmitAnswer =
     isChatSessionReady &&
     interviewStatus === "IN_PROGRESS" &&
@@ -117,13 +210,7 @@ export const useInterviewSession = (
   }, [displayQuestionNumber]);
 
   useEffect(() => {
-    const nextInitialQuestion = buildInitialQuestion(preparedInterview);
-
-    currentQuestionKeyRef.current = buildQuestionKey(nextInitialQuestion);
-    setCurrentQuestion(nextInitialQuestion);
-    setDisplayQuestionNumber(nextInitialQuestion ? 1 : 0);
-    setInterviewStatus(preparedInterview?.status ?? "IN_PROGRESS");
-    setIsChatSessionReady(!preparedInterview);
+    dispatch({ type: "RESET_SESSION", preparedInterview });
     isSessionClosedRef.current = false;
     hasPreparedChatSessionRef.current = !preparedInterview;
   }, [preparedInterview]);
@@ -143,19 +230,19 @@ export const useInterviewSession = (
     void questionTts.onPlay();
   }, [currentQuestion, questionTts]);
 
-  const applyCurrentQuestion = useCallback((nextQuestion: CurrentInterviewQuestion) => {
-    const nextQuestionKey = buildQuestionKey(nextQuestion);
+  const syncCurrentQuestion = useCallback(
+    (nextQuestion: CurrentInterviewQuestion) => {
+      dispatch({ type: "SYNC_QUESTION", question: nextQuestion });
+    },
+    [dispatch],
+  );
 
-    if (currentQuestionKeyRef.current === nextQuestionKey) {
-      return;
-    }
-
-    currentQuestionKeyRef.current = nextQuestionKey;
-    setCurrentQuestion(nextQuestion);
-    setDisplayQuestionNumber((previousNumber) =>
-      previousNumber > 0 ? previousNumber + 1 : 1,
-    );
-  }, []);
+  const advanceCurrentQuestion = useCallback(
+    (nextQuestion: CurrentInterviewQuestion) => {
+      dispatch({ type: "ADVANCE_QUESTION", question: nextQuestion });
+    },
+    [dispatch],
+  );
 
   const endInterviewSession = useCallback(
     async (
@@ -216,25 +303,25 @@ export const useInterviewSession = (
       status: InterviewProgressStatus | null;
     }) => {
       if (question) {
-        applyCurrentQuestion(question);
+        syncCurrentQuestion(question);
       }
 
       if (!status) {
         return;
       }
 
-      setInterviewStatus(status);
+      dispatch({ type: "SET_INTERVIEW_STATUS", status });
 
       if (status === "COMPLETED") {
         void endInterviewSession(true, "completed");
       }
     },
-    [applyCurrentQuestion, endInterviewSession],
+    [endInterviewSession, syncCurrentQuestion],
   );
 
   useInterviewSocket({
     sessionId: isChatSessionReady ? sessionId : null,
-    onQuestionReceived: applyCurrentQuestion,
+    onQuestionReceived: syncCurrentQuestion,
     onStatusChange: handleSocketStatusChange,
   });
 
@@ -274,6 +361,7 @@ export const useInterviewSession = (
 
       if (errorMessage || !data) {
         preparedChatSessionIdRef.current = null;
+        setPreparationError(errorMessage ?? "면접 준비에 실패했습니다.");
         return;
       }
 
@@ -282,13 +370,13 @@ export const useInterviewSession = (
       hasPreparedChatSessionRef.current = true;
 
       if (data.status) {
-        setInterviewStatus(data.status);
+        dispatch({ type: "SET_INTERVIEW_STATUS", status: data.status });
       }
 
       const firstQuestion = buildInitialQuestion(data);
 
       if (firstQuestion) {
-        applyCurrentQuestion(firstQuestion);
+        syncCurrentQuestion(firstQuestion);
       }
 
       if (!firstQuestion) {
@@ -299,11 +387,11 @@ export const useInterviewSession = (
         }
 
         if (nextQuestion) {
-          applyCurrentQuestion(nextQuestion);
+          syncCurrentQuestion(nextQuestion);
         }
       }
 
-      setIsChatSessionReady(true);
+      dispatch({ type: "SET_CHAT_SESSION_READY" });
     };
 
     void startInterviewSession();
@@ -315,7 +403,7 @@ export const useInterviewSession = (
         preparedChatSessionIdRef.current = null;
       }
     };
-  }, [applyCurrentQuestion, preparedInterview, sessionId]);
+  }, [preparedInterview, sessionId, syncCurrentQuestion]);
 
   useEffect(() => {
     return () => {
@@ -390,6 +478,8 @@ export const useInterviewSession = (
       return;
     }
 
+    const submittedQuestion = currentQuestion;
+
     const { data, errorMessage } = await submitInterviewAnswer({
       sessionId: activeSessionId,
       questionId: currentQuestion.questionId,
@@ -406,12 +496,8 @@ export const useInterviewSession = (
     questionTts.onStop();
     voiceAnswer.onClearAnswer();
 
-    if (data?.question) {
-      applyCurrentQuestion(data.question);
-    }
-
     if (data?.status) {
-      setInterviewStatus(data.status);
+      dispatch({ type: "SET_INTERVIEW_STATUS", status: data.status });
 
       if (data.status === "COMPLETED") {
         await endInterviewSession(true, "completed");
@@ -419,11 +505,27 @@ export const useInterviewSession = (
       }
     }
 
-    if (!data?.question) {
+    const responseQuestion = data?.question ?? null;
+    const hasNextResponseQuestion =
+      responseQuestion !== null &&
+      !isSameQuestionPrompt(responseQuestion, submittedQuestion);
+
+    if (responseQuestion) {
+      if (hasNextResponseQuestion) {
+        advanceCurrentQuestion(responseQuestion);
+      } else {
+        syncCurrentQuestion(responseQuestion);
+      }
+    }
+
+    if (!hasNextResponseQuestion) {
       const { data: nextQuestion } = await getCurrentInterviewQuestion(activeSessionId);
 
-      if (nextQuestion) {
-        applyCurrentQuestion(nextQuestion);
+      if (
+        nextQuestion &&
+        !isSameQuestionPrompt(nextQuestion, submittedQuestion)
+      ) {
+        advanceCurrentQuestion(nextQuestion);
       }
     }
   };
@@ -453,6 +555,7 @@ export const useInterviewSession = (
     isPreparingInterview: Boolean(preparedInterview) && !isChatSessionReady,
     isVoiceStarted: voiceAnswer.isVoiceStarted,
     mode,
+    preparationError,
     questionAudioStatus: questionTts.status,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,

@@ -13,6 +13,7 @@
 
     interface RawUserResponse {
     success?: boolean;
+    message?: string | null;
     data?: RawUserRecord;
     }
 
@@ -55,6 +56,25 @@
         const response = await authInstance.get<RawUserRecord | RawUserResponse>(
         GET_MY_INFO_URL,
         );
+
+        if ("success" in response.data && response.data.success === false) {
+        return {
+            data: null,
+            errorMessage:
+            response.data.message?.trim() || "회원 정보를 불러오지 못했습니다.",
+        };
+        }
+
+        if (
+        "success" in response.data &&
+        response.data.success === true &&
+        !response.data.data
+        ) {
+        return {
+            data: null,
+            errorMessage: "회원 정보를 받지 못했습니다.",
+        };
+        }
 
         return {
         data: normalizeUserMe(response.data),
