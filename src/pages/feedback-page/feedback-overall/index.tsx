@@ -57,6 +57,7 @@ const FeedbackOverallPage = () => {
             <FeedbackSummaryCard
               interview={interview}
               feedbackStatus={feedback?.status}
+              style={feedback?.style}
             />
             <FeedbackOverallTopSection content={content.topSection} />
             <FeedbackOverallMiddleSection content={content.middleSection} />

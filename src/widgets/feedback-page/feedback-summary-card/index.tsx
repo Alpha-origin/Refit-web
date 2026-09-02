@@ -4,6 +4,7 @@ import {
   getInterviewerCount,
   getInterviewModeLabel,
   getInterviewStatusLabel,
+  getInterviewStyleLabel,
 } from "@/features/feedback-page/model/interviewDisplay";
 
 import * as S from "./style";
@@ -11,12 +12,15 @@ import * as S from "./style";
 interface FeedbackSummaryCardProps {
   interview: InterviewSummary;
   feedbackStatus?: string;
+  style?: string;
 }
 
 const FeedbackSummaryCard = ({
   interview,
   feedbackStatus,
+  style,
 }: FeedbackSummaryCardProps) => {
+  const persona = interview.persona;
   const interviewerCount = getInterviewerCount(interview);
 
   return (
@@ -44,6 +48,13 @@ const FeedbackSummaryCard = ({
         <S.MetaCard>
           <S.MetaLabel>면접관 수</S.MetaLabel>
           <S.MetaValue>{interviewerCount > 0 ? `${interviewerCount}명` : "미제공"}</S.MetaValue>
+        </S.MetaCard>
+
+        <S.MetaCard>
+          <S.MetaLabel>면접관 성향</S.MetaLabel>
+          <S.MetaValue>
+            {getInterviewStyleLabel(style ?? persona?.type)}
+          </S.MetaValue>
         </S.MetaCard>
 
         <S.MetaCard>

@@ -62,7 +62,9 @@ const getListItems = (
         interview.persona?.id,
       ),
       title: getInterviewModeLabel(interview),
-      styleLabel: getInterviewStyleLabel(interview.persona?.type),
+      styleLabel: getInterviewStyleLabel(
+        feedback?.style ?? interview.persona?.type,
+      ),
       levelLabel: getCareerLabel(interview.persona?.career),
       interviewerName,
       statusLabel: feedback

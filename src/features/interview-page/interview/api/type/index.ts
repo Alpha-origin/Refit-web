@@ -9,6 +9,8 @@ export type {
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonality,
+  InterviewTone,
 } from "./create-interview";
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";

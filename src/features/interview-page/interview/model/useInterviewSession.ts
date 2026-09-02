@@ -103,6 +103,15 @@ const isSameQuestion = (
   right: CurrentInterviewQuestion | null,
 ) => buildQuestionKey(left) === buildQuestionKey(right);
 
+const isSameQuestionReference = (
+  left: CurrentInterviewQuestion | null,
+  right: CurrentInterviewQuestion | null,
+) =>
+  left !== null &&
+  right !== null &&
+  left.questionId === right.questionId &&
+  left.parentId === right.parentId;
+
 const isSameQuestionPrompt = (
   left: CurrentInterviewQuestion | null,
   right: CurrentInterviewQuestion | null,
@@ -111,6 +120,42 @@ const isSameQuestionPrompt = (
   right !== null &&
   left.intention === right.intention &&
   left.content === right.content;
+
+const isFollowUpQuestion = (question: CurrentInterviewQuestion | null) =>
+  question !== null && question.questionId < 0;
+
+const getFollowUpQuestionNumber = (
+  question: CurrentInterviewQuestion | null,
+) => {
+  if (!isFollowUpQuestion(question)) {
+    return null;
+  }
+
+  return Math.abs(question.questionId);
+};
+
+const getNextDisplayQuestionNumber = ({
+  currentQuestion,
+  currentQuestionNumber,
+  nextQuestion,
+}: {
+  currentQuestion: CurrentInterviewQuestion | null;
+  currentQuestionNumber: number;
+  nextQuestion: CurrentInterviewQuestion;
+}) => {
+  if (isFollowUpQuestion(nextQuestion)) {
+    return currentQuestionNumber > 0 ? currentQuestionNumber : 1;
+  }
+
+  if (
+    currentQuestion === null ||
+    isSameQuestionReference(currentQuestion, nextQuestion)
+  ) {
+    return currentQuestionNumber > 0 ? currentQuestionNumber : 1;
+  }
+
+  return currentQuestionNumber > 0 ? currentQuestionNumber + 1 : 1;
+};
 
 const interviewSessionReducer = (
   state: InterviewSessionState,
@@ -139,16 +184,22 @@ const interviewSessionReducer = (
       return {
         ...state,
         currentQuestion: action.question,
-        displayQuestionNumber:
-          state.displayQuestionNumber > 0 ? state.displayQuestionNumber : 1,
+        displayQuestionNumber: getNextDisplayQuestionNumber({
+          currentQuestion: state.currentQuestion,
+          currentQuestionNumber: state.displayQuestionNumber,
+          nextQuestion: action.question,
+        }),
       };
     }
     case "ADVANCE_QUESTION": {
       return {
         ...state,
         currentQuestion: action.question,
-        displayQuestionNumber:
-          state.displayQuestionNumber > 0 ? state.displayQuestionNumber + 1 : 1,
+        displayQuestionNumber: getNextDisplayQuestionNumber({
+          currentQuestion: state.currentQuestion,
+          currentQuestionNumber: state.displayQuestionNumber,
+          nextQuestion: action.question,
+        }),
       };
     }
     case "SET_INTERVIEW_STATUS": {
@@ -597,5 +648,6 @@ export const useInterviewSession = (
     videoRef,
     voiceLevel: voiceAnswer.voiceLevel,
     totalQuestionCount,
+    followUpQuestionNumber: getFollowUpQuestionNumber(currentQuestion),
   };
 };

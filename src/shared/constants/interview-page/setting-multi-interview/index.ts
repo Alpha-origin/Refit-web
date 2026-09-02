@@ -11,8 +11,8 @@ import type {
 
 export const TYPE_BY_STYLE = {
   편함: "FRIENDLY",
-  일반: "NEUTRAL",
-  압박: "STRESS",
+  일반: "REALISTIC",
+  압박: "METICULOUS",
 } as const;
 
 export const LEVEL_BY_DIFFICULTY = {

@@ -10,10 +10,12 @@ const FALLBACK_TOTAL_QUESTION_COUNT = 10;
 
 const formatQuestionLabel = ({
   currentQuestionNumber,
+  followUpQuestionNumber,
   isLoading,
   totalQuestionCount,
 }: {
   currentQuestionNumber: number;
+  followUpQuestionNumber: number | null;
   isLoading: boolean;
   totalQuestionCount: number;
 }) => {
@@ -21,9 +23,16 @@ const formatQuestionLabel = ({
     return "Question -- / --";
   }
 
-  return `Question ${String(currentQuestionNumber).padStart(2, "0")} / ${String(
-    totalQuestionCount,
-  ).padStart(2, "0")}`;
+  const questionNumber = String(currentQuestionNumber).padStart(2, "0");
+  const questionLabel =
+    followUpQuestionNumber === null
+      ? questionNumber
+      : `${questionNumber}-${followUpQuestionNumber}`;
+
+  return `Question ${questionLabel} / ${String(totalQuestionCount).padStart(
+    2,
+    "0",
+  )}`;
 };
 
 interface InterviewContentViewProps {
@@ -35,6 +44,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
     answerText,
     currentQuestion,
     displayQuestionNumber,
+    followUpQuestionNumber,
     isVoiceStarted,
     isSubmitting,
     mode,
@@ -56,6 +66,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
   const question = {
     id: formatQuestionLabel({
       currentQuestionNumber,
+      followUpQuestionNumber,
       isLoading: isQuestionLoading,
       totalQuestionCount,
     }),

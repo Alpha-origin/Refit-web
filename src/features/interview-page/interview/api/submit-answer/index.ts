@@ -43,9 +43,14 @@ export const submitInterviewAnswer = async ({
         content: trimmedContent,
       },
     );
+    const responseEvent = getInterviewEvent(response.data);
 
     return {
-      data: response.data,
+      data: {
+        ...response.data,
+        question: responseEvent.question ?? response.data.question,
+        message: responseEvent.message ?? response.data.message,
+      },
       errorMessage: null,
     };
   } catch (error) {

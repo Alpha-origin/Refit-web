@@ -123,7 +123,7 @@ const FeedbackList = ({
                       </S.ScoreLine>
                     ) : null}
                     <S.MetaGroup>
-                      <S.MetaLabel>스타일/난이도</S.MetaLabel>
+                      <S.MetaLabel>성향/난이도</S.MetaLabel>
                       <S.TagGroup>
                         <S.Tag key={`${item.id}-style`}>{item.styleLabel}</S.Tag>
                         <S.Tag key={`${item.id}-level`}>{item.levelLabel}</S.Tag>
