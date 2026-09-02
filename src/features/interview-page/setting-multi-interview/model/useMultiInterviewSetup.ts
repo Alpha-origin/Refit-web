@@ -12,6 +12,7 @@ import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   LEVEL_BY_DIFFICULTY,
   TYPE_BY_STYLE,
+  getInterviewerGender,
   getInterviewerCandidatesForSlot,
   type InterviewerTemplate,
   type MultiInterviewSelection,
@@ -182,7 +183,7 @@ export const useMultiInterviewSetup = () => {
           type: TYPE_BY_STYLE[style],
           level: LEVEL_BY_DIFFICULTY[difficulty],
           career: template.career,
-          gender: template.gender,
+          gender: getInterviewerGender(template.voiceIndex),
         };
         const { data: savedPersona, errorMessage: savePersonaError } =
           await savePersona(personaPayload);
@@ -250,6 +251,7 @@ export const useMultiInterviewSetup = () => {
               name: interviewer.name,
               roleLabel: interviewer.roleLabel,
               image: interviewer.image,
+              voiceIndex: interviewer.voiceIndex,
             })),
           },
           multiInterview: {

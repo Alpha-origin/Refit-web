@@ -94,6 +94,10 @@ export const MULTI_INTERVIEWER_TEMPLATES = [
   },
 ] as const satisfies readonly InterviewerTemplate[];
 
+export const getInterviewerGender = (
+  voiceIndex: InterviewerTemplate["voiceIndex"],
+) => (voiceIndex <= 2 ? "FEMALE" : "MALE");
+
 interface InterviewerRoleConfig {
   role: InterviewerTemplateRole;
   roleLabel: string;
