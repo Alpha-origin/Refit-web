@@ -1,9 +1,14 @@
 import type { PrepareInterviewQuestion } from "./prepare-interview";
 
 export type InterviewPersonaMajor = "BACKEND" | "FRONTEND";
-export type CreateInterviewPersonaType = "FRIENDLY" | "NEUTRAL" | "STRESS";
+export type InterviewPersonality =
+  | "FRIENDLY"
+  | "REALISTIC"
+  | "METICULOUS";
+export type CreateInterviewPersonaType = InterviewPersonality;
 export type InterviewPersonaGender = "MALE" | "FEMALE";
 export type InterviewPersonaRole = "TECH" | "HR" | "CEO" | "PM" | "DESIGN";
+export type InterviewTone = "GENTLE" | "DIRECT" | "PRESSURING";
 export type InterviewMode = "SOLO" | "MULTI";
 export type InterviewLifecycleStatus =
   | "IN_PROGRESS"

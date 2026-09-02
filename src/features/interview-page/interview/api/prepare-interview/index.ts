@@ -210,6 +210,7 @@ const buildPrepareInterviewRequest = (
     level: params.level,
     career: params.career,
     gender: params.gender,
+    tone: params.tone,
     jobId: params.jobId.trim(),
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,

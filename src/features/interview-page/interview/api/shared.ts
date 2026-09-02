@@ -6,7 +6,11 @@ import type {
   PersonaType,
 } from "./type";
 
-const PERSONA_TYPES: readonly PersonaType[] = ["FRIENDLY", "NEUTRAL", "STRESS"];
+const PERSONA_TYPES: readonly PersonaType[] = [
+  "FRIENDLY",
+  "REALISTIC",
+  "METICULOUS",
+];
 const INTERVIEW_PROGRESS_STATUSES: readonly InterviewProgressStatus[] = [
   "IN_PROGRESS",
   "COMPLETED",
