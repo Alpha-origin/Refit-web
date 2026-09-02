@@ -195,7 +195,11 @@ export const useInterviewSession = (
     isChatSessionReady,
     totalQuestionCount,
   } = session;
-  const [mode, setMode] = useState<InterviewMode>("voice");
+  const [mode, setMode] = useState<InterviewMode>(
+    preparedInterview?.mode === "MULTI" || ttsProvider === "supertone"
+      ? "text"
+      : "voice",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isWaitingForNextQuestion, setIsWaitingForNextQuestion] = useState(false);
   const [preparationError, setPreparationError] = useState<string | null>(null);
