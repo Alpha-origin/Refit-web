@@ -5,6 +5,7 @@ import type { SettingActionsProps } from './type';
 const SettingActions = ({
   isBusy,
   isNextDisabled,
+  isPortfolioAnalyzing,
   onBack,
   onNext,
 }: SettingActionsProps) => (
@@ -18,12 +19,21 @@ const SettingActions = ({
       {INTERVIEW_SETTING_ACTION_LABELS.back}
     </S.BackButton>
     <S.NextButton
+      $analyzing={isPortfolioAnalyzing}
       $disabled={isNextDisabled}
       disabled={isNextDisabled}
       type="button"
       onClick={onNext}
     >
-      {isBusy ? '시작 중...' : INTERVIEW_SETTING_ACTION_LABELS.next}
+      {isBusy
+        ? '시작 중...'
+          : isPortfolioAnalyzing
+          ? (
+            <>
+              분석 중<S.LoadingDots aria-hidden="true" />
+            </>
+          )
+          : INTERVIEW_SETTING_ACTION_LABELS.next}
     </S.NextButton>
   </S.BottomButtonWrapper>
 );

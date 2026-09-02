@@ -9,12 +9,15 @@ export type {
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonaTone,
 } from "./create-interview";
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";
 export type {
   InterviewLevel,
   InterviewProgressStatus,
+  PreparedInterviewer,
+  PreparedInterviewMode,
   PersonaType,
   PrepareInterviewParams,
   PrepareInterviewQuestion,

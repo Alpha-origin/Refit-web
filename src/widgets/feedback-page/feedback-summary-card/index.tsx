@@ -1,65 +1,53 @@
 import type { InterviewSummary } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import {
-  getCareerLabel,
   getFormattedDate,
-  getInterviewMajorLabel,
+  getInterviewerCount,
+  getInterviewModeLabel,
   getInterviewStatusLabel,
-  getInterviewStyleLabel,
-  getInterviewTitle,
-  getInterviewerName,
 } from "@/features/feedback-page/model/interviewDisplay";
 
 import * as S from "./style";
 
 interface FeedbackSummaryCardProps {
   interview: InterviewSummary;
-  notice: string;
+  feedbackStatus?: string;
 }
 
 const FeedbackSummaryCard = ({
   interview,
-  notice,
+  feedbackStatus,
 }: FeedbackSummaryCardProps) => {
-  const persona = interview.persona;
+  const interviewerCount = getInterviewerCount(interview);
 
   return (
     <S.Card>
       <S.HeaderRow>
         <S.HeaderText>
-          <S.Eyebrow>실제 연결된 면접 정보</S.Eyebrow>
-          <S.Title>{getInterviewTitle(persona?.major)}</S.Title>
+          <S.Eyebrow>면접 결과</S.Eyebrow>
+          <S.Title>{getInterviewModeLabel(interview)}</S.Title>
           <S.Description>
-            {getFormattedDate(interview.createdAt)}에 진행된{" "}
-            {getInterviewerName(interview)} 면접입니다.
+            {getFormattedDate(interview.createdAt)}에 진행된 면접입니다.
           </S.Description>
         </S.HeaderText>
 
-        <S.StatusBadge>{getInterviewStatusLabel(interview.status)}</S.StatusBadge>
+        <S.StatusBadge>
+          {getInterviewStatusLabel(feedbackStatus ?? interview.status)}
+        </S.StatusBadge>
       </S.HeaderRow>
 
       <S.MetaGrid>
         <S.MetaCard>
-          <S.MetaLabel>면접관</S.MetaLabel>
-          <S.MetaValue>{getInterviewerName(interview)}</S.MetaValue>
+          <S.MetaLabel>면접 유형</S.MetaLabel>
+          <S.MetaValue>{interview.mode ?? "SOLO"}</S.MetaValue>
         </S.MetaCard>
 
         <S.MetaCard>
-          <S.MetaLabel>분야</S.MetaLabel>
-          <S.MetaValue>{getInterviewMajorLabel(persona?.major)}</S.MetaValue>
+          <S.MetaLabel>면접관 수</S.MetaLabel>
+          <S.MetaValue>{interviewerCount > 0 ? `${interviewerCount}명` : "미제공"}</S.MetaValue>
         </S.MetaCard>
 
-        <S.MetaCard>
-          <S.MetaLabel>면접 스타일</S.MetaLabel>
-          <S.MetaValue>{getInterviewStyleLabel(persona?.type)}</S.MetaValue>
-        </S.MetaCard>
-
-        <S.MetaCard>
-          <S.MetaLabel>경력 기준</S.MetaLabel>
-          <S.MetaValue>{getCareerLabel(persona?.career)}</S.MetaValue>
-        </S.MetaCard>
       </S.MetaGrid>
 
-      <S.Notice>{notice}</S.Notice>
     </S.Card>
   );
 };

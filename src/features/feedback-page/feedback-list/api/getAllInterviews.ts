@@ -11,12 +11,16 @@ export interface InterviewPersona {
   type?: string;
   career?: number;
   gender?: string;
+  imageUrl?: string;
 }
 
 export interface InterviewSummary {
-  id: number;
+  id?: number;
   interviewId?: number;
   userId?: number;
+  mode?: "SOLO" | "MULTI";
+  personaId?: number | null;
+  personaIds?: number[];
   persona?: InterviewPersona | null;
   sessionId?: string;
   status?: string;
@@ -52,6 +56,7 @@ export interface QuestionFeedback {
 export interface FeedbackPersona {
   personaId?: number;
   personaRole?: string;
+  imageUrl?: string;
   score?: number;
   comment?: string;
   strengths?: string[];
@@ -84,6 +89,24 @@ interface FeedbackApiResponse {
   success: boolean;
   data?: FeedbackData;
 }
+
+const isFeedbackApiResponse = (
+  payload: FeedbackData | FeedbackApiResponse,
+): payload is FeedbackApiResponse => "data" in payload;
+
+const normalizeFeedback = (
+  payload: FeedbackData | FeedbackApiResponse | null | undefined,
+): FeedbackData | null => {
+  if (!payload) {
+    return null;
+  }
+
+  if (isFeedbackApiResponse(payload)) {
+    return payload.data ?? null;
+  }
+
+  return payload;
+};
 
 const normalizeInterviews = (
   payload: InterviewSummary[] | ApiResponse<InterviewSummary[]>,
@@ -144,12 +167,14 @@ export const getFeedback = async (interviewId: number) => {
     hasAuthorization: Boolean(authorizationHeader),
   });
 
-  const response = await apiInstance.get<FeedbackApiResponse>(GET_FEEDBACK_URL, {
+  const response = await apiInstance.get<
+    FeedbackData | FeedbackApiResponse
+  >(GET_FEEDBACK_URL, {
     params: { interviewId },
     headers: {
       Authorization: authorizationHeader,
     },
   });
 
-  return response.data?.data ?? null;
+  return normalizeFeedback(response.data);
 };

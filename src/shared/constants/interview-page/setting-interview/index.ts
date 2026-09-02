@@ -34,6 +34,24 @@ export const INTERVIEW_SETTING_STYLE_META = {
   },
 } as const satisfies Record<InterviewStyleOption, InterviewSettingStyleMeta>;
 
+export const INTERVIEW_SETTING_INTERVIEWER_OPTION_SECTIONS = [
+  {
+    key: 'personality',
+    title: '성격',
+    options: ['친근한', '현실적인', '꼼꼼함'],
+  },
+  {
+    key: 'tone',
+    title: '말투',
+    options: ['부드러운', '직설적인', '압박하는'],
+  },
+  {
+    key: 'specialty',
+    title: '전문 분야',
+    options: ['프론트엔드', '백엔드'],
+  },
+] as const;
+
 export const INTERVIEW_SETTING_INTERVIEWER_SECTION_TITLE = '면접관';
 
 export const INTERVIEW_SETTING_INTERVIEWERS = [
@@ -74,13 +92,19 @@ export const INTERVIEW_SETTING_ACTION_LABELS = {
 
 export const INTERVIEW_SETTING_DEFAULT_SELECTION: InterviewSettingSelection = {
   difficulty: '쉬움',
-  interviewerId: 1,
+  interviewerId: 2,
+  personality: '친근한',
+  specialty: '프론트엔드',
   style: '편함',
+  tone: '부드러운',
 };
 
 export type {
   InterviewDifficultyOption,
   InterviewerId,
+  InterviewerPersonalityOption,
+  InterviewerSpecialtyOption,
+  InterviewerToneOption,
   InterviewSettingSelectHandlers,
   InterviewSettingSelection,
   InterviewSettingStyleIcon,

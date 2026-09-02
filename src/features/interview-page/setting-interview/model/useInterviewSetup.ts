@@ -2,10 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  getTailoredQuestions,
-  normalizeTailoredQuestions,
-} from "@/features/feedback-page/api/tailorQuestions";
-import {
   createInterview,
   prepareInterviewRecord,
   savePersona,
@@ -15,19 +11,25 @@ import {
   type InterviewLevel,
   type InterviewPersonaMajor,
   type InterviewPersonaRole,
+  type InterviewPersonaTone,
   type PersonaType,
-  type PrepareInterviewQuestion,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
-import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
   type InterviewDifficultyOption,
+  type InterviewerPersonalityOption,
+  type InterviewerSpecialtyOption,
+  type InterviewerToneOption,
+  type InterviewerId,
   type InterviewSettingSelectHandlers,
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
-import { getInterviewJobId } from "@/shared/storage/interviewJobId";
+import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
+import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
+import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
 
 const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
   편함: "FRIENDLY",
@@ -56,9 +58,26 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   어려움: "HARD",
 };
 
-const DEFAULT_INTERVIEW_MAJOR: InterviewPersonaMajor = "BACKEND";
-const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
+const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
+
+const TONE_BY_OPTION: Record<InterviewerToneOption, InterviewPersonaTone> = {
+  부드러운: "GENTLE",
+  직설적인: "DIRECT",
+  압박하는: "PRESSURING",
+};
+
+const INTERVIEWER_IMAGE_BY_ID: Record<InterviewerId, string> = {
+  1: InterviewerImage1,
+  2: InterviewerImage2,
+  3: InterviewerImage3,
+  4: InterviewerImage4,
+};
+
+const MAJOR_BY_SPECIALTY: Record<InterviewerSpecialtyOption, InterviewPersonaMajor> = {
+  프론트엔드: "FRONTEND",
+  백엔드: "BACKEND",
+};
 
 const buildUniquePersonaName = (personaName: string) =>
   `${personaName}-${Date.now().toString(36)}`;
@@ -78,6 +97,18 @@ export const useInterviewSetup = () => {
     INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId,
   );
 
+  const [selectedPersonality, setSelectedPersonality] = useState<InterviewerPersonalityOption>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.personality,
+  );
+
+  const [selectedTone, setSelectedTone] = useState<InterviewerToneOption>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.tone,
+  );
+
+  const [selectedSpecialty, setSelectedSpecialty] = useState<InterviewerSpecialtyOption>(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.specialty,
+  );
+
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -90,14 +121,6 @@ export const useInterviewSetup = () => {
 
     setErrorMessage("");
     setIsSubmitting(true);
-
-    const jobId = getInterviewJobId();
-
-    if (!jobId) {
-      setIsSubmitting(false);
-      setErrorMessage("마이페이지에서 포트폴리오를 먼저 등록해주세요.");
-      return;
-    }
 
     const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
       (interviewer) => interviewer.id === selectedInterviewerId,
@@ -112,11 +135,14 @@ export const useInterviewSetup = () => {
     const personaPayload: SavePersonaParams = {
       personaName: buildUniquePersonaName(selectedInterviewer.personaName),
       role: DEFAULT_INTERVIEW_ROLE,
-      level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
-      major: DEFAULT_INTERVIEW_MAJOR,
+      major: MAJOR_BY_SPECIALTY[selectedSpecialty],
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
+      tone: TONE_BY_OPTION[selectedTone],
+      level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
       gender: DEFAULT_INTERVIEW_GENDER,
+      imageUrl: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
+      description: selectedInterviewer.description,
     };
 
     console.log("[persona/save] request payload", personaPayload);
@@ -171,50 +197,21 @@ export const useInterviewSetup = () => {
 
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
+    const interviewSessionId =
+      preparedInterviewRecord.sessionId ??
+      data.sessionId;
     const personaId =
       data.personaId !== null && data.personaId > 0
         ? data.personaId
         : savedPersona.personaId;
-    let tailoredQuestions: PrepareInterviewQuestion[] = [];
-
-    try {
-      const tailorResponse = await getTailoredQuestions(
-        preparedInterviewRecord.interviewId,
-      );
-      const normalizedTailoredQuestions = normalizeTailoredQuestions(
-        tailorResponse,
-        personaId,
-      );
-
-      if (normalizedTailoredQuestions.length > 0) {
-        tailoredQuestions = normalizedTailoredQuestions;
-      }
-
-      console.log("[questions/tailor] questions saved", {
-        interviewId: preparedInterviewRecord.interviewId,
-        questionCount: tailoredQuestions.length,
-        questions: tailoredQuestions,
-      });
-    } catch (error) {
-      setIsSubmitting(false);
-      setErrorMessage(
-        extractErrorMessage(error, "맞춤 질문을 불러오지 못했습니다."),
-      );
-      return;
-    }
-
-    console.log("[questions/tailor] completed before SSE", {
-      interviewId: preparedInterviewRecord.interviewId,
-    });
-
-    setActiveInterviewSessionId(data.sessionId);
+    setActiveInterviewSessionId(interviewSessionId);
 
     setIsSubmitting(false);
 
-    navigate("/main/interview/1", {
+    navigate(`/main/interview/${data.interviewId}`, {
       state: {
         preparedInterview: {
-          sessionId: data.sessionId,
+          sessionId: interviewSessionId,
           interviewId: preparedInterviewRecord.interviewId,
           userId: data.userId,
           personaId,
@@ -226,15 +223,27 @@ export const useInterviewSetup = () => {
           level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
           career: personaPayload.career,
           gender: personaPayload.gender,
-          jobId,
+          jobId: preparedInterviewRecord.jobId ?? "",
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
-          questions: tailoredQuestions,
+          questions: [],
+          mode: "SOLO",
+          interviewers: [
+            {
+              personaId,
+              name: selectedInterviewer.personaName,
+              roleLabel: "기술 면접관",
+              image: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
+            },
+          ],
         },
         interviewSetting: {
           style: selectedStyle,
           difficulty: selectedDifficulty,
           interviewerId: selectedInterviewerId,
+          personality: selectedPersonality,
+          tone: selectedTone,
+          specialty: selectedSpecialty,
         },
       },
     });
@@ -243,12 +252,19 @@ export const useInterviewSetup = () => {
   const select: InterviewSettingSelectHandlers = {
     difficulty: setSelectedDifficulty,
     interviewer: setSelectedInterviewerId,
+    personality: setSelectedPersonality,
+    specialty: (value) => {
+      setSelectedSpecialty(value);
+      setSelectedInterviewerId(value === "프론트엔드" ? 2 : 1);
+    },
     style: setSelectedStyle,
+    tone: setSelectedTone,
   };
 
   return {
     errorMessage,
     isNextDisabled: isSubmitting,
+    isPortfolioAnalyzing: false,
     isSubmitting,
     onBack: handleBack,
     onNext: handleNext,
@@ -256,7 +272,10 @@ export const useInterviewSetup = () => {
     selection: {
       difficulty: selectedDifficulty,
       interviewerId: selectedInterviewerId,
+      personality: selectedPersonality,
+      specialty: selectedSpecialty,
       style: selectedStyle,
+      tone: selectedTone,
     },
   };
 };

@@ -11,8 +11,18 @@ export {
   disconnectInterviewSocket,
   parseInterviewSocketMessage,
 } from "./interview-socket";
-export { prepareInterview } from "./prepare-interview";
-export { prepareInterviewRecord } from "./prepare-interview-record";
+export {
+  prepareInterview,
+  waitForInterviewReady,
+} from "./prepare-interview";
+export {
+  getInterviewPreparation,
+  prepareInterviewRecord,
+} from "./prepare-interview-record";
+export type {
+  InterviewPreparationData,
+  InterviewPreparationStatus,
+} from "./prepare-interview-record";
 export { quitInterview } from "./quit-interview";
 export { savePersona } from "./save-persona";
 export { submitInterviewAnswer } from "./submit-answer";
@@ -31,6 +41,7 @@ export type {
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonaTone,
   InterviewProgressStatus,
   PersonaType,
   PrepareInterviewParams,

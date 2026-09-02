@@ -54,11 +54,20 @@ const SettingMultiInterviewPage = () => {
             돌아가기
           </S.BackButton>
           <S.NextButton
+            $analyzing={setup.isPortfolioAnalyzing}
             disabled={setup.isNextDisabled}
             type="button"
             onClick={setup.onNext}
           >
-            {setup.isSubmitting ? "시작 중..." : "다음"}
+            {setup.isSubmitting
+              ? "시작 중..."
+              : setup.isPortfolioAnalyzing
+                ? (
+                  <>
+                    분석 중<S.LoadingDots aria-hidden="true" />
+                  </>
+                )
+                : "다음"}
           </S.NextButton>
         </S.ActionRow>
       </S.Content>

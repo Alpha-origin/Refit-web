@@ -1,20 +1,43 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { CameraState } from "@/widgets/interview-page/interview/type";
 
 export const useInterviewCamera = (enabled: boolean) => {
   const [cameraState, setCameraState] = useState<CameraState>("loading");
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoElementRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const attachStream = useCallback((stream: MediaStream) => {
+    const videoElement = videoElementRef.current;
+
+    if (!videoElement) {
+      return;
+    }
+
+    videoElement.srcObject = stream;
+    void videoElement.play().catch(() => {});
+  }, []);
+  const videoRef = useCallback(
+    (videoElement: HTMLVideoElement | null) => {
+      videoElementRef.current = videoElement;
+
+      if (videoElement && streamRef.current) {
+        attachStream(streamRef.current);
+      }
+    },
+    [attachStream],
+  );
 
   useEffect(() => {
     let cancelled = false;
     let currentStream: MediaStream | null = null;
-    const videoElement = videoRef.current;
 
     if (!enabled) {
-      if (videoElement) {
-        videoElement.srcObject = null;
+      if (videoElementRef.current) {
+        videoElementRef.current.srcObject = null;
       }
+
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
       return;
     }
 
@@ -44,11 +67,8 @@ export const useInterviewCamera = (enabled: boolean) => {
         }
 
         currentStream = stream;
-
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          void videoElement.play().catch(() => {});
-        }
+        streamRef.current = stream;
+        attachStream(stream);
 
         setCameraState("ready");
       } catch {
@@ -63,13 +83,16 @@ export const useInterviewCamera = (enabled: boolean) => {
     return () => {
       cancelled = true;
 
-      if (videoElement) {
-        videoElement.srcObject = null;
+      if (videoElementRef.current?.srcObject === currentStream) {
+        videoElementRef.current.srcObject = null;
       }
 
+      if (streamRef.current === currentStream) {
+        streamRef.current = null;
+      }
       currentStream?.getTracks().forEach((track) => track.stop());
     };
-  }, [enabled]);
+  }, [attachStream, enabled]);
 
   return {
     cameraState,

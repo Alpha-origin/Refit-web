@@ -79,11 +79,9 @@ const DifficultyOptions = ({
             onClick={() => onSelect(option.value)}
             role="radio"
             type="button"
-          >
-            <S.DifficultyIcon src={option.image} alt="" aria-hidden="true" />
-            <S.OptionLabel>{option.value}</S.OptionLabel>
-            <S.SelectionCircle $selected={isSelected} aria-hidden="true" />
-          </S.DifficultyButton>
+                >
+                  <S.OptionLabel>{option.value}</S.OptionLabel>
+                </S.DifficultyButton>
         );
       })}
     </S.DifficultyGroup>

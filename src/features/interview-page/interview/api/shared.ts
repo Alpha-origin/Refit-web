@@ -94,6 +94,7 @@ export const getInterviewQuestion = (
       ) ??
       "",
     content,
+    personaId: getNumericValue(questionRecord?.personaId) ?? undefined,
   };
 };
 

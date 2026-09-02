@@ -17,7 +17,7 @@ const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
 type PrepareInterviewRequestData = PreparedInterviewData;
 
 interface InterviewReadySseData {
-  sessionId: string;
+  sessionId: string | null;
   interviewId: number | null;
 }
 
@@ -51,8 +51,9 @@ const getSseErrorMessage = (data: string, fallback: string) => {
   );
 };
 
-const waitForInterviewReady = async (
+export const waitForInterviewReady = async (
   jobId: string,
+  signal?: AbortSignal,
 ): Promise<InterviewReadySseData> => {
   const baseUrl =
     import.meta.env.MODE === "development" ? window.location.origin : API_URL;
@@ -64,6 +65,15 @@ const waitForInterviewReady = async (
   const timeoutId = window.setTimeout(() => {
     abortController.abort();
   }, AI_SUBSCRIBE_TIMEOUT_MS);
+  const handleExternalAbort = () => abortController.abort();
+
+  if (signal) {
+    if (signal.aborted) {
+      abortController.abort();
+    } else {
+      signal.addEventListener("abort", handleExternalAbort, { once: true });
+    }
+  }
 
   try {
     const authorizationHeader = await ensureAccessToken();
@@ -143,6 +153,21 @@ const waitForInterviewReady = async (
           };
         }
 
+        if (eventName === "question-generated") {
+          const payload = getSsePayload(data);
+          const errorMessage = getTrimmedString(payload?.error);
+
+          if (errorMessage) {
+            throw new Error(errorMessage);
+          }
+
+          await reader.cancel();
+          return {
+            sessionId: getTrimmedString(payload?.sessionId),
+            interviewId: getNumericValue(payload?.interviewId),
+          };
+        }
+
         if (eventName === "interview-preparation-failed") {
           throw new Error(
             getSseErrorMessage(data, "채팅 면접을 준비하지 못했습니다."),
@@ -172,6 +197,7 @@ const waitForInterviewReady = async (
     throw new Error(errorMessage);
   } finally {
     window.clearTimeout(timeoutId);
+    signal?.removeEventListener("abort", handleExternalAbort);
     abortController.abort();
   }
 };
@@ -214,6 +240,7 @@ const buildPrepareInterviewRequest = (
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
+    mode: "SOLO",
   };
 };
 
@@ -233,7 +260,7 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
     const ready = await waitForInterviewReady(requestData.jobId);
     const preparedInterview: PreparedInterviewData = {
       ...requestData,
-      sessionId: ready.sessionId,
+      sessionId: ready.sessionId ?? normalizedSessionId,
       interviewId: ready.interviewId ?? requestData.interviewId,
     };
 

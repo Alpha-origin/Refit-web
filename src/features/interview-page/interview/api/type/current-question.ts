@@ -4,4 +4,5 @@ export interface CurrentInterviewQuestion {
   type: string;
   intention: string;
   content: string;
+  personaId?: number;
 }

@@ -2,6 +2,7 @@ export interface FeedbackDetailQuestionItem {
   id: number;
   label: string;
   preview: string;
+  personaLabel?: string;
   question: string;
   intention: string;
   myAnswer: string;

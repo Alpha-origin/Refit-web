@@ -36,6 +36,9 @@ const normalizeSavedPersona = (
     type:
       (getTrimmedString(sourceRecord?.type) as SavedPersonaData["type"] | null) ??
       fallbackData.type,
+    tone:
+      (getTrimmedString(sourceRecord?.tone) as SavedPersonaData["tone"] | null) ??
+      fallbackData.tone,
     level:
       (getTrimmedString(sourceRecord?.level) as SavedPersonaData["level"] | null) ??
       fallbackData.level,
@@ -43,6 +46,10 @@ const normalizeSavedPersona = (
     gender:
       (getTrimmedString(sourceRecord?.gender) as SavedPersonaData["gender"] | null) ??
       fallbackData.gender,
+    imageUrl:
+      getTrimmedString(sourceRecord?.imageUrl) ?? fallbackData.imageUrl,
+    description:
+      getTrimmedString(sourceRecord?.description) ?? fallbackData.description,
   } satisfies SavedPersonaData;
 };
 
