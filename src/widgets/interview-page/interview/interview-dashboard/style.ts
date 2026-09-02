@@ -250,6 +250,13 @@ export const QuestionText = styled.h1<MultiLayoutProps>`
       : ""}
 `;
 
+export const QuestionAudioError = styled.span`
+  color: #c24141;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+`;
+
 export const AnswerPanel = styled.section<MultiLayoutProps>`
   ${panel}
   min-height: 0;

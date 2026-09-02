@@ -141,6 +141,11 @@ const InterviewDashboard = () => {
               <S.QuestionText>
                 {interview.currentQuestion?.content ?? "질문을 불러오는 중입니다."}
               </S.QuestionText>
+              {interview.questionAudioErrorMessage ? (
+                <S.QuestionAudioError role="status">
+                  {interview.questionAudioErrorMessage}
+                </S.QuestionAudioError>
+              ) : null}
             </S.QuestionPanel>
 
             <S.AnswerPanel $multi={isMultiInterview}>
