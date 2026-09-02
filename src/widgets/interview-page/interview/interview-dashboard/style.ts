@@ -1,6 +1,14 @@
 import styled from "styled-components";
 
-export const Page = styled.section`
+interface MultiLayoutProps {
+  $multi: boolean;
+}
+
+interface MultiCardProps {
+  $multi: boolean;
+}
+
+export const Page = styled.section<MultiLayoutProps>`
   width: 100%;
   min-height: 0;
   height: 100%;
@@ -8,9 +16,11 @@ export const Page = styled.section`
   padding: clamp(1rem, 2.4vw, 2.2rem);
   box-sizing: border-box;
   background: transparent;
+
+  ${({ $multi }) => ($multi ? "padding: clamp(1rem, 2.1vw, 2rem);" : "")}
 `;
 
-export const Content = styled.div`
+export const Content = styled.div<MultiLayoutProps>`
   position: relative;
   width: min(100%, 74rem);
   min-height: 100%;
@@ -18,6 +28,8 @@ export const Content = styled.div`
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.65rem;
+
+  ${({ $multi }) => ($multi ? "width: min(100%, 80rem);" : "")}
 `;
 
 export const Timer = styled.div`
@@ -82,12 +94,22 @@ export const LoadingMessage = styled.span`
   font-weight: 700;
 `;
 
-export const MainGrid = styled.main`
+export const MainGrid = styled.main<MultiLayoutProps>`
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.95fr);
   grid-template-rows: minmax(11rem, 0.72fr) minmax(23rem, 1.28fr);
   gap: clamp(0.85rem, 1.5vw, 1.2rem);
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          --multi-top-row-height: clamp(13rem, 30vh, 15rem);
+          grid-template-columns: minmax(0, 1.65fr) minmax(24rem, 0.95fr);
+          grid-template-rows: none;
+          align-items: start;
+        `
+      : ""}
 
   @media (max-width: 58rem) {
     grid-template-columns: 1fr;
@@ -95,7 +117,7 @@ export const MainGrid = styled.main`
   }
 `;
 
-export const LeftColumn = styled.div`
+export const LeftColumn = styled.div<MultiLayoutProps>`
   min-width: 0;
   grid-row: 1 / -1;
   display: grid;
@@ -106,9 +128,18 @@ export const LeftColumn = styled.div`
     grid-template-rows: auto auto;
     gap: 0.85rem;
   }
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          grid-row: auto;
+          grid-template-rows: var(--multi-top-row-height) minmax(18.5rem, 1fr);
+          gap: 0.8rem;
+        `
+      : ""}
 `;
 
-export const RightColumn = styled.aside`
+export const RightColumn = styled.aside<MultiLayoutProps>`
   min-width: 0;
   display: grid;
   grid-row: 1 / -1;
@@ -119,6 +150,15 @@ export const RightColumn = styled.aside`
     grid-template-rows: auto minmax(16rem, 1fr);
     gap: 0.85rem;
   }
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          grid-row: auto;
+          grid-template-rows: var(--multi-top-row-height) minmax(19rem, 1fr);
+          gap: 0.8rem;
+        `
+      : ""}
 `;
 
 const panel = `
@@ -128,7 +168,7 @@ const panel = `
   box-shadow: 0 0.35rem 1.2rem rgba(55, 82, 125, 0.08);
 `;
 
-export const QuestionPanel = styled.article`
+export const QuestionPanel = styled.article<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   padding: clamp(1.5rem, 3.5vw, 3rem);
@@ -136,6 +176,16 @@ export const QuestionPanel = styled.article`
   flex-direction: column;
   justify-content: center;
   gap: 1rem;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          height: var(--multi-top-row-height);
+          box-sizing: border-box;
+          padding: 1.45rem 2.5rem;
+          gap: 0.7rem;
+        `
+      : ""}
 `;
 
 export const QuestionMetaRow = styled.div`
@@ -183,21 +233,31 @@ export const QuestionSpeaker = styled.span`
   font-weight: 700;
 `;
 
-export const QuestionText = styled.h1`
+export const QuestionText = styled.h1<MultiLayoutProps>`
   margin: 0;
   color: #151a23;
   font-size: clamp(1rem, 1.6vw, 1.25rem);
   font-weight: 650;
   line-height: 1.48;
   word-break: keep-all;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          font-size: clamp(0.92rem, 1.1vw, 1.2rem);
+          line-height: 1.48;
+        `
+      : ""}
 `;
 
-export const AnswerPanel = styled.section`
+export const AnswerPanel = styled.section<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   overflow: hidden;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+
+  ${({ $multi }) => ($multi ? "min-height: 18.5rem;" : "")}
 `;
 
 export const AnswerTabs = styled.div`
@@ -219,7 +279,7 @@ export const Tab = styled.button<{ $active: boolean }>`
   &:last-child { border-right: 0; }
 `;
 
-export const TextArea = styled.textarea`
+export const TextArea = styled.textarea<MultiLayoutProps>`
   width: 100%;
   min-height: 0;
   resize: none;
@@ -232,6 +292,16 @@ export const TextArea = styled.textarea`
   line-height: 1.6;
 
   &::placeholder { color: #a0a8b4; }
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          padding: 3rem 2rem;
+          font-size: 0.86rem;
+          line-height: 1.55;
+          text-align: center;
+        `
+      : ""}
 `;
 
 export const VideoArea = styled.div`
@@ -297,16 +367,27 @@ export const Button = styled.button<{ $secondary?: boolean }>`
   &:disabled { opacity: 0.55; cursor: not-allowed; }
 `;
 
-export const Interviewers = styled.section`
+export const Interviewers = styled.section<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   padding: 0.65rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
   gap: 0.55rem;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          height: var(--multi-top-row-height);
+          min-height: 0;
+          box-sizing: border-box;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.6rem;
+        `
+      : ""}
 `;
 
-export const InterviewerCard = styled.article<{ $active: boolean }>`
+export const InterviewerCard = styled.article<{ $active: boolean } & MultiCardProps>`
   min-width: 0;
   min-height: 0;
   padding: 0.65rem;
@@ -315,15 +396,25 @@ export const InterviewerCard = styled.article<{ $active: boolean }>`
   background: ${({ $active }) => ($active ? "#f4f9ff" : "#fff")};
   display: flex;
   flex-direction: column;
+
+  ${({ $multi }) => ($multi ? "padding: 0.55rem;" : "")}
 `;
 
-export const InterviewerImage = styled.img`
+export const InterviewerImage = styled.img<MultiLayoutProps>`
   width: 100%;
   min-height: 0;
   flex: 1 1 auto;
   border-radius: 0.36rem;
   object-fit: cover;
   background: #e9edf4;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          flex: 0 0 auto;
+          height: 7.4rem;
+        `
+      : ""}
 `;
 
 export const InterviewerFallback = styled.div`
@@ -357,6 +448,21 @@ export const InterviewerRole = styled.span`
   font-weight: 700;
 `;
 
+export const InterviewerTags = styled.div`
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+`;
+
+export const InterviewerTag = styled.span`
+  padding: 0.12rem 0.35rem;
+  border: 0.0625rem solid #9ac5ff;
+  border-radius: 0.15rem;
+  color: #2179ed;
+  font-size: 0.6rem;
+  line-height: 1.2;
+`;
+
 export const ActiveBadge = styled.span`
   display: block;
   width: fit-content;
@@ -369,13 +475,15 @@ export const ActiveBadge = styled.span`
   font-weight: 800;
 `;
 
-export const MemoPanel = styled.section`
+export const MemoPanel = styled.section<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   padding: 0.8rem;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.55rem;
+
+  ${({ $multi }) => ($multi ? "min-height: 19rem;" : "")}
 `;
 
 export const MemoLabel = styled.label`
