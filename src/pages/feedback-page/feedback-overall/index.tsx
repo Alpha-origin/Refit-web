@@ -3,7 +3,8 @@ import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedback
 import FeedbackOverallBottomSection from "@/widgets/feedback-page/feedback-overall/bottom-section";
 import FeedbackOverallMiddleSection from "@/widgets/feedback-page/feedback-overall/middle-section";
 import FeedbackOverallTopSection from "@/widgets/feedback-page/feedback-overall/top-section";
-import FeedbackSummaryCard from "@/widgets/feedback-page/feedback-summary-card";
+import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
+import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as S from "./style";
 
@@ -24,10 +25,31 @@ const FeedbackOverallPage = () => {
     feedback && !isAnalysisPending && !isAnalysisFailed
       ? buildFeedbackOverallContent(feedback)
       : null;
+  const panelRef = useRef<HTMLElement | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!panelRef.current || isDownloadingPdf) {
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+
+    try {
+      await exportElementToPdf(panelRef.current, {
+        fileName: `repit-feedback-overall-${id ?? "unknown"}.pdf`,
+      });
+    } catch (error) {
+      console.error(error);
+      window.alert("PDF 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   return (
     <S.Page>
-      <S.Panel>
+      <S.Panel ref={panelRef}>
         {isLoading ? (
           <S.StateCard aria-live="polite">
             <S.StateText>면접 정보를 불러오는 중입니다.</S.StateText>
@@ -54,13 +76,13 @@ const FeedbackOverallPage = () => {
           </S.StateCard>
         ) : (
           <>
-            <FeedbackSummaryCard
-              interview={interview}
-              feedbackStatus={feedback?.status}
-            />
             <FeedbackOverallTopSection content={content.topSection} />
             <FeedbackOverallMiddleSection content={content.middleSection} />
-            <FeedbackOverallBottomSection content={content.bottomSection} />
+            <FeedbackOverallBottomSection
+              content={content.bottomSection}
+              isDownloadingPdf={isDownloadingPdf}
+              onDownloadPdf={handleDownloadPdf}
+            />
           </>
         )}
       </S.Panel>

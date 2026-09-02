@@ -119,16 +119,22 @@ export const buildFeedbackOverallContent = (
         ],
       },
       averageComparison: {
-        title: "내 면접 점수",
+        title: "점수 분석",
         bars: [
           {
             label: "내 점수",
             score: totalScore,
             tone: "primary",
           },
+          {
+            label: "질문 의도 적합도",
+            score: getScore(feedback.intentAlignmentScore),
+            tone: "muted",
+          },
         ],
       },
       comparisonCards,
+      intentAlignmentScore: getScore(feedback.intentAlignmentScore),
     },
     middleSection: {
       cards: [
@@ -141,6 +147,11 @@ export const buildFeedbackOverallContent = (
           content: getListText(feedback.improvements),
         },
       ],
+      personaFeedbacks: (feedback.personas ?? []).map((persona, index) => ({
+        title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
+        comment:
+          persona.comment?.trim() || "면접관 코멘트가 아직 등록되지 않았습니다.",
+      })),
     },
     bottomSection: {
       reliability: {
@@ -160,6 +171,7 @@ export const buildFeedbackOverallContent = (
           left: `${15 + ((index * 37) % 70)}%`,
         })),
       },
+      pdfActionLabel: "PDF로 저장",
     },
   };
 };

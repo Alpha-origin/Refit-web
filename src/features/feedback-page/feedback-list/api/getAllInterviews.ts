@@ -88,6 +88,24 @@ interface FeedbackApiResponse {
   data?: FeedbackData;
 }
 
+const isFeedbackApiResponse = (
+  payload: FeedbackData | FeedbackApiResponse,
+): payload is FeedbackApiResponse => "data" in payload;
+
+const normalizeFeedback = (
+  payload: FeedbackData | FeedbackApiResponse | null | undefined,
+): FeedbackData | null => {
+  if (!payload) {
+    return null;
+  }
+
+  if (isFeedbackApiResponse(payload)) {
+    return payload.data ?? null;
+  }
+
+  return payload;
+};
+
 const normalizeInterviews = (
   payload: InterviewSummary[] | ApiResponse<InterviewSummary[]>,
 ) => {
@@ -147,12 +165,14 @@ export const getFeedback = async (interviewId: number) => {
     hasAuthorization: Boolean(authorizationHeader),
   });
 
-  const response = await apiInstance.get<FeedbackApiResponse>(GET_FEEDBACK_URL, {
+  const response = await apiInstance.get<
+    FeedbackData | FeedbackApiResponse
+  >(GET_FEEDBACK_URL, {
     params: { interviewId },
     headers: {
       Authorization: authorizationHeader,
     },
   });
 
-  return response.data?.data ?? null;
+  return normalizeFeedback(response.data);
 };

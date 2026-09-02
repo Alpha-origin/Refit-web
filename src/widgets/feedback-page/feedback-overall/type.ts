@@ -10,6 +10,12 @@ export interface FeedbackOverallComparisonCard {
   bars: readonly FeedbackOverallBarItem[];
 }
 
+export interface FeedbackOverallPersonaFeedback {
+  title: string;
+  comment: string;
+  imageUrl?: string;
+}
+
 export interface FeedbackOverallKeywordItem {
   text: string;
   size: "xs" | "sm" | "md" | "xl";
@@ -33,6 +39,7 @@ export interface FeedbackOverallTopSectionData {
     bars: readonly FeedbackOverallBarItem[];
   };
   comparisonCards: readonly FeedbackOverallComparisonCard[];
+  intentAlignmentScore: number;
 }
 
 export interface FeedbackOverallMiddleSectionData {
@@ -40,6 +47,7 @@ export interface FeedbackOverallMiddleSectionData {
     title: string;
     content: string;
   }[];
+  personaFeedbacks: readonly FeedbackOverallPersonaFeedback[];
 }
 
 export interface FeedbackOverallBottomSectionData {
@@ -55,6 +63,7 @@ export interface FeedbackOverallBottomSectionData {
   keywords: {
     items: readonly FeedbackOverallKeywordItem[];
   };
+  pdfActionLabel: string;
 }
 
 export interface FeedbackOverallTopSectionProps {
@@ -67,4 +76,6 @@ export interface FeedbackOverallMiddleSectionProps {
 
 export interface FeedbackOverallBottomSectionProps {
   content: FeedbackOverallBottomSectionData;
+  isDownloadingPdf?: boolean;
+  onDownloadPdf?: () => void;
 }

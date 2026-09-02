@@ -47,17 +47,29 @@ const getInterviewerImageUrl = (
 const getListItems = (
   items: Awaited<ReturnType<typeof getAllInterviews>>,
   feedbackByInterviewId: Map<number, FeedbackData>,
+  feedbackBySessionId: Map<string, FeedbackData>,
 ): FeedbackListItem[] =>
   sortInterviewsByCreatedAt(items).map<FeedbackListItem>((interview) => {
     const interviewerName = getInterviewerName(interview);
     const interviewId = getInterviewId(interview);
-    const feedback = feedbackByInterviewId.get(interviewId);
+    const feedback =
+      feedbackByInterviewId.get(interviewId) ??
+      (interview.sessionId
+        ? feedbackBySessionId.get(interview.sessionId)
+        : undefined);
+    const feedbackInterviewId = feedback?.interviewId;
+    const targetInterviewId =
+      typeof feedbackInterviewId === "number" &&
+      Number.isInteger(feedbackInterviewId) &&
+      feedbackInterviewId > 0
+        ? feedbackInterviewId
+        : interviewId;
 
     return {
-      id: interviewId,
+      id: targetInterviewId,
       date: getFormattedDate(interview.createdAt),
       imageUrl: getInterviewerImageUrl(
-        interviewId,
+        targetInterviewId,
         interviewerName,
         interview.persona?.id,
       ),
@@ -93,6 +105,7 @@ export const useFeedbackList = () => {
         getAllFeedbacks(),
       ]);
       const feedbackByInterviewId = new Map<number, FeedbackData>();
+      const feedbackBySessionId = new Map<string, FeedbackData>();
 
       feedbacks.forEach((feedback) => {
         const interviewId = feedback.interviewId;
@@ -104,6 +117,10 @@ export const useFeedbackList = () => {
         ) {
           feedbackByInterviewId.set(interviewId, feedback);
         }
+
+        if (feedback.sessionId) {
+          feedbackBySessionId.set(feedback.sessionId, feedback);
+        }
       });
 
       if (interviews.length === 0) {
@@ -111,7 +128,9 @@ export const useFeedbackList = () => {
         return;
       }
 
-      setItems(getListItems(interviews, feedbackByInterviewId));
+      setItems(
+        getListItems(interviews, feedbackByInterviewId, feedbackBySessionId),
+      );
     } catch (error) {
       setItems([]);
       setErrorMessage(

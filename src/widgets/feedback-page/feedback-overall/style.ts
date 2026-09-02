@@ -19,6 +19,19 @@ interface KeywordWordProps {
   $top: string;
 }
 
+interface ScoreRingProps {
+  $score: number;
+}
+
+interface ProgressFillProps {
+  $score: number;
+  $tone: "primary" | "muted";
+}
+
+interface InsightCardProps {
+  $tone: "positive" | "negative";
+}
+
 const cardSurface = css`
   background: rgba(255, 255, 255, 0.9);
   border: 0.0625rem solid rgba(223, 232, 247, 0.96);
@@ -63,6 +76,14 @@ export const SectionBlock = styled.section`
   @media (max-width: 48rem) {
     gap: 0.8rem;
   }
+`;
+
+export const PageHeading = styled.h1`
+  margin: 0;
+  color: #4a4a4a;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.04rem;
 `;
 
 export const SectionShell = styled.div`
@@ -123,10 +144,10 @@ export const TabButton = styled.button<TabButtonProps>`
 
 export const TopGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(14rem, 0.7fr) minmax(0, 1.35fr);
   gap: 1rem;
 
-  @media (max-width: 72rem) {
+  @media (max-width: 48rem) {
     grid-template-columns: 1fr;
   }
 `;
@@ -138,9 +159,14 @@ export const LeftColumn = styled.div`
 
 export const ScoreCard = styled.article`
   ${cardSurface}
-  min-height: 10.5rem;
-  border: none;
-  padding: 1rem 1.15rem 1.15rem;
+  min-height: 15rem;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
 `;
 
 export const SectionLabel = styled.p`
@@ -151,9 +177,9 @@ export const SectionLabel = styled.p`
 `;
 
 export const MainScore = styled.h2`
-  margin: 0.45rem 0 0.6rem;
+  margin: 0.35rem 0 0;
   color: #2b74e3;
-  font-size: clamp(1.3rem, 2.8vw, 2.85rem);
+  font-size: clamp(2rem, 3vw, 2.8rem);
   font-weight: 700;
   letter-spacing: -0.08rem;
   line-height: 1;
@@ -168,9 +194,92 @@ export const DescriptionBlock = styled.div`
 export const DescriptionLine = styled.p`
   margin: 0;
   color: #222222;
-  font-size: 1.14rem;
+  font-size: 0.92rem;
   font-weight: 500;
   line-height: 1.45;
+`;
+
+export const ScoreRing = styled.div<ScoreRingProps>`
+  width: 9.6rem;
+  height: 9.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: ${({ $score }) =>
+    `conic-gradient(#2477e8 ${Math.min(100, Math.max(0, $score))}%, #d9d9d9 0)`};
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0.55rem;
+    border-radius: 50%;
+    background: #ffffff;
+  }
+`;
+
+export const ScoreRingInner = styled.div`
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const ScoreRingLabel = styled.span`
+  color: #222222;
+  font-size: 0.9rem;
+  font-weight: 700;
+`;
+
+export const MetricsCard = styled.article`
+  ${cardSurface}
+  min-height: 15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.8rem;
+  padding: 1.6rem 2rem;
+`;
+
+export const MetricRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+`;
+
+export const MetricHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+`;
+
+export const MetricLabel = styled.span`
+  color: #333333;
+  font-size: 0.92rem;
+  font-weight: 500;
+`;
+
+export const MetricValue = styled.strong`
+  color: #2477e8;
+  font-size: 0.95rem;
+  font-weight: 700;
+`;
+
+export const ProgressTrack = styled.div`
+  width: 100%;
+  height: 0.6rem;
+  overflow: hidden;
+  border-radius: 999rem;
+  background: #e1e1e1;
+`;
+
+export const ProgressFill = styled.div<ProgressFillProps>`
+  width: ${({ $score }) => `${Math.min(100, Math.max(0, $score))}%`};
+  height: 100%;
+  border-radius: inherit;
+  background: ${({ $tone }) => ($tone === "primary" ? "#2477e8" : "#a6a6a6")};
 `;
 
 export const ChartCard = styled.article`
@@ -334,6 +443,29 @@ export const MiddleGrid = styled.div`
   }
 `;
 
+export const InsightCard = styled.article<InsightCardProps>`
+  min-height: 10rem;
+  padding: 1.25rem 1.45rem;
+  border: 0.0625rem solid
+    ${({ $tone }) => ($tone === "positive" ? "#d4e4f7" : "#f1d4d1")};
+  border-radius: 0.35rem;
+  background: ${({ $tone }) =>
+    $tone === "positive" ? "#edf5ff" : "#fff1f0"};
+`;
+
+export const InsightHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+`;
+
+export const InsightIcon = styled.span`
+  color: #2477e8;
+  font-size: 1.3rem;
+  line-height: 1;
+`;
+
 export const TextCard = styled.article`
   ${cardSurface}
   min-height: 12.6rem;
@@ -357,21 +489,76 @@ export const TextCardTitle = styled.h3`
 export const TextCardBody = styled.p`
   margin: 0;
   color: #1b1b1b;
-  font-size: 1.04rem;
+  font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.6;
   word-break: keep-all;
 `;
 
+export const PersonaFeedbackList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.1rem;
+`;
+
+export const PersonaFeedbackCard = styled.article`
+  ${cardSurface}
+  min-height: 4.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.35rem;
+`;
+
+export const PersonaImage = styled.img`
+  width: 3.8rem;
+  height: 3.8rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 0.2rem;
+  background: #e8edf5;
+`;
+
+export const PersonaFeedbackBody = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+`;
+
+export const PersonaFeedbackTitle = styled.strong`
+  color: #2477e8;
+  font-size: 0.88rem;
+  font-weight: 700;
+`;
+
+export const PersonaFeedbackText = styled.p`
+  margin: 0;
+  color: #333333;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  word-break: keep-all;
+`;
+
+export const PersonaEmpty = styled.p`
+  ${cardSurface}
+  padding: 1.25rem;
+  color: #777777;
+  font-size: 0.9rem;
+  text-align: center;
+`;
+
 export const BottomGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(14rem, 0.62fr);
   gap: 0.9rem;
   align-items: start;
   padding-bottom: 0.4rem;
   box-sizing: border-box;
 
-  @media (max-width: 72rem) {
+  @media (max-width: 48rem) {
     grid-template-columns: 1fr;
   }
 
@@ -437,7 +624,7 @@ export const QuestionCard = styled.article`
 
 export const KeywordCard = styled.article`
   ${cardSurface}
-  min-height: 17rem;
+  min-height: 15rem;
   align-self: start;
   padding: 1rem 1.15rem;
 `;
@@ -445,7 +632,7 @@ export const KeywordCard = styled.article`
 export const KeywordCanvas = styled.div`
   position: relative;
   width: 100%;
-  min-height: 15rem;
+  min-height: 13rem;
 `;
 
 export const KeywordWord = styled.span<KeywordWordProps>`
@@ -457,4 +644,21 @@ export const KeywordWord = styled.span<KeywordWordProps>`
   letter-spacing: -0.05rem;
   transform: translate(-50%, -50%);
   ${({ $size }) => keywordSizeMap[$size]}
+`;
+
+export const PdfButton = styled.button`
+  width: 100%;
+  height: 2.8rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: #2477e8;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
 `;
