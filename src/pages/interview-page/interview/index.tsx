@@ -25,9 +25,6 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
-const isMultiInterviewState = (state: unknown) =>
-  Boolean(state && typeof state === "object" && "multiInterview" in state);
-
 const getPreparedInterviewForDisplay = (state: unknown) => {
   const preparedInterview = getPreparedInterviewFromState(state);
 
@@ -64,9 +61,7 @@ const InterviewPage = () => {
     () => getPreparedInterviewForDisplay(location.state),
     [location.state],
   );
-  const ttsProvider = isMultiInterviewState(location.state)
-    ? "supertone"
-    : "elevenlabs";
+  const ttsProvider = "elevenlabs" as const;
 
   return (
     <InterviewSessionProvider
