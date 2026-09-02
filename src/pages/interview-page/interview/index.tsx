@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
@@ -5,8 +6,11 @@ import {
   InterviewSessionProvider,
 } from "@/features/interview-page/interview/model/interviewSessionContext";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
+import CameraIcon from "@/shared/img/interview-page/camara.svg?url";
+import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
-import InterviewDashboard from "@/widgets/interview-page/interview/interview-dashboard";
+import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
+import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
 import * as S from "@/widgets/interview-page/interview/style";
 
 const getPreparedInterviewFromState = (state: unknown) => {
@@ -23,6 +27,13 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
+const formatElapsedTime = (elapsedSeconds: number) => {
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const seconds = elapsedSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+};
+
 const InterviewPage = () => {
   const location = useLocation();
   const preparedInterview = getPreparedInterviewFromState(location.state);
@@ -36,6 +47,30 @@ const InterviewPage = () => {
 
 const InterviewPageContent = () => {
   const interviewSession = useInterviewSessionContext();
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
+  const isVoiceMode = interviewSession.mode === "voice";
+  const isTextMode = interviewSession.mode === "text";
+  const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
+  const isQuestionLoading = interviewSession.currentQuestion === null;
+  const isAwaitingResponse = interviewSession.isAwaitingResponse;
+  const isStartActionDisabled =
+    !interviewSession.isInterviewReady ||
+    isQuestionLoading ||
+    isAwaitingResponse;
+
+  useEffect(() => {
+    if (!isTimerRunning) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setElapsedSeconds((previousSeconds) => previousSeconds + 1);
+    }, 1_000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isTimerRunning]);
 
   if (interviewSession.preparationError) {
     return (
@@ -57,7 +92,146 @@ const InterviewPageContent = () => {
     return <Loading message="포트폴리오 분석 및 면접 준비 중입니다..." />;
   }
 
-  return <InterviewDashboard />;
+  const handleStartVoice = () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
+    setIsVoiceAnswering(true);
+    setIsTimerRunning(true);
+    interviewSession.onStartVoice();
+  };
+
+  const handleCompleteVoice = async () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
+    try {
+      await interviewSession.onCompleteVoice();
+    } finally {
+      setIsVoiceAnswering(false);
+    }
+  };
+
+  const handleModeChange = (nextMode: typeof interviewSession.mode) => {
+    if (nextMode === "text") {
+      setIsVoiceAnswering(false);
+    }
+
+    interviewSession.onModeChange(nextMode);
+  };
+
+  return (
+    <S.Container $textMode={isTextMode} $voiceMode={isVoiceMode}>
+      <S.Content $textMode={isTextMode} $voiceMode={isVoiceMode}>
+        {isVoiceMode ? (
+          <S.TopControlBar>
+            <S.TopControls>
+              <S.TimerPill aria-label={`경과 시간 ${formatElapsedTime(elapsedSeconds)}`}>
+                <S.TimerDot aria-hidden="true" />
+                {formatElapsedTime(elapsedSeconds)}
+              </S.TimerPill>
+
+              <S.ModeControl>
+                <S.ModeButton
+                  type="button"
+                  $active={interviewSession.mode === "text"}
+                  aria-pressed={interviewSession.mode === "text"}
+                  disabled={isAwaitingResponse}
+                  onClick={() => handleModeChange("text")}
+                >
+                  텍스트
+                </S.ModeButton>
+                <S.ModeButton
+                  type="button"
+                  $active={interviewSession.mode === "voice"}
+                  aria-pressed={interviewSession.mode === "voice"}
+                  disabled={isAwaitingResponse}
+                  onClick={() => handleModeChange("voice")}
+                >
+                  음성
+                </S.ModeButton>
+              </S.ModeControl>
+            </S.TopControls>
+          </S.TopControlBar>
+        ) : null}
+
+        <S.InterviewStage $textMode={isTextMode} $voiceMode={isVoiceMode}>
+          <InterviewContentView onModeChange={handleModeChange} />
+
+          {isVoiceMode && (
+            <InterviewCameraView />
+          )}
+        </S.InterviewStage>
+
+        {interviewSession.isPreparingInterview ? (
+          <S.PreparationMessage role="status" aria-live="polite">
+            포트폴리오를 등록하고 있습니다. 분석이 끝날 때까지 잠시 기다려주세요.
+          </S.PreparationMessage>
+        ) : null}
+
+        <S.ActionRow>
+          <S.SecondaryAction
+            type="button"
+            onClick={() => void interviewSession.onQuitInterview()}
+          >
+            그만두기
+          </S.SecondaryAction>
+
+          {isVoiceMode ? (
+            <>
+              <S.IconActionButton type="button" aria-label="카메라 상태">
+                <S.ActionIconImage
+                  src={CameraIcon}
+                  alt=""
+                  aria-hidden="true"
+                  $iconType="camera"
+                />
+              </S.IconActionButton>
+              <S.IconActionButton type="button" aria-label="마이크 상태">
+                <S.ActionIconImage
+                  src={MicIcon}
+                  alt=""
+                  aria-hidden="true"
+                  $iconType="mic"
+                />
+              </S.IconActionButton>
+              {isVoiceActionStarted ? (
+                <S.PrimaryAction
+                  type="button"
+                  onClick={handleCompleteVoice}
+                  disabled={isAwaitingResponse}
+                  aria-busy={isAwaitingResponse}
+                >
+                  {isAwaitingResponse ? "응답 대기중..." : "끝내기"}
+                </S.PrimaryAction>
+              ) : (
+                <S.PrimaryAction
+                  type="button"
+                  onClick={handleStartVoice}
+                  disabled={isStartActionDisabled}
+                  aria-disabled={isStartActionDisabled}
+                  aria-busy={interviewSession.isPreparingInterview || isAwaitingResponse}
+                  title={
+                    isStartActionDisabled && !isAwaitingResponse
+                      ? "포트폴리오를 등록하고 잠시 기다려주세요."
+                      : undefined
+                  }
+                >
+                  {isAwaitingResponse
+                    ? "응답 대기중..."
+                    : interviewSession.isPreparingInterview
+                      ? "준비 중..."
+                      : "시작하기"}
+                </S.PrimaryAction>
+              )}
+            </>
+          ) : null}
+        </S.ActionRow>
+      </S.Content>
+    </S.Container>
+  );
 };
 
 export default InterviewPage;

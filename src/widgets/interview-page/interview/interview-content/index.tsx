@@ -44,9 +44,11 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
     answerText,
     currentQuestion,
     displayQuestionNumber,
+    isAwaitingNextQuestion,
+    isAwaitingResponse,
+    isSubmitting,
     followUpQuestionNumber,
     isVoiceStarted,
-    isSubmitting,
     mode,
     onAnswerTextChange,
     onSubmitText,
@@ -110,6 +112,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
                 type="button"
                 $active
                 aria-pressed="true"
+                disabled={isAwaitingResponse}
                 onClick={() => onModeChange("text")}
               >
                 텍스트
@@ -118,6 +121,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
                 type="button"
                 $active={false}
                 aria-pressed="false"
+                disabled={isAwaitingResponse}
                 onClick={() => onModeChange("voice")}
               >
                 음성
@@ -127,9 +131,16 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
             <S.TextSubmitButton
               type="button"
               onClick={onSubmitText}
-              disabled={isSubmitting || !answerText.trim() || isQuestionLoading}
+              disabled={
+                isAwaitingResponse || !answerText.trim() || isQuestionLoading
+              }
+              aria-busy={isAwaitingResponse}
             >
-              {isSubmitting ? "제출 중..." : "제출하기"}
+              {isSubmitting
+                ? "전송 중..."
+                : isAwaitingNextQuestion
+                  ? "응답 대기중..."
+                  : "제출하기"}
             </S.TextSubmitButton>
           </S.TextAnswerHeader>
 
@@ -138,6 +149,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
               value={answerText}
               maxLength={TEXT_ANSWER_MAX_LENGTH}
               placeholder={TEXT_ANSWER_PLACEHOLDER}
+              readOnly={isAwaitingResponse}
               onChange={onAnswerTextChange}
             />
             <S.TextAnswerCount>
