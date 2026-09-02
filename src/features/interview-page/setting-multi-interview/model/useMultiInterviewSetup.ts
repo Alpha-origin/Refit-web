@@ -90,6 +90,17 @@ const getCandidateConflictMessage = (
 const buildPersonaName = (template: InterviewerTemplate) =>
   `${template.key}-${crypto.randomUUID()}`;
 
+const buildPreparedInterviewer = (
+  template: InterviewerTemplate,
+  personaId: number,
+) => ({
+  personaId,
+  name: template.name,
+  roleLabel: template.roleLabel,
+  image: template.image,
+  voiceIndex: template.voiceIndex,
+});
+
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
   const [style, setStyle] = useState<InterviewStyleOption>(
@@ -246,13 +257,9 @@ export const useMultiInterviewSetup = () => {
             currentQuestionIndex: createdInterview.currentQuestionIndex,
             questions: [],
             mode: "MULTI",
-            interviewers: selectedSlots.map((interviewer, index) => ({
-              personaId: savedPersonaIds[index],
-              name: interviewer.name,
-              roleLabel: interviewer.roleLabel,
-              image: interviewer.image,
-              voiceIndex: interviewer.voiceIndex,
-            })),
+            interviewers: selectedSlots.map((interviewer, index) =>
+              buildPreparedInterviewer(interviewer, savedPersonaIds[index]),
+            ),
           },
           multiInterview: {
             interviewId: createdInterview.interviewId,
