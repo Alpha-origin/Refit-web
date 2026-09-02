@@ -130,7 +130,7 @@ const isVoiceAccessRestricted = async (response: Response) => {
   );
 };
 
-export const useElevenLabsTts = (text: string) => {
+export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
   const [status, setStatus] = useState<QuestionAudioStatus>("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
@@ -138,6 +138,7 @@ export const useElevenLabsTts = (text: string) => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const resolvedVoiceIdRef = useRef<string | null>(null);
   const voiceIdRequestRef = useRef<Promise<string> | null>(null);
+  const configuredVoiceId = getConfiguredVoiceId(voiceIndex);
 
   const clearAudioUrl = () => {
     if (audioUrlRef.current) {
@@ -174,6 +175,12 @@ export const useElevenLabsTts = (text: string) => {
     clearAudioUrl();
     setStatus("idle");
   };
+
+  useEffect(() => {
+    resolvedVoiceIdRef.current = isPlaceholderVoiceId(configuredVoiceId)
+      ? null
+      : configuredVoiceId ?? null;
+  }, [configuredVoiceId]);
 
   useEffect(() => {
     return () => {
@@ -241,8 +248,8 @@ export const useElevenLabsTts = (text: string) => {
 
     try {
       if (!resolvedVoiceIdRef.current) {
-        if (!isPlaceholderVoiceId(ELEVENLABS_CONFIGURED_VOICE_ID)) {
-          resolvedVoiceIdRef.current = ELEVENLABS_CONFIGURED_VOICE_ID;
+        if (!isPlaceholderVoiceId(configuredVoiceId)) {
+          resolvedVoiceIdRef.current = configuredVoiceId;
         } else {
           const voiceIdRequest =
             voiceIdRequestRef.current ?? getVoiceIdFromAccount(controller.signal);
