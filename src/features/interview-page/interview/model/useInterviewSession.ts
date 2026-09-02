@@ -27,8 +27,6 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
-const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
-const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
 
 export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
@@ -391,12 +389,8 @@ export const useInterviewSession = (
 
     preparingSessionIdRef.current = sessionId;
     let isCancelled = false;
-    let attemptCount = 0;
-    let timeoutId: number | null = null;
-    let lastErrorMessage: string | null = null;
 
-    const waitForChatSession = async () => {
-      attemptCount += 1;
+    const loadChatSession = async () => {
       const { data, errorMessage } = await getInterviewPreparation(
         preparedInterview.interviewId,
       );
@@ -405,13 +399,6 @@ export const useInterviewSession = (
         return;
       }
 
-      if (errorMessage || !data) {
-        lastErrorMessage =
-          errorMessage ?? "면접 준비 상태를 확인하지 못했습니다.";
-      }
-
-      // 질문 생성 실패 뒤에도 SOLO는 원본 질문으로 채팅 전달이 성공할 수 있다.
-      // 따라서 생성 상태보다 실제 채팅 전달 여부를 먼저 확인한다.
       if (data?.chatDelivered) {
         preparingSessionIdRef.current = null;
         setActiveInterviewSessionId(sessionId);
@@ -429,36 +416,20 @@ export const useInterviewSession = (
         return;
       }
 
-      // MULTI 질문 생성 실패에는 현재 서버 측 원본 질문 fallback이 없다.
-      if (data?.status === "FAILED" && preparedInterview.mode === "MULTI") {
-        preparingSessionIdRef.current = null;
-        setPreparationError(data.errorMessage ?? "면접 질문 준비에 실패했습니다.");
-        return;
-      }
-
-      if (attemptCount >= INTERVIEW_PREPARATION_MAX_ATTEMPTS) {
-        preparingSessionIdRef.current = null;
-        setPreparationError(
+      preparingSessionIdRef.current = null;
+      setPreparationError(
+        errorMessage ??
           data?.errorMessage ??
-            lastErrorMessage ??
-            "면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
-        );
-        return;
-      }
-
-      timeoutId = window.setTimeout(() => {
-        void waitForChatSession();
-      }, INTERVIEW_PREPARATION_POLL_INTERVAL_MS);
+          (data?.status === "FAILED"
+            ? "면접 질문 준비에 실패했습니다."
+            : "면접 질문이 아직 준비되지 않았습니다. 다시 시도해주세요."),
+      );
     };
 
-    void waitForChatSession();
+    void loadChatSession();
 
     return () => {
       isCancelled = true;
-
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
-      }
 
       if (preparingSessionIdRef.current === sessionId) {
         preparingSessionIdRef.current = null;
@@ -480,9 +451,10 @@ export const useInterviewSession = (
         return;
       }
 
-      void endInterviewSession(false);
+      clearActiveInterviewSessionId();
+      disconnectInterviewSocket(activeSessionId);
     };
-  }, [endInterviewSession]);
+  }, []);
 
   const handleModeChange = (nextMode: InterviewMode) => {
     if (nextMode === mode) {
