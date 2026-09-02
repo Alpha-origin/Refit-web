@@ -29,7 +29,11 @@ const InterviewDashboard = () => {
   const isMultiInterview = interview.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interview.mode === "voice";
   const isQuestionLoading = interview.currentQuestion === null;
-  const activePersonaId = interview.currentQuestion?.personaId;
+  const activePersonaId = isMultiInterview
+    ? isQuestionLoading
+      ? undefined
+      : interview.ttsSpeakerPersonaId
+    : interview.currentQuestion?.personaId;
   const interviewers = interview.preparedInterview?.interviewers ?? [];
   const activeInterviewer = interviewers.find(
     (interviewer) => interviewer.personaId === activePersonaId,
