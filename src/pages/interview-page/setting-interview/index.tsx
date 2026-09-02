@@ -16,8 +16,8 @@ const SettingInterviewPage = () => {
             selection={setup.selection}
           />
           <InterviewerOptions
-            onSelect={setup.select.interviewer}
-            selectedValue={setup.selection.interviewerId}
+            onSelect={setup.select}
+            selection={setup.selection}
           />
         </S.Sections>
         {setup.errorMessage ? (

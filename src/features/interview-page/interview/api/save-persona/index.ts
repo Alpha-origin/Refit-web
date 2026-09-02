@@ -9,7 +9,6 @@ import {
 import type { SavePersonaParams, SavedPersonaData } from "../type";
 
 const SAVE_PERSONA_URL = "/api/persona/save";
-const FIXED_PERSONA_ROLE = "TECH" as const;
 
 const normalizeSavedPersona = (
   payload: unknown,
@@ -28,7 +27,9 @@ const normalizeSavedPersona = (
     personaId,
     personaName:
       getTrimmedString(sourceRecord?.personaName) ?? fallbackData.personaName,
-    role: FIXED_PERSONA_ROLE,
+    role:
+      (getTrimmedString(sourceRecord?.role) as SavedPersonaData["role"] | null) ??
+      fallbackData.role,
     major:
       (getTrimmedString(sourceRecord?.major) as SavedPersonaData["major"] | null) ??
       fallbackData.major,
@@ -42,19 +43,17 @@ const normalizeSavedPersona = (
     gender:
       (getTrimmedString(sourceRecord?.gender) as SavedPersonaData["gender"] | null) ??
       fallbackData.gender,
+    tone:
+      (getTrimmedString(sourceRecord?.tone) as SavedPersonaData["tone"] | null) ??
+      fallbackData.tone,
   } satisfies SavedPersonaData;
 };
 
 export const savePersona = async (params: SavePersonaParams) => {
   try {
-    const requestPayload: SavePersonaParams = {
-      ...params,
-      role: FIXED_PERSONA_ROLE,
-    };
+    console.log("[persona/save] POST request payload", params);
 
-    console.log("[persona/save] POST request payload", requestPayload);
-
-    const response = await apiInstance.post(SAVE_PERSONA_URL, requestPayload);
+    const response = await apiInstance.post(SAVE_PERSONA_URL, params);
     const responseRecord = getRecord(response.data);
 
     if (responseRecord?.success === false) {

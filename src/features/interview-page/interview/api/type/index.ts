@@ -1,17 +1,24 @@
 export type {
   CreateInterviewParams,
+  CreateMultiInterviewParams,
   CreateInterviewPersonaType,
+  CreateSoloInterviewParams,
   CreatedInterviewData,
   InterviewLifecycleStatus,
+  InterviewMode,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonality,
+  InterviewTone,
 } from "./create-interview";
 export type { CreateAnswerRequest } from "./create-answer";
 export type { CurrentInterviewQuestion } from "./current-question";
 export type {
   InterviewLevel,
   InterviewProgressStatus,
+  PreparedInterviewer,
+  PreparedInterviewMode,
   PersonaType,
   PrepareInterviewParams,
   PrepareInterviewQuestion,

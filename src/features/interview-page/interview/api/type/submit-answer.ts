@@ -11,6 +11,7 @@ export interface SubmitInterviewAnswerQuestion {
   type: string;
   intention: string;
   content: string;
+  personaId?: number;
 }
 
 export interface SubmitInterviewAnswerResponse {

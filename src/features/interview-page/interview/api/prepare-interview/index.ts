@@ -1,8 +1,4 @@
-import {
-  API_URL,
-  chatInstance,
-  ensureAccessToken,
-} from "@/shared/api/axiosInstance";
+import { API_URL, ensureAccessToken } from "@/shared/api/axiosInstance";
 
 import {
   getCurrentUserId,
@@ -10,44 +6,54 @@ import {
   getNumericValue,
   getRecord,
   getTrimmedString,
-  isInterviewProgressStatus,
-  isPersonaType,
 } from "../shared";
 import type {
-  InterviewLevel,
   PrepareInterviewParams,
-  PrepareInterviewQuestion,
-  PersonaType,
   PreparedInterviewData,
 } from "../type";
 
-const PREPARE_INTERVIEW_URL = "/chat/interviews";
 const AI_SUBSCRIBE_URL = "/api/v1/ai/subscribe";
 const AI_SUBSCRIBE_TIMEOUT_MS = 120_000;
 type PrepareInterviewRequestData = PreparedInterviewData;
 
-interface PrepareChatInterviewPayload {
+interface InterviewReadySseData {
   sessionId: string;
-  interviewId: number;
-  userId: number;
-  personaId: number;
-  personaType: PersonaType;
-  level: InterviewLevel;
-  jobId: string;
-  status: "IN_PROGRESS";
-  questions: PrepareChatInterviewQuestion[];
+  interviewId: number | null;
 }
 
-interface PrepareChatInterviewQuestion {
-  id: number;
-  category: string;
-  question: string;
-  expectedAnswer: string;
-  basedOn: string[];
-  personaId: number;
-}
+const getSseEventName = (eventBlock: string) =>
+  eventBlock
+    .split(/\r?\n/)
+    .find((line) => line.startsWith("event:"))
+    ?.slice("event:".length)
+    .trim() ?? "message";
 
-const waitForAiSseMessage = async (jobId: string): Promise<void> => {
+const getSseData = (eventBlock: string) =>
+  eventBlock
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith("data:"))
+    .map((line) => line.slice("data:".length).replace(/^ /, ""))
+    .join("\n");
+
+const getSsePayload = (data: string) => {
+  try {
+    return getRecord(JSON.parse(data));
+  } catch {
+    return null;
+  }
+};
+
+const getSseErrorMessage = (data: string, fallback: string) => {
+  const payload = getSsePayload(data);
+
+  return (
+    getTrimmedString(payload?.errorMessage ?? payload?.message) ?? fallback
+  );
+};
+
+const waitForInterviewReady = async (
+  jobId: string,
+): Promise<InterviewReadySseData> => {
   const baseUrl =
     import.meta.env.MODE === "development" ? window.location.origin : API_URL;
   const subscribeUrl = new URL(
@@ -109,22 +115,45 @@ const waitForAiSseMessage = async (jobId: string): Promise<void> => {
       buffer = eventBlocks.pop() ?? "";
 
       for (const eventBlock of eventBlocks) {
-        const data = eventBlock
-          .split(/\r?\n/)
-          .filter((line) => line.startsWith("data:"))
-          .map((line) => line.slice(5).replace(/^ /, ""))
-          .join("\n");
+        const eventName = getSseEventName(eventBlock);
+        const data = getSseData(eventBlock);
 
         if (!data) {
           continue;
         }
 
-        console.log("[AI SSE] message received", {
+        console.log("[AI SSE] event received", {
           jobId,
+          eventName,
           data,
         });
-        await reader.cancel();
-        return;
+
+        if (eventName === "interview-ready") {
+          const payload = getSsePayload(data);
+          const sessionId = getTrimmedString(payload?.sessionId);
+
+          if (!sessionId) {
+            throw new Error("준비 완료 이벤트에 면접 세션 정보가 없습니다.");
+          }
+
+          await reader.cancel();
+          return {
+            sessionId,
+            interviewId: getNumericValue(payload?.interviewId),
+          };
+        }
+
+        if (eventName === "interview-preparation-failed") {
+          throw new Error(
+            getSseErrorMessage(data, "채팅 면접을 준비하지 못했습니다."),
+          );
+        }
+
+        if (eventName === "question-generation-failed") {
+          throw new Error(
+            getSseErrorMessage(data, "면접 질문을 준비하지 못했습니다."),
+          );
+        }
       }
     }
   } catch (error) {
@@ -145,41 +174,6 @@ const waitForAiSseMessage = async (jobId: string): Promise<void> => {
     window.clearTimeout(timeoutId);
     abortController.abort();
   }
-};
-
-const normalizeQuestion = (
-  value: unknown,
-  index: number,
-  fallbackPersonaId: number,
-): PrepareInterviewQuestion | null => {
-  const questionRecord = getRecord(value);
-  const content = getTrimmedString(
-    questionRecord?.content ?? questionRecord?.question ?? questionRecord?.text,
-  );
-
-  if (!content) {
-    return null;
-  }
-
-  return {
-    questionId:
-      getNumericValue(questionRecord?.questionId ?? questionRecord?.id) ??
-      index + 1,
-    intention:
-      getTrimmedString(questionRecord?.intention ?? questionRecord?.purpose) ??
-      "",
-    content,
-    expectedAnswer:
-      getTrimmedString(questionRecord?.expectedAnswer ?? questionRecord?.answer) ??
-      "",
-    basedOn: Array.isArray(questionRecord?.basedOn)
-      ? questionRecord.basedOn.filter(
-          (item): item is string => typeof item === "string",
-        )
-      : [],
-    personaId:
-      getNumericValue(questionRecord?.personaId) ?? fallbackPersonaId,
-  };
 };
 
 const buildPrepareInterviewRequest = (
@@ -216,76 +210,12 @@ const buildPrepareInterviewRequest = (
     level: params.level,
     career: params.career,
     gender: params.gender,
+    tone: params.tone,
     jobId: params.jobId.trim(),
     status: "IN_PROGRESS",
     currentQuestionIndex: 0,
     questions: normalizedQuestions,
-  };
-};
-
-const normalizePreparedInterview = (
-  payload: unknown,
-  fallbackData: PrepareInterviewRequestData,
-): PreparedInterviewData => {
-  const responseRecord = getRecord(payload);
-  const responseDataRecord = getRecord(responseRecord?.data);
-  const sourceRecord = responseDataRecord ?? responseRecord;
-  const responseQuestions =
-    sourceRecord?.questions ?? sourceRecord?.interviewQuestions;
-  const responseNormalizedQuestions = Array.isArray(responseQuestions)
-    ? responseQuestions.reduce<PrepareInterviewQuestion[]>((accumulator, question, index) => {
-        const normalizedQuestion = normalizeQuestion(
-          question,
-          index,
-          fallbackData.personaId,
-        );
-
-        if (normalizedQuestion) {
-          accumulator.push(normalizedQuestion);
-        }
-
-        return accumulator;
-      }, [])
-    : [];
-  const normalizedQuestions =
-    responseNormalizedQuestions.length > 0
-      ? responseNormalizedQuestions
-      : fallbackData.questions;
-  const totalQuestionCount =
-    normalizedQuestions.length > 0
-      ? normalizedQuestions.length
-      : fallbackData.questions.length;
-  const currentQuestionIndexCandidate =
-    getNumericValue(sourceRecord?.currentQuestionIndex) ??
-    fallbackData.currentQuestionIndex;
-  const currentQuestionIndex =
-    totalQuestionCount > 0
-      ? Math.min(Math.max(currentQuestionIndexCandidate, 0), totalQuestionCount - 1)
-      : 0;
-
-  return {
-    sessionId: getTrimmedString(sourceRecord?.sessionId) ?? fallbackData.sessionId,
-    interviewId:
-      getNumericValue(sourceRecord?.interviewId) ?? fallbackData.interviewId,
-    userId: getNumericValue(sourceRecord?.userId) ?? fallbackData.userId,
-    personaId: getNumericValue(sourceRecord?.personaId) ?? fallbackData.personaId,
-    personaName:
-      getTrimmedString(sourceRecord?.personaName) ?? fallbackData.personaName,
-    role: fallbackData.role,
-    major: fallbackData.major,
-    type: fallbackData.type,
-    personaType: isPersonaType(sourceRecord?.personaType)
-      ? sourceRecord.personaType
-      : fallbackData.personaType,
-    level: fallbackData.level,
-    career: fallbackData.career,
-    gender: fallbackData.gender,
-    jobId: fallbackData.jobId,
-    status: isInterviewProgressStatus(sourceRecord?.status)
-      ? sourceRecord.status
-      : fallbackData.status,
-    currentQuestionIndex,
-    questions: normalizedQuestions,
+    mode: "SOLO",
   };
 };
 
@@ -302,51 +232,12 @@ export const prepareInterview = async (params: PrepareInterviewParams) => {
   const requestData = buildPrepareInterviewRequest(params, normalizedSessionId);
 
   try {
-    await waitForAiSseMessage(requestData.jobId);
-
-    console.log("[AI SSE] message received, proceeding to chat/interviews", {
-      jobId: requestData.jobId,
-    });
-
-    const requestPayload: PrepareChatInterviewPayload = {
-      sessionId: requestData.sessionId,
-      interviewId: requestData.interviewId,
-      userId: requestData.userId,
-      personaId: requestData.personaId,
-      personaType: requestData.personaType,
-      level: requestData.level,
-      jobId: requestData.jobId,
-      status: "IN_PROGRESS",
-      questions: requestData.questions.map((question) => ({
-        id: question.questionId,
-        category: question.intention,
-        question: question.content,
-        expectedAnswer: question.expectedAnswer ?? "",
-        basedOn: question.basedOn ?? [],
-        personaId: question.personaId ?? requestData.personaId,
-      })),
+    const ready = await waitForInterviewReady(requestData.jobId);
+    const preparedInterview: PreparedInterviewData = {
+      ...requestData,
+      sessionId: ready.sessionId,
+      interviewId: ready.interviewId ?? requestData.interviewId,
     };
-
-    console.log("[chat/interviews] request payload", requestPayload);
-    console.log("[chat/interviews] sending after SSE", { jobId: requestData.jobId });
-    const response = await chatInstance.post(PREPARE_INTERVIEW_URL, requestPayload);
-    const responseRecord = getRecord(response.data);
-
-    if (responseRecord?.success === false) {
-      return {
-        data: null,
-        errorMessage: "면접 준비에 실패했습니다.",
-      };
-    }
-
-    const preparedInterview = normalizePreparedInterview(response.data, requestData);
-
-    if (!preparedInterview.sessionId) {
-      return {
-        data: null,
-        errorMessage: "면접 세션 정보를 받지 못했습니다.",
-      };
-    }
 
     return {
       data: preparedInterview,

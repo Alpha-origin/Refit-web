@@ -13,6 +13,7 @@ interface PortfolioProps {
   isSaving: boolean;
   jobRole: string;
   jobRoleError: string;
+  onBack: () => void;
   onGitAdd: () => void;
   onGitInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onGitInputKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
@@ -31,8 +32,8 @@ const TrashIcon = () => (
     aria-hidden="true"
     focusable="false"
     viewBox="0 0 24 24"
-    width="18"
-    height="18"
+    width="17"
+    height="17"
   >
     <path
       d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 6v9h2V9h-2Zm4 0v9h2V9h-2ZM7 9h2v9c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2V9h2v9c0 2.21-1.79 4-4 4h-2c-2.21 0-4-1.79-4-4V9Z"
@@ -49,6 +50,7 @@ const Portfolio = ({
   isSaving,
   jobRole,
   jobRoleError,
+  onBack,
   onGitAdd,
   onGitInputChange,
   onGitInputKeyDown,
@@ -69,15 +71,14 @@ const Portfolio = ({
 
       <S.UploadBox>
         <S.GuideBadge>
-          내용이 자세할수록 가이드 정확도 <span>UP</span>
+          내용이 정밀할수록 가이드 정밀도 <span>UP</span>
         </S.GuideBadge>
 
         <S.UploadContent>
           <S.FileIcon src={MyPageFileImage} alt="" aria-hidden="true" />
 
           <S.UploadText>
-            자신의 포트폴리오를 첨부해주세요.
-            <span> PDF 형식</span>
+            자신의 포트폴리오를 첨부해주세요. <span>PDF 형식</span>
           </S.UploadText>
 
           <S.UploadButton type="button" onClick={onPortfolioUploadClick}>
@@ -90,20 +91,30 @@ const Portfolio = ({
             accept=".pdf,application/pdf"
             onChange={onPortfolioFileChange}
           />
-
-          {selectedPortfolioFile && (
-            <S.SelectedFileName>{selectedPortfolioFile.name}</S.SelectedFileName>
-          )}
-
-          {fileError && <S.FileErrorText>{fileError}</S.FileErrorText>}
         </S.UploadContent>
       </S.UploadBox>
 
+      {selectedPortfolioFile && (
+        <S.SelectedFileRow>
+          <S.SelectedFileName>{selectedPortfolioFile.name}</S.SelectedFileName>
+          <S.ReplaceFileButton
+            type="button"
+            aria-label="포트폴리오 PDF 교체"
+            onClick={onPortfolioUploadClick}
+          >
+            +
+          </S.ReplaceFileButton>
+        </S.SelectedFileRow>
+      )}
+
+      {fileError && <S.FieldError role="alert">{fileError}</S.FieldError>}
+
       <S.InputSection>
-        <S.Label>git</S.Label>
+        <S.Label htmlFor="my-page-git">git</S.Label>
 
         <S.GitInputWrapper>
           <S.Input
+            id="my-page-git"
             type="text"
             value={gitInput}
             placeholder="깃허브 주소를 링크 또는 아이디로 입력해주세요."
@@ -139,10 +150,14 @@ const Portfolio = ({
       </S.InputSection>
 
       <S.InputSection>
-        <S.Label>직무</S.Label>
+        <S.Label htmlFor="my-page-job-role">직무</S.Label>
 
         <S.SelectWrapper>
-          <S.Select value={jobRole} onChange={onJobRoleChange}>
+          <S.Select
+            id="my-page-job-role"
+            value={jobRole}
+            onChange={onJobRoleChange}
+          >
             <option value="" disabled>
               본인의 직무를 선택해주세요.
             </option>
@@ -154,10 +169,12 @@ const Portfolio = ({
             ))}
           </S.Select>
 
-          <S.Arrow>⌄</S.Arrow>
+          <S.Arrow aria-hidden="true">▼</S.Arrow>
         </S.SelectWrapper>
 
-        {jobRoleError && <S.FileErrorText>{jobRoleError}</S.FileErrorText>}
+        {jobRoleError && (
+          <S.FieldError role="alert">{jobRoleError}</S.FieldError>
+        )}
       </S.InputSection>
 
       {(saveMessage || saveError) && (
@@ -167,7 +184,9 @@ const Portfolio = ({
       )}
 
       <S.ButtonWrapper>
-        <S.BackButton type="button">돌아가기</S.BackButton>
+        <S.BackButton type="button" onClick={onBack}>
+          돌아가기
+        </S.BackButton>
 
         <S.SaveButton
           type="button"

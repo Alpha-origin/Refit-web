@@ -1,5 +1,5 @@
-import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
 import { buildFeedbackDetailContent } from "@/features/feedback-page/model/feedbackDisplay";
+import { useFeedbackInterview } from "@/features/feedback-page/model/useFeedbackInterview";
 import { exportElementToPdf } from "@/shared/utils/exportElementToPdf";
 import FeedbackDetailBottomSection from "@/widgets/feedback-page/feedback-detail/bottom-section";
 import FeedbackDetailMiddleSection from "@/widgets/feedback-page/feedback-detail/middle-section";
@@ -19,7 +19,14 @@ const FeedbackDetailPage = () => {
     isLoading,
     refetch,
   } = useFeedbackInterview(id);
-  const content = feedback ? buildFeedbackDetailContent(feedback) : null;
+  const isAnalysisPending =
+    feedback?.status === "PENDING" || feedback?.status === "IN_PROGRESS";
+  const isAnalysisFailed = feedback?.status === "FAILED";
+  const hasQuestionFeedback = (feedback?.feedbacks?.length ?? 0) > 0;
+  const content =
+    feedback && !isAnalysisPending && !isAnalysisFailed && hasQuestionFeedback
+      ? buildFeedbackDetailContent(feedback)
+      : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
@@ -32,7 +39,7 @@ const FeedbackDetailPage = () => {
 
     try {
       await exportElementToPdf(panelRef.current, {
-        fileName: `repit-feedback-detail-${id ?? "1"}.pdf`,
+        fileName: `repit-feedback-detail-${id ?? "unknown"}.pdf`,
       });
     } catch (error) {
       console.error(error);
@@ -52,26 +59,22 @@ const FeedbackDetailPage = () => {
         ) : errorMessage || !interview ? (
           <S.StateCard aria-live="polite">
             <S.StateText>{errorMessage ?? "면접 정보를 찾을 수 없습니다."}</S.StateText>
-            <S.RetryButton
-              type="button"
-              onClick={() => {
-                void refetch();
-              }}
-            >
+            <S.RetryButton type="button" onClick={() => void refetch()}>
               다시 시도
             </S.RetryButton>
           </S.StateCard>
         ) : !content ? (
           <S.StateCard aria-live="polite">
             <S.StateText>
-              {feedbackErrorMessage ?? "피드백 분석 결과를 불러오지 못했습니다."}
+              {isAnalysisPending
+                ? "질문별 피드백을 분석 중입니다. 잠시 후 다시 확인해주세요."
+                : isAnalysisFailed
+                  ? feedback?.errorMessage ?? "피드백 분석에 실패했습니다."
+                  : feedback && !hasQuestionFeedback
+                    ? "표시할 질문별 피드백이 없습니다."
+                    : feedbackErrorMessage ?? "피드백 분석 결과를 불러오지 못했습니다."}
             </S.StateText>
-            <S.RetryButton
-              type="button"
-              onClick={() => {
-                void refetch();
-              }}
-            >
+            <S.RetryButton type="button" onClick={() => void refetch()}>
               다시 시도
             </S.RetryButton>
           </S.StateCard>
@@ -79,7 +82,8 @@ const FeedbackDetailPage = () => {
           <>
             <FeedbackSummaryCard
               interview={interview}
-              notice="/api/feedbacks에서 불러온 실제 질문별 피드백 데이터입니다."
+              feedbackStatus={feedback?.status}
+              style={feedback?.style}
             />
             <FeedbackDetailTopSection content={content.topSection} />
             <FeedbackDetailMiddleSection content={content.middleSection} />

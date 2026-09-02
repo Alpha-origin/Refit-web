@@ -1,7 +1,7 @@
 import type { InterviewSummary } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 
 export const getInterviewId = (interview: InterviewSummary) =>
-  interview.interviewId ?? interview.id;
+  interview.interviewId ?? interview.id ?? 0;
 
 const MAJOR_LABELS: Record<string, string> = {
   BACKEND: "백엔드",
@@ -13,21 +13,21 @@ const MAJOR_LABELS: Record<string, string> = {
   AI: "AI",
 };
 
-const STYLE_LABELS: Record<string, string> = {
-  FRIENDLY: "편함",
-  NORMAL: "일반",
-  NEUTRAL: "일반",
-  PRESSURE: "압박",
-  STRESS: "압박",
-  HARD: "압박",
+const PERSONA_TYPE_LABELS: Record<string, string> = {
+  FRIENDLY: "친근한",
+  REALISTIC: "현실적인",
+  METICULOUS: "꼼꼼한",
 };
 
 const STATUS_LABELS: Record<string, string> = {
+  SUCCEEDED: "분석완료",
   COMPLETED: "분석완료",
   FINISHED: "분석완료",
   DONE: "분석완료",
   IN_PROGRESS: "진행중",
   READY: "대기중",
+  PENDING: "분석중",
+  FAILED: "분석실패",
 };
 
 const getSafeDate = (value?: string) => {
@@ -64,7 +64,7 @@ export const sortInterviewsByCreatedAt = (items: InterviewSummary[]) =>
 
 export const getInterviewMajorLabel = (major?: string) => {
   if (!major) {
-    return "일반";
+    return "미제공";
   }
 
   return MAJOR_LABELS[major] ?? major;
@@ -73,17 +73,28 @@ export const getInterviewMajorLabel = (major?: string) => {
 export const getInterviewTitle = (major?: string) =>
   `${getInterviewMajorLabel(major)} 모의면접`;
 
-export const getInterviewStyleLabel = (type?: string) => {
-  if (!type) {
-    return "일반";
+export const getInterviewModeLabel = (interview: InterviewSummary) =>
+  interview.mode === "MULTI" ? "다대일 모의면접" : "일대일 모의면접";
+
+export const getInterviewerCount = (interview: InterviewSummary) => {
+  if (interview.personaIds && interview.personaIds.length > 0) {
+    return interview.personaIds.length;
   }
 
-  return STYLE_LABELS[type] ?? type;
+  return interview.personaId || interview.persona?.id ? 1 : 0;
+};
+
+export const getInterviewStyleLabel = (type?: string) => {
+  if (!type) {
+    return "미제공";
+  }
+
+  return PERSONA_TYPE_LABELS[type] ?? "성향 미정";
 };
 
 export const getCareerLabel = (career?: number) => {
   if (career === undefined || career === null) {
-    return "미정";
+    return "미제공";
   }
 
   if (career <= 1) {
@@ -98,11 +109,14 @@ export const getCareerLabel = (career?: number) => {
 };
 
 export const getInterviewerName = (interview: InterviewSummary) =>
-  interview.persona?.personaName?.trim() || "면접관";
+  interview.persona?.personaName?.trim() ||
+  (getInterviewerCount(interview) > 0
+    ? `면접관 ${getInterviewerCount(interview)}명`
+    : "면접관 정보 없음");
 
 export const getInterviewStatusLabel = (status?: string) => {
   if (!status) {
-    return "분석완료";
+    return "상태 확인 중";
   }
 
   return STATUS_LABELS[status] ?? status;

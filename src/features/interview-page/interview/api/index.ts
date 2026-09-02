@@ -12,22 +12,34 @@ export {
   parseInterviewSocketMessage,
 } from "./interview-socket";
 export { prepareInterview } from "./prepare-interview";
-export { prepareInterviewRecord } from "./prepare-interview-record";
+export {
+  getInterviewPreparation,
+  prepareInterviewRecord,
+} from "./prepare-interview-record";
+export type {
+  InterviewPreparationData,
+  InterviewPreparationStatus,
+} from "./prepare-interview-record";
 export { quitInterview } from "./quit-interview";
 export { savePersona } from "./save-persona";
 export { submitInterviewAnswer } from "./submit-answer";
 
 export type {
   CreateInterviewParams,
+  CreateMultiInterviewParams,
   CreateInterviewPersonaType,
+  CreateSoloInterviewParams,
   CreatedInterviewData,
   CreateAnswerRequest,
   CurrentInterviewQuestion,
   InterviewLifecycleStatus,
+  InterviewMode,
   InterviewLevel,
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonality,
+  InterviewTone,
   InterviewProgressStatus,
   PersonaType,
   PrepareInterviewParams,

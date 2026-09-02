@@ -12,4 +12,9 @@ export const Page = styled.main`
   button {
     font-family: inherit;
   }
+
+  @media (max-width: 72rem) {
+    height: auto;
+    grid-template-rows: auto auto;
+  }
 `;

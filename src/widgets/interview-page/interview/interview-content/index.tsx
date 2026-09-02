@@ -10,10 +10,12 @@ const FALLBACK_TOTAL_QUESTION_COUNT = 10;
 
 const formatQuestionLabel = ({
   currentQuestionNumber,
+  followUpQuestionNumber,
   isLoading,
   totalQuestionCount,
 }: {
   currentQuestionNumber: number;
+  followUpQuestionNumber: number | null;
   isLoading: boolean;
   totalQuestionCount: number;
 }) => {
@@ -21,9 +23,16 @@ const formatQuestionLabel = ({
     return "Question -- / --";
   }
 
-  return `Question ${String(currentQuestionNumber).padStart(2, "0")} / ${String(
-    totalQuestionCount,
-  ).padStart(2, "0")}`;
+  const questionNumber = String(currentQuestionNumber).padStart(2, "0");
+  const questionLabel =
+    followUpQuestionNumber === null
+      ? questionNumber
+      : `${questionNumber}-${followUpQuestionNumber}`;
+
+  return `Question ${questionLabel} / ${String(totalQuestionCount).padStart(
+    2,
+    "0",
+  )}`;
 };
 
 interface InterviewContentViewProps {
@@ -38,6 +47,7 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
     isAwaitingNextQuestion,
     isAwaitingResponse,
     isSubmitting,
+    followUpQuestionNumber,
     isVoiceStarted,
     mode,
     onAnswerTextChange,
@@ -52,9 +62,13 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
   const totalQuestionCount =
     preparedInterview?.questions.length || FALLBACK_TOTAL_QUESTION_COUNT;
   const currentQuestionNumber = Math.max(displayQuestionNumber, 1);
+  const activeInterviewer = preparedInterview?.interviewers?.find(
+    (interviewer) => interviewer.personaId === currentQuestion?.personaId,
+  );
   const question = {
     id: formatQuestionLabel({
       currentQuestionNumber,
+      followUpQuestionNumber,
       isLoading: isQuestionLoading,
       totalQuestionCount,
     }),
@@ -69,6 +83,11 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
         <S.QuestionBody>
           <S.QuestionContentStack>
             <S.QuestionLabel>{question.id}</S.QuestionLabel>
+            {activeInterviewer ? (
+              <S.QuestionSpeaker>
+                현재 면접관 · {activeInterviewer.name} ({activeInterviewer.roleLabel})
+              </S.QuestionSpeaker>
+            ) : null}
             <S.QuestionText>{question.text}</S.QuestionText>
 
             {isVoiceMode ? (
@@ -112,7 +131,9 @@ const InterviewContentView = ({ onModeChange }: InterviewContentViewProps) => {
             <S.TextSubmitButton
               type="button"
               onClick={onSubmitText}
-              disabled={isAwaitingResponse}
+              disabled={
+                isAwaitingResponse || !answerText.trim() || isQuestionLoading
+              }
               aria-busy={isAwaitingResponse}
             >
               {isSubmitting
