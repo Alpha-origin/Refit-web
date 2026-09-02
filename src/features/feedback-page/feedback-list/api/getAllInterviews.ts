@@ -11,6 +11,8 @@ export interface InterviewPersona {
   type?: string;
   career?: number;
   gender?: string;
+  level?: string;
+  tone?: string;
 }
 
 export interface InterviewSummary {
@@ -64,6 +66,7 @@ export interface FeedbackData {
   feedbackId?: number;
   interviewId?: number;
   sessionId?: string;
+  style?: string;
   status?: string;
   totalScore?: number;
   intentAlignmentScore?: number;

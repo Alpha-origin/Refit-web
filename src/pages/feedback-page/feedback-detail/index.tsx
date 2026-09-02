@@ -80,6 +80,7 @@ const FeedbackDetailPage = () => {
             <FeedbackSummaryCard
               interview={interview}
               notice="/api/feedbacks에서 불러온 실제 질문별 피드백 데이터입니다."
+              style={feedback?.style}
             />
             <FeedbackDetailTopSection content={content.topSection} />
             <FeedbackDetailMiddleSection content={content.middleSection} />

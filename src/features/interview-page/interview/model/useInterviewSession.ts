@@ -351,6 +351,7 @@ export const useInterviewSession = (
         level: preparedInterview.level,
         career: preparedInterview.career,
         gender: preparedInterview.gender,
+        tone: preparedInterview.tone,
         jobId: preparedInterview.jobId,
         questions: preparedInterview.questions,
       });

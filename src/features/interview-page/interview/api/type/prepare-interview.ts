@@ -2,10 +2,12 @@ import type {
   CreateInterviewPersonaType,
   InterviewPersonaGender,
   InterviewPersonaMajor,
+  InterviewPersonality,
   InterviewPersonaRole,
+  InterviewTone,
 } from "./create-interview";
 
-export type PersonaType = "FRIENDLY" | "NEUTRAL" | "STRESS";
+export type PersonaType = InterviewPersonality;
 export type InterviewLevel = "EASY" | "MEDIUM" | "NORMAL" | "HARD";
 export type InterviewProgressStatus =
   | "IN_PROGRESS"
@@ -35,6 +37,7 @@ export interface PrepareInterviewParams {
   level: InterviewLevel;
   career: number;
   gender: InterviewPersonaGender;
+  tone: InterviewTone;
   jobId: string;
   questions: PrepareInterviewQuestion[];
 }
@@ -52,6 +55,7 @@ export interface PreparedInterviewData {
   level: InterviewLevel;
   career: number;
   gender: InterviewPersonaGender;
+  tone: InterviewTone;
   jobId: string;
   status: InterviewProgressStatus;
   currentQuestionIndex: number;

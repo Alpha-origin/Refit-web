@@ -14,11 +14,13 @@ import * as S from "./style";
 interface FeedbackSummaryCardProps {
   interview: InterviewSummary;
   notice: string;
+  style?: string;
 }
 
 const FeedbackSummaryCard = ({
   interview,
   notice,
+  style,
 }: FeedbackSummaryCardProps) => {
   const persona = interview.persona;
 
@@ -49,8 +51,10 @@ const FeedbackSummaryCard = ({
         </S.MetaCard>
 
         <S.MetaCard>
-          <S.MetaLabel>면접 스타일</S.MetaLabel>
-          <S.MetaValue>{getInterviewStyleLabel(persona?.type)}</S.MetaValue>
+          <S.MetaLabel>면접관 성향</S.MetaLabel>
+          <S.MetaValue>
+            {getInterviewStyleLabel(style ?? persona?.type)}
+          </S.MetaValue>
         </S.MetaCard>
 
         <S.MetaCard>

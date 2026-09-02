@@ -31,6 +31,8 @@ export type {
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonality,
+  InterviewTone,
   InterviewProgressStatus,
   PersonaType,
   PrepareInterviewParams,

@@ -10,6 +10,7 @@ import {
   prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
+  type InterviewTone,
   type PrepareInterviewQuestion,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
@@ -33,6 +34,7 @@ import { getInterviewJobId } from "@/shared/storage/interviewJobId";
 type CompletedSlots = [InterviewerTemplate, InterviewerTemplate, InterviewerTemplate];
 
 const INITIAL_SLOTS: MultiInterviewSelection["slots"] = [null, null, null];
+const DEFAULT_MULTI_TONE: InterviewTone = "GENTLE";
 
 const getCompletedSlots = (
   slots: MultiInterviewSelection["slots"],
@@ -202,6 +204,7 @@ export const useMultiInterviewSetup = () => {
           level: LEVEL_BY_DIFFICULTY[difficulty],
           career: template.career,
           gender: template.gender,
+          tone: DEFAULT_MULTI_TONE,
         };
         const { data: savedPersona, errorMessage: savePersonaError } =
           await savePersona(personaPayload);
@@ -273,6 +276,7 @@ export const useMultiInterviewSetup = () => {
             level: LEVEL_BY_DIFFICULTY[difficulty],
             career: representative.career,
             gender: representative.gender,
+            tone: DEFAULT_MULTI_TONE,
             jobId,
             status:
               createdInterview.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",

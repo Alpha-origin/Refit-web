@@ -3,6 +3,7 @@ import type {
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewTone,
 } from "./create-interview";
 import type { InterviewLevel } from "./prepare-interview";
 
@@ -14,6 +15,7 @@ export interface SavePersonaParams {
   type: CreateInterviewPersonaType;
   career: number;
   gender: InterviewPersonaGender;
+  tone: InterviewTone;
 }
 
 export interface SavedPersonaData {
@@ -25,4 +27,5 @@ export interface SavedPersonaData {
   level: InterviewLevel;
   career: number;
   gender: InterviewPersonaGender;
+  tone: InterviewTone;
 }

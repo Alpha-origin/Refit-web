@@ -13,13 +13,10 @@ const MAJOR_LABELS: Record<string, string> = {
   AI: "AI",
 };
 
-const STYLE_LABELS: Record<string, string> = {
-  FRIENDLY: "편함",
-  NORMAL: "일반",
-  NEUTRAL: "일반",
-  PRESSURE: "압박",
-  STRESS: "압박",
-  HARD: "압박",
+const PERSONA_TYPE_LABELS: Record<string, string> = {
+  FRIENDLY: "친근한",
+  REALISTIC: "현실적인",
+  METICULOUS: "꼼꼼한",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -75,10 +72,10 @@ export const getInterviewTitle = (major?: string) =>
 
 export const getInterviewStyleLabel = (type?: string) => {
   if (!type) {
-    return "일반";
+    return "성향 미정";
   }
 
-  return STYLE_LABELS[type] ?? type;
+  return PERSONA_TYPE_LABELS[type] ?? "성향 미정";
 };
 
 export const getCareerLabel = (career?: number) => {

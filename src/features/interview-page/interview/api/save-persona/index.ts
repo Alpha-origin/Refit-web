@@ -43,6 +43,9 @@ const normalizeSavedPersona = (
     gender:
       (getTrimmedString(sourceRecord?.gender) as SavedPersonaData["gender"] | null) ??
       fallbackData.gender,
+    tone:
+      (getTrimmedString(sourceRecord?.tone) as SavedPersonaData["tone"] | null) ??
+      fallbackData.tone,
   } satisfies SavedPersonaData;
 };
 
