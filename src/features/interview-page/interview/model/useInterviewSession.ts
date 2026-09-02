@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -202,7 +202,26 @@ export const useInterviewSession = (
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
-  const elevenLabsTts = useElevenLabsTts(currentQuestion?.content ?? "");
+  const currentQuestionKey = buildQuestionKey(currentQuestion);
+  const multiTtsVoiceIndex = useMemo(() => {
+    if (preparedInterview?.mode !== "MULTI") {
+      return undefined;
+    }
+
+    const interviewers = preparedInterview.interviewers ?? [];
+    const speakerCount = Math.min(3, interviewers.length);
+
+    if (speakerCount === 0) {
+      return undefined;
+    }
+
+    const randomSpeakerIndex = Math.floor(Math.random() * speakerCount);
+    return interviewers[randomSpeakerIndex]?.voiceIndex ?? randomSpeakerIndex + 1;
+  }, [currentQuestionKey, preparedInterview]);
+  const elevenLabsTts = useElevenLabsTts(
+    currentQuestion?.content ?? "",
+    multiTtsVoiceIndex,
+  );
   const supertoneTts = useSupertoneTts(currentQuestion?.content ?? "");
   const questionTts = ttsProvider === "elevenlabs" ? elevenLabsTts : supertoneTts;
   const sessionId = preparedInterview?.sessionId ?? getActiveInterviewSessionId();
