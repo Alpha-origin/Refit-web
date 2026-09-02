@@ -11,7 +11,10 @@ export {
   disconnectInterviewSocket,
   parseInterviewSocketMessage,
 } from "./interview-socket";
-export { prepareInterview } from "./prepare-interview";
+export {
+  prepareInterview,
+  waitForInterviewReady,
+} from "./prepare-interview";
 export {
   getInterviewPreparation,
   prepareInterviewRecord,

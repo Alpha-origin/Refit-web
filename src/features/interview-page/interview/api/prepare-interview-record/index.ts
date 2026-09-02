@@ -43,6 +43,16 @@ const getInterviewId = (payload: unknown) => {
   );
 };
 
+const getSessionId = (payload: unknown) => {
+  const responseRecord = getRecord(payload);
+  const dataRecord = getRecord(responseRecord?.data);
+
+  return (
+    getTrimmedString(dataRecord?.sessionId) ??
+    getTrimmedString(responseRecord?.sessionId)
+  );
+};
+
 export const prepareInterviewRecord = async (interviewId: number) => {
   const requestUrl = `${PREPARE_INTERVIEW_RECORD_URL}/${encodeURIComponent(
     interviewId,
@@ -82,7 +92,10 @@ export const prepareInterviewRecord = async (interviewId: number) => {
     }
 
     return {
-      data: { interviewId: responseInterviewId },
+      data: {
+        interviewId: responseInterviewId,
+        sessionId: getSessionId(response.data) ?? undefined,
+      },
       errorMessage: null,
     };
   } catch (error) {

@@ -11,6 +11,20 @@ const spin = keyframes`
   }
 `;
 
+const loadingDots = keyframes`
+  0%, 20% {
+    content: '.';
+  }
+
+  40%, 60% {
+    content: '..';
+  }
+
+  80%, 100% {
+    content: '...';
+  }
+`;
+
 const focusRing = css`
   &:focus-visible {
     outline: 0.125rem solid rgba(47, 128, 237, 0.34);
@@ -443,17 +457,20 @@ export const ErrorMessage = styled.p`
 `;
 
 const baseButton = styled.button<ActionButtonProps>`
-  width: min(100%, 9.5rem);
-  height: clamp(2.85rem, 5.8vh, 3.35rem);
+  width: ${({ $analyzing }) =>
+    $analyzing ? 'min(100%, 8rem)' : 'min(100%, 9.5rem)'};
+  height: ${({ $analyzing }) =>
+    $analyzing ? 'clamp(2.55rem, 5.2vh, 3rem)' : 'clamp(2.85rem, 5.8vh, 3.35rem)'};
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border-radius: 0.5rem;
   box-sizing: border-box;
-  font-size: 1.15rem;
+  font-size: ${({ $analyzing }) => ($analyzing ? '0.9rem' : '1.15rem')};
   font-weight: 800;
   line-height: 1.2;
+  white-space: nowrap;
   cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
   transition:
     background-color 0.2s ease,
@@ -477,8 +494,8 @@ const baseButton = styled.button<ActionButtonProps>`
   }
 
   @media (max-height: 44rem) {
-    height: 2.65rem;
-    font-size: 1rem;
+    height: ${({ $analyzing }) => ($analyzing ? '2.45rem' : '2.65rem')};
+    font-size: ${({ $analyzing }) => ($analyzing ? '0.85rem' : '1rem')};
   }
 `;
 
@@ -503,6 +520,17 @@ export const NextButton = styled(baseButton)`
     background: #176fd9;
     border-color: #176fd9;
     box-shadow: 0 0.85rem 1.7rem rgba(37, 126, 232, 0.2);
+  }
+`;
+
+export const LoadingDots = styled.span`
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+
+  &::after {
+    content: '.';
+    animation: ${loadingDots} 1.2s steps(1, end) infinite;
   }
 `;
 

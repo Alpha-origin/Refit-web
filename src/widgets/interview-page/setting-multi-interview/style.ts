@@ -10,6 +10,10 @@ interface CandidateCardProps {
   $selected: boolean;
 }
 
+interface ActionButtonProps {
+  $analyzing?: boolean;
+}
+
 const focusRing = css`
   &:focus-visible {
     outline: 0.15rem solid rgba(37, 126, 232, 0.48);
@@ -20,6 +24,20 @@ const focusRing = css`
 const spin = keyframes`
   to {
     transform: rotate(360deg);
+  }
+`;
+
+const loadingDots = keyframes`
+  0%, 20% {
+    content: '.';
+  }
+
+  40%, 60% {
+    content: '..';
+  }
+
+  80%, 100% {
+    content: '...';
   }
 `;
 
@@ -347,12 +365,14 @@ export const ActionRow = styled.div`
   }
 `;
 
-const actionButton = styled.button`
-  width: min(100%, 9.5rem);
-  height: 3rem;
+const actionButton = styled.button<ActionButtonProps>`
+  width: ${({ $analyzing }) =>
+    $analyzing ? 'min(100%, 8rem)' : 'min(100%, 9.5rem)'};
+  height: ${({ $analyzing }) => ($analyzing ? '2.7rem' : '3rem')};
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: ${({ $analyzing }) => ($analyzing ? '0.85rem' : '1rem')};
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
   ${focusRing}
 
@@ -372,6 +392,17 @@ export const NextButton = styled(actionButton)`
   background: ${({ disabled }) => (disabled ? "#b9c7db" : "#257ee8")};
   color: #ffffff;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+`;
+
+export const LoadingDots = styled.span`
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+
+  &::after {
+    content: '.';
+    animation: ${loadingDots} 1.2s steps(1, end) infinite;
+  }
 `;
 
 export const LoadingOverlay = styled.div`

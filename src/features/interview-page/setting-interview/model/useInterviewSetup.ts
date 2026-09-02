@@ -14,6 +14,7 @@ import {
   type PersonaType,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
+import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
@@ -25,6 +26,7 @@ import {
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
 import { getInterviewJobId } from "@/shared/storage/interviewJobId";
+import { usePortfolioAnalysisStatus } from "@/features/interview-page/model/usePortfolioAnalysisStatus";
 
 const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
   편함: "FRIENDLY",
@@ -66,6 +68,11 @@ const buildUniquePersonaName = (personaName: string) =>
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
+  const {
+    isWaiting: isPortfolioAnalyzing,
+    readySessionId: portfolioReadySessionId,
+    waitForPortfolioAnalysis,
+  } = usePortfolioAnalysisStatus();
 
   const [selectedStyle, setSelectedStyle] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
@@ -97,20 +104,32 @@ export const useInterviewSetup = () => {
   const handleBack = () => navigate(-1);
 
   const handleNext = async () => {
-    if (isSubmitting) {
+    if (isSubmitting || isPortfolioAnalyzing) {
       return;
     }
 
     setErrorMessage("");
-    setIsSubmitting(true);
 
     const jobId = getInterviewJobId();
 
     if (!jobId) {
-      setIsSubmitting(false);
       setErrorMessage("마이페이지에서 포트폴리오를 먼저 등록해주세요.");
       return;
     }
+
+    let portfolioSessionId = portfolioReadySessionId;
+
+    try {
+      const readyData = await waitForPortfolioAnalysis(jobId);
+      portfolioSessionId = readyData?.sessionId ?? portfolioSessionId;
+    } catch (error) {
+      setErrorMessage(
+        extractErrorMessage(error, "포트폴리오 분석 상태를 확인하지 못했습니다."),
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
       (interviewer) => interviewer.id === selectedInterviewerId,
@@ -184,18 +203,22 @@ export const useInterviewSetup = () => {
 
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
+    const interviewSessionId =
+      preparedInterviewRecord.sessionId ??
+      portfolioSessionId ??
+      data.sessionId;
     const personaId =
       data.personaId !== null && data.personaId > 0
         ? data.personaId
         : savedPersona.personaId;
-    setActiveInterviewSessionId(data.sessionId);
+    setActiveInterviewSessionId(interviewSessionId);
 
     setIsSubmitting(false);
 
     navigate(`/main/interview/${data.interviewId}`, {
       state: {
         preparedInterview: {
-          sessionId: data.sessionId,
+          sessionId: interviewSessionId,
           interviewId: preparedInterviewRecord.interviewId,
           userId: data.userId,
           personaId,
@@ -246,7 +269,8 @@ export const useInterviewSetup = () => {
 
   return {
     errorMessage,
-    isNextDisabled: isSubmitting,
+    isNextDisabled: isSubmitting || isPortfolioAnalyzing,
+    isPortfolioAnalyzing,
     isSubmitting,
     onBack: handleBack,
     onNext: handleNext,

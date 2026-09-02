@@ -25,6 +25,7 @@ import {
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
 import { getInterviewJobId } from "@/shared/storage/interviewJobId";
+import { usePortfolioAnalysisStatus } from "@/features/interview-page/model/usePortfolioAnalysisStatus";
 
 type CompletedSlots = [InterviewerTemplate, InterviewerTemplate, InterviewerTemplate];
 
@@ -103,6 +104,11 @@ const buildPreparedInterviewer = (
 
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
+  const {
+    isWaiting: isPortfolioAnalyzing,
+    readySessionId: portfolioReadySessionId,
+    waitForPortfolioAnalysis,
+  } = usePortfolioAnalysisStatus();
   const [style, setStyle] = useState<InterviewStyleOption>(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
   );
@@ -119,10 +125,11 @@ export const useMultiInterviewSetup = () => {
     Boolean(completedSlots) &&
     !validation.hasDuplicateInterviewer &&
     !validation.hasDuplicateRole &&
-    !isSubmitting;
+    !isSubmitting &&
+    !isPortfolioAnalyzing;
 
   const selectSlot = (slot: SlotIndex) => {
-    if (isSubmitting) {
+    if (isSubmitting || isPortfolioAnalyzing) {
       return;
     }
 
@@ -149,7 +156,7 @@ export const useMultiInterviewSetup = () => {
   };
 
   const handleNext = async () => {
-    if (isSubmitting) {
+    if (isSubmitting || isPortfolioAnalyzing) {
       return;
     }
 
@@ -180,9 +187,14 @@ export const useMultiInterviewSetup = () => {
     }
 
     setErrorMessage("");
-    setIsSubmitting(true);
 
     try {
+      let portfolioSessionId = portfolioReadySessionId;
+      const readyData = await waitForPortfolioAnalysis(jobId);
+      portfolioSessionId = readyData?.sessionId ?? portfolioSessionId;
+
+      setIsSubmitting(true);
+
       const savedPersonaIds: number[] = [];
       const savedPersonaLabels: string[] = [];
 
@@ -234,12 +246,16 @@ export const useMultiInterviewSetup = () => {
       }
 
       const representative = selectedSlots[0];
-      setActiveInterviewSessionId(createdInterview.sessionId);
+      const interviewSessionId =
+        preparedInterviewRecord.sessionId ??
+        portfolioSessionId ??
+        createdInterview.sessionId;
+      setActiveInterviewSessionId(interviewSessionId);
 
       navigate(`/main/interview/${createdInterview.interviewId}`, {
         state: {
           preparedInterview: {
-            sessionId: createdInterview.sessionId,
+            sessionId: interviewSessionId,
             interviewId: preparedInterviewRecord.interviewId,
             userId: createdInterview.userId,
             personaId: savedPersonaIds[0],
@@ -281,6 +297,7 @@ export const useMultiInterviewSetup = () => {
   return {
     candidates: getInterviewerCandidatesForSlot(activeSlot),
     errorMessage,
+    isPortfolioAnalyzing,
     isSubmitting,
     isNextDisabled: !canSubmit,
     onBack: () => navigate(-1),
