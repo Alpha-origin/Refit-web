@@ -129,6 +129,11 @@ const MULTI_INTERVIEW_ROLE_CONFIGS: readonly (readonly InterviewerRoleConfig[])[
   ],
 ];
 
+export const getInterviewerRoleConfigForSlot = (
+  slot: SlotIndex,
+  interviewerIndex: number,
+) => MULTI_INTERVIEW_ROLE_CONFIGS[slot][interviewerIndex];
+
 export const MULTI_INTERVIEW_SLOT_LABELS = [
   "기술",
   "직무·조직 적합성",
@@ -138,7 +143,7 @@ export const MULTI_INTERVIEW_SLOT_LABELS = [
 export const getInterviewerCandidatesForSlot = (slot: SlotIndex) =>
   MULTI_INTERVIEWER_TEMPLATES.map((interviewer, index) => ({
     ...interviewer,
-    ...MULTI_INTERVIEW_ROLE_CONFIGS[slot][index],
+    ...getInterviewerRoleConfigForSlot(slot, index),
   }));
 
 const ROLE_LABELS: Record<InterviewerTemplateRole, string> = {
