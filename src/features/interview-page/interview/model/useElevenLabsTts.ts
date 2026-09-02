@@ -132,6 +132,7 @@ const isVoiceAccessRestricted = async (response: Response) => {
 
 export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
   const [status, setStatus] = useState<QuestionAudioStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -241,6 +242,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
     }
 
     stop();
+    setErrorMessage(null);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -294,6 +296,9 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
 
       if (!response.ok) {
         if (response.status === 401) {
+          setErrorMessage(
+            "ElevenLabs 인증에 실패했습니다. API 키와 권한을 확인해주세요.",
+          );
           console.warn(
             "ElevenLabs API 키를 인증할 수 없어 브라우저 음성으로 재생합니다.",
           );
@@ -301,6 +306,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
           return;
         }
 
+        setErrorMessage(`ElevenLabs TTS 요청에 실패했습니다. (${response.status})`);
         throw new Error(`ElevenLabs TTS failed with ${response.status}`);
       }
 
@@ -327,6 +333,9 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
       releaseAudio();
       clearAudioUrl();
       setStatus("idle");
+      if (error instanceof Error && !errorMessage) {
+        setErrorMessage(error.message);
+      }
       console.error("Failed to play ElevenLabs TTS.", error);
     } finally {
       abortControllerRef.current = null;
@@ -345,6 +354,7 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
   return {
     onPlay: play,
     status,
+    errorMessage,
     onStop: stop,
     onToggle: toggle,
   };

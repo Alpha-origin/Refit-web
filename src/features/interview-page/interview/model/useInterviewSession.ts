@@ -207,7 +207,7 @@ export const useInterviewSession = (
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
   const currentQuestionKey = buildQuestionKey(currentQuestion);
-  const multiTtsVoiceIndex = useMemo(() => {
+  const multiTtsSpeaker = useMemo(() => {
     if (preparedInterview?.mode !== "MULTI") {
       return undefined;
     }
@@ -220,11 +220,20 @@ export const useInterviewSession = (
     }
 
     const randomSpeakerIndex = Math.floor(Math.random() * speakerCount);
-    return interviewers[randomSpeakerIndex]?.voiceIndex ?? randomSpeakerIndex + 1;
+    const speaker = interviewers[randomSpeakerIndex];
+
+    if (!speaker) {
+      return undefined;
+    }
+
+    return {
+      personaId: speaker.personaId,
+      voiceIndex: speaker.voiceIndex ?? randomSpeakerIndex + 1,
+    };
   }, [currentQuestionKey, preparedInterview]);
   const elevenLabsTts = useElevenLabsTts(
     currentQuestion?.content ?? "",
-    multiTtsVoiceIndex,
+    multiTtsSpeaker?.voiceIndex,
   );
   const supertoneTts = useSupertoneTts(currentQuestion?.content ?? "");
   const questionTts = ttsProvider === "elevenlabs" ? elevenLabsTts : supertoneTts;
@@ -620,6 +629,9 @@ export const useInterviewSession = (
     mode,
     preparationError,
     questionAudioStatus: questionTts.status,
+    questionAudioErrorMessage:
+      ttsProvider === "elevenlabs" ? elevenLabsTts.errorMessage : null,
+    ttsSpeakerPersonaId: multiTtsSpeaker?.personaId,
     onAnswerTextChange: voiceAnswer.onAnswerTextChange,
     onClearAnswer: voiceAnswer.onClearAnswer,
     onCompleteVoice: handleCompleteVoice,
