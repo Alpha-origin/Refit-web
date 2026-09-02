@@ -11,6 +11,7 @@ export interface InterviewPersona {
   type?: string;
   career?: number;
   gender?: string;
+  imageUrl?: string;
 }
 
 export interface InterviewSummary {
@@ -55,6 +56,7 @@ export interface QuestionFeedback {
 export interface FeedbackPersona {
   personaId?: number;
   personaRole?: string;
+  imageUrl?: string;
   score?: number;
   comment?: string;
   strengths?: string[];

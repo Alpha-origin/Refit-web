@@ -43,7 +43,7 @@ export const INTERVIEW_SETTING_INTERVIEWER_OPTION_SECTIONS = [
   {
     key: 'tone',
     title: '말투',
-    options: ['부드러운', '직설적인', '차분한'],
+    options: ['부드러운', '직설적인', '압박하는'],
   },
   {
     key: 'specialty',

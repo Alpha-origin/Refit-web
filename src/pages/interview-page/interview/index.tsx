@@ -7,7 +7,6 @@ import {
 } from "@/features/interview-page/interview/model/interviewSessionContext";
 import { useInterviewSessionContext } from "@/features/interview-page/interview/model/useInterviewSessionContext";
 import Loading from "@/shared/components/loading";
-import { SETTING_INTERVIEWER_CARDS } from "@/widgets/interview-page/setting-interview/data";
 import InterviewDashboard from "@/widgets/interview-page/interview/interview-dashboard";
 import * as S from "@/widgets/interview-page/interview/style";
 
@@ -25,40 +24,10 @@ const getPreparedInterviewFromState = (state: unknown) => {
   return preparedInterview as PreparedInterviewData;
 };
 
-const getPreparedInterviewForDisplay = (state: unknown) => {
-  const preparedInterview = getPreparedInterviewFromState(state);
-
-  if (!preparedInterview || preparedInterview.mode !== "SOLO") {
-    return preparedInterview;
-  }
-
-  const selectedInterviewer = SETTING_INTERVIEWER_CARDS.find(
-    (interviewer) => interviewer.id === 4,
-  );
-
-  if (!selectedInterviewer) {
-    return preparedInterview;
-  }
-
-  const existingInterviewer = preparedInterview.interviewers?.[0];
-
-  return {
-    ...preparedInterview,
-    interviewers: [
-      {
-        personaId: existingInterviewer?.personaId ?? preparedInterview.personaId,
-        name: selectedInterviewer.name,
-        roleLabel: "기술 면접관",
-        image: selectedInterviewer.image,
-      },
-    ],
-  } satisfies PreparedInterviewData;
-};
-
 const InterviewPage = () => {
   const location = useLocation();
   const preparedInterview = useMemo(
-    () => getPreparedInterviewForDisplay(location.state),
+    () => getPreparedInterviewFromState(location.state),
     [location.state],
   );
   const ttsProvider = "elevenlabs" as const;

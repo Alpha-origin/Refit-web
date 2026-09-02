@@ -11,10 +11,10 @@ import {
   type InterviewLevel,
   type InterviewPersonaMajor,
   type InterviewPersonaRole,
+  type InterviewPersonaTone,
   type PersonaType,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
-import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
   INTERVIEW_SETTING_INTERVIEWERS,
@@ -22,11 +22,14 @@ import {
   type InterviewerPersonalityOption,
   type InterviewerSpecialtyOption,
   type InterviewerToneOption,
+  type InterviewerId,
   type InterviewSettingSelectHandlers,
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
-import { getInterviewJobId } from "@/shared/storage/interviewJobId";
-import { usePortfolioAnalysisStatus } from "@/features/interview-page/model/usePortfolioAnalysisStatus";
+import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
+import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
+import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
 
 const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
   편함: "FRIENDLY",
@@ -55,8 +58,21 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   어려움: "HARD",
 };
 
-const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
+const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
+
+const TONE_BY_OPTION: Record<InterviewerToneOption, InterviewPersonaTone> = {
+  부드러운: "GENTLE",
+  직설적인: "DIRECT",
+  압박하는: "PRESSURING",
+};
+
+const INTERVIEWER_IMAGE_BY_ID: Record<InterviewerId, string> = {
+  1: InterviewerImage1,
+  2: InterviewerImage2,
+  3: InterviewerImage3,
+  4: InterviewerImage4,
+};
 
 const MAJOR_BY_SPECIALTY: Record<InterviewerSpecialtyOption, InterviewPersonaMajor> = {
   프론트엔드: "FRONTEND",
@@ -68,11 +84,6 @@ const buildUniquePersonaName = (personaName: string) =>
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
-  const {
-    isWaiting: isPortfolioAnalyzing,
-    readySessionId: portfolioReadySessionId,
-    waitForPortfolioAnalysis,
-  } = usePortfolioAnalysisStatus();
 
   const [selectedStyle, setSelectedStyle] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
@@ -104,31 +115,11 @@ export const useInterviewSetup = () => {
   const handleBack = () => navigate(-1);
 
   const handleNext = async () => {
-    if (isSubmitting || isPortfolioAnalyzing) {
+    if (isSubmitting) {
       return;
     }
 
     setErrorMessage("");
-
-    const jobId = getInterviewJobId();
-
-    if (!jobId) {
-      setErrorMessage("마이페이지에서 포트폴리오를 먼저 등록해주세요.");
-      return;
-    }
-
-    let portfolioSessionId = portfolioReadySessionId;
-
-    try {
-      const readyData = await waitForPortfolioAnalysis(jobId);
-      portfolioSessionId = readyData?.sessionId ?? portfolioSessionId;
-    } catch (error) {
-      setErrorMessage(
-        extractErrorMessage(error, "포트폴리오 분석 상태를 확인하지 못했습니다."),
-      );
-      return;
-    }
-
     setIsSubmitting(true);
 
     const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
@@ -144,11 +135,14 @@ export const useInterviewSetup = () => {
     const personaPayload: SavePersonaParams = {
       personaName: buildUniquePersonaName(selectedInterviewer.personaName),
       role: DEFAULT_INTERVIEW_ROLE,
-      level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       major: MAJOR_BY_SPECIALTY[selectedSpecialty],
       type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
+      tone: TONE_BY_OPTION[selectedTone],
+      level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
       gender: DEFAULT_INTERVIEW_GENDER,
+      imageUrl: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
+      description: selectedInterviewer.description,
     };
 
     console.log("[persona/save] request payload", personaPayload);
@@ -205,7 +199,6 @@ export const useInterviewSetup = () => {
 
     const interviewSessionId =
       preparedInterviewRecord.sessionId ??
-      portfolioSessionId ??
       data.sessionId;
     const personaId =
       data.personaId !== null && data.personaId > 0
@@ -230,7 +223,7 @@ export const useInterviewSetup = () => {
           level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
           career: personaPayload.career,
           gender: personaPayload.gender,
-          jobId,
+          jobId: preparedInterviewRecord.jobId ?? "",
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
           questions: [],
@@ -240,6 +233,7 @@ export const useInterviewSetup = () => {
               personaId,
               name: selectedInterviewer.personaName,
               roleLabel: "기술 면접관",
+              image: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
             },
           ],
         },
@@ -269,8 +263,8 @@ export const useInterviewSetup = () => {
 
   return {
     errorMessage,
-    isNextDisabled: isSubmitting || isPortfolioAnalyzing,
-    isPortfolioAnalyzing,
+    isNextDisabled: isSubmitting,
+    isPortfolioAnalyzing: false,
     isSubmitting,
     onBack: handleBack,
     onNext: handleNext,

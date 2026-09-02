@@ -23,7 +23,7 @@ const FeedbackOverallPage = () => {
   const isAnalysisFailed = feedback?.status === "FAILED";
   const content =
     feedback && !isAnalysisPending && !isAnalysisFailed
-      ? buildFeedbackOverallContent(feedback)
+      ? buildFeedbackOverallContent(feedback, interview)
       : null;
   const panelRef = useRef<HTMLElement | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);

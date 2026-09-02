@@ -27,6 +27,8 @@ import { useVoiceAnswer } from "./useVoiceAnswer";
 
 type InterviewCloseReason = "completed" | "quit";
 const INTERVIEW_COMPLETED_PATH = "/main/interview/completed";
+const INTERVIEW_PREPARATION_POLL_INTERVAL_MS = 1_000;
+const INTERVIEW_PREPARATION_MAX_ATTEMPTS = 120;
 
 export type InterviewTtsProvider = "elevenlabs" | "supertone";
 
@@ -204,21 +206,28 @@ export const useInterviewSession = (
   const isVoiceMode = mode === "voice";
   const { cameraState, videoRef } = useInterviewCamera(isVoiceMode);
   const voiceAnswer = useVoiceAnswer();
-  const currentQuestionKey = buildQuestionKey(currentQuestion);
   const multiTtsSpeaker = useMemo(() => {
     if (preparedInterview?.mode !== "MULTI") {
       return undefined;
     }
 
     const interviewers = preparedInterview.interviewers ?? [];
-    const speakerCount = Math.min(3, interviewers.length);
-
-    if (speakerCount === 0) {
+    if (interviewers.length === 0) {
       return undefined;
     }
 
-    const randomSpeakerIndex = Math.floor(Math.random() * speakerCount);
-    const speaker = interviewers[randomSpeakerIndex];
+    // 질문에 연결된 persona를 우선 사용해야 질문 내용과 면접관 음성이 일치한다.
+    // personaId가 없는 응답은 대표 면접관으로 대체해 성별이 섞이지 않게 한다.
+    const speaker =
+      (currentQuestion?.personaId
+        ? interviewers.find(
+            (interviewer) => interviewer.personaId === currentQuestion.personaId,
+          )
+        : undefined) ??
+      interviewers.find(
+        (interviewer) => interviewer.personaId === preparedInterview.personaId,
+      ) ??
+      interviewers[0];
 
     if (!speaker) {
       return undefined;
@@ -226,9 +235,9 @@ export const useInterviewSession = (
 
     return {
       personaId: speaker.personaId,
-      voiceIndex: speaker.voiceIndex ?? randomSpeakerIndex + 1,
+      voiceIndex: speaker.voiceIndex ?? interviewers.indexOf(speaker) + 1,
     };
-  }, [currentQuestionKey, preparedInterview]);
+  }, [currentQuestion?.personaId, preparedInterview]);
   const elevenLabsTts = useElevenLabsTts(
     currentQuestion?.content ?? "",
     multiTtsSpeaker?.voiceIndex,
@@ -389,14 +398,23 @@ export const useInterviewSession = (
 
     preparingSessionIdRef.current = sessionId;
     let isCancelled = false;
+    let attemptCount = 0;
+    let timeoutId: number | null = null;
+    let lastErrorMessage: string | null = null;
 
-    const loadChatSession = async () => {
+    const waitForChatSession = async () => {
+      attemptCount += 1;
+
       const { data, errorMessage } = await getInterviewPreparation(
         preparedInterview.interviewId,
       );
 
       if (isCancelled) {
         return;
+      }
+
+      if (errorMessage || !data) {
+        lastErrorMessage = errorMessage ?? "면접 준비 상태를 확인하지 못했습니다.";
       }
 
       if (data?.chatDelivered) {
@@ -416,20 +434,44 @@ export const useInterviewSession = (
         return;
       }
 
-      preparingSessionIdRef.current = null;
-      setPreparationError(
-        errorMessage ??
-          data?.errorMessage ??
-          (data?.status === "FAILED"
-            ? "면접 질문 준비에 실패했습니다."
-            : "면접 질문이 아직 준비되지 않았습니다. 다시 시도해주세요."),
-      );
+      if (data?.status === "FAILED") {
+        preparingSessionIdRef.current = null;
+        setPreparationError(data.errorMessage ?? "면접 질문 준비에 실패했습니다.");
+        return;
+      }
+
+      if (attemptCount >= INTERVIEW_PREPARATION_MAX_ATTEMPTS) {
+        preparingSessionIdRef.current = null;
+        setPreparationError(
+          lastErrorMessage ??
+            "면접 준비 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.",
+        );
+        return;
+      }
+
+      const retryAfterMs = data?.retryAfterMs ?? INTERVIEW_PREPARATION_POLL_INTERVAL_MS;
+
+      console.log("[interview] waiting for preparation", {
+        interviewId: preparedInterview.interviewId,
+        jobId: data?.jobId,
+        status: data?.status,
+        chatDelivered: data?.chatDelivered,
+        retryAfterMs,
+      });
+
+      timeoutId = window.setTimeout(() => {
+        void waitForChatSession();
+      }, retryAfterMs);
     };
 
-    void loadChatSession();
+    void waitForChatSession();
 
     return () => {
       isCancelled = true;
+
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
 
       if (preparingSessionIdRef.current === sessionId) {
         preparingSessionIdRef.current = null;

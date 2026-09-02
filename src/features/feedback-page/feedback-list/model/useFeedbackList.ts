@@ -68,11 +68,13 @@ const getListItems = (
     return {
       id: targetInterviewId,
       date: getFormattedDate(interview.createdAt),
-      imageUrl: getInterviewerImageUrl(
-        targetInterviewId,
-        interviewerName,
-        interview.persona?.id,
-      ),
+      imageUrl:
+        interview.persona?.imageUrl ??
+        getInterviewerImageUrl(
+          targetInterviewId,
+          interviewerName,
+          interview.persona?.id,
+        ),
       title: getInterviewModeLabel(interview),
       styleLabel: getInterviewStyleLabel(interview.persona?.type),
       levelLabel: getCareerLabel(interview.persona?.career),

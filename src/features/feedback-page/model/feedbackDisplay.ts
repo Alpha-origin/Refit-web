@@ -1,5 +1,6 @@
 import type {
   FeedbackData,
+  InterviewSummary,
   QuestionFeedback,
 } from "@/features/feedback-page/feedback-list/api/getAllInterviews";
 import type {
@@ -71,6 +72,7 @@ export const getFeedbackStatusLabel = (status?: string) => {
 
 export const buildFeedbackOverallContent = (
   feedback: FeedbackData,
+  interview?: InterviewSummary | null,
 ): {
   topSection: FeedbackOverallTopSectionData;
   middleSection: FeedbackOverallMiddleSectionData;
@@ -149,6 +151,11 @@ export const buildFeedbackOverallContent = (
       ],
       personaFeedbacks: (feedback.personas ?? []).map((persona, index) => ({
         title: persona.personaRole?.trim() || `면접관 ${index + 1}`,
+        imageUrl:
+          persona.imageUrl ??
+          (persona.personaId === interview?.persona?.id
+            ? interview.persona?.imageUrl
+            : undefined),
         comment:
           persona.comment?.trim() || "면접관 코멘트가 아직 등록되지 않았습니다.",
       })),

@@ -3,17 +3,21 @@ import type {
   InterviewPersonaGender,
   InterviewPersonaMajor,
   InterviewPersonaRole,
+  InterviewPersonaTone,
 } from "./create-interview";
 import type { InterviewLevel } from "./prepare-interview";
 
 export interface SavePersonaParams {
   personaName: string;
   role: InterviewPersonaRole;
-  level: InterviewLevel;
   major: InterviewPersonaMajor | null;
   type: CreateInterviewPersonaType;
+  tone: InterviewPersonaTone;
+  level: InterviewLevel;
   career: number;
   gender: InterviewPersonaGender;
+  imageUrl: string;
+  description: string;
 }
 
 export interface SavedPersonaData {
@@ -22,7 +26,10 @@ export interface SavedPersonaData {
   role: InterviewPersonaRole;
   major: InterviewPersonaMajor | null;
   type: CreateInterviewPersonaType;
+  tone: InterviewPersonaTone;
   level: InterviewLevel;
   career: number;
   gender: InterviewPersonaGender;
+  imageUrl: string;
+  description: string;
 }

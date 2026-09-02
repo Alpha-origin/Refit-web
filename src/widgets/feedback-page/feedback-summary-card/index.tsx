@@ -46,15 +46,6 @@ const FeedbackSummaryCard = ({
           <S.MetaValue>{interviewerCount > 0 ? `${interviewerCount}명` : "미제공"}</S.MetaValue>
         </S.MetaCard>
 
-        <S.MetaCard>
-          <S.MetaLabel>Interview ID</S.MetaLabel>
-          <S.MetaValue>{interview.interviewId ?? interview.id ?? "-"}</S.MetaValue>
-        </S.MetaCard>
-
-        <S.MetaCard>
-          <S.MetaLabel>Session ID</S.MetaLabel>
-          <S.MetaValue>{interview.sessionId ?? "-"}</S.MetaValue>
-        </S.MetaCard>
       </S.MetaGrid>
 
     </S.Card>

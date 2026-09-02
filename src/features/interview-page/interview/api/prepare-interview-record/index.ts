@@ -26,7 +26,9 @@ export interface InterviewPreparationData {
   chatDelivered: boolean;
   errorMessage: string | null;
   interviewId: number;
+  jobId: string | null;
   questions: CurrentInterviewQuestion[];
+  retryAfterMs: number | null;
   status: InterviewPreparationStatus;
 }
 
@@ -51,6 +53,22 @@ const getSessionId = (payload: unknown) => {
     getTrimmedString(dataRecord?.sessionId) ??
     getTrimmedString(responseRecord?.sessionId)
   );
+};
+
+const getJobId = (payload: unknown) => {
+  const responseRecord = getRecord(payload);
+  const dataRecord = getRecord(responseRecord?.data);
+
+  return (
+    getTrimmedString(dataRecord?.jobId) ??
+    getTrimmedString(responseRecord?.jobId)
+  );
+};
+
+const getRetryAfterMs = (payload: unknown) => {
+  const retryAfterMs = getNumericValue(payload);
+
+  return retryAfterMs !== null && retryAfterMs >= 0 ? retryAfterMs : null;
 };
 
 export const prepareInterviewRecord = async (interviewId: number) => {
@@ -94,6 +112,7 @@ export const prepareInterviewRecord = async (interviewId: number) => {
     return {
       data: {
         interviewId: responseInterviewId,
+        jobId: getJobId(response.data) ?? undefined,
         sessionId: getSessionId(response.data) ?? undefined,
       },
       errorMessage: null,
@@ -165,7 +184,9 @@ export const getInterviewPreparation = async (interviewId: number) => {
         errorMessage: getTrimmedString(sourceRecord?.errorMessage),
         interviewId:
           getNumericValue(sourceRecord?.interviewId) ?? interviewId,
+        jobId: getTrimmedString(sourceRecord?.jobId),
         questions,
+        retryAfterMs: getRetryAfterMs(sourceRecord?.retryAfterMs),
         status,
       } satisfies InterviewPreparationData,
       errorMessage: null,

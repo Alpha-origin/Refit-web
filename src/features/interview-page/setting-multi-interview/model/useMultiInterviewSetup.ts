@@ -6,13 +6,13 @@ import {
   prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
+  type InterviewPersonaTone,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
 import {
   LEVEL_BY_DIFFICULTY,
   TYPE_BY_STYLE,
-  getInterviewerGender,
   getInterviewerCandidatesForSlot,
   type InterviewerTemplate,
   type MultiInterviewSelection,
@@ -24,12 +24,16 @@ import {
   type InterviewDifficultyOption,
   type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
-import { getInterviewJobId } from "@/shared/storage/interviewJobId";
-import { usePortfolioAnalysisStatus } from "@/features/interview-page/model/usePortfolioAnalysisStatus";
 
 type CompletedSlots = [InterviewerTemplate, InterviewerTemplate, InterviewerTemplate];
 
 const INITIAL_SLOTS: MultiInterviewSelection["slots"] = [null, null, null];
+
+const TONE_BY_STYLE: Record<InterviewStyleOption, InterviewPersonaTone> = {
+  편함: "GENTLE",
+  일반: "DIRECT",
+  압박: "PRESSURING",
+};
 
 const getCompletedSlots = (
   slots: MultiInterviewSelection["slots"],
@@ -99,16 +103,12 @@ const buildPreparedInterviewer = (
   name: template.name,
   roleLabel: template.roleLabel,
   image: template.image,
+  gender: template.gender,
   voiceIndex: template.voiceIndex,
 });
 
 export const useMultiInterviewSetup = () => {
   const navigate = useNavigate();
-  const {
-    isWaiting: isPortfolioAnalyzing,
-    readySessionId: portfolioReadySessionId,
-    waitForPortfolioAnalysis,
-  } = usePortfolioAnalysisStatus();
   const [style, setStyle] = useState<InterviewStyleOption>(
     INTERVIEW_SETTING_DEFAULT_SELECTION.style,
   );
@@ -125,11 +125,10 @@ export const useMultiInterviewSetup = () => {
     Boolean(completedSlots) &&
     !validation.hasDuplicateInterviewer &&
     !validation.hasDuplicateRole &&
-    !isSubmitting &&
-    !isPortfolioAnalyzing;
+    !isSubmitting;
 
   const selectSlot = (slot: SlotIndex) => {
-    if (isSubmitting || isPortfolioAnalyzing) {
+    if (isSubmitting) {
       return;
     }
 
@@ -156,7 +155,7 @@ export const useMultiInterviewSetup = () => {
   };
 
   const handleNext = async () => {
-    if (isSubmitting || isPortfolioAnalyzing) {
+    if (isSubmitting) {
       return;
     }
 
@@ -179,20 +178,9 @@ export const useMultiInterviewSetup = () => {
       return;
     }
 
-    const jobId = getInterviewJobId();
-
-    if (!jobId) {
-      setErrorMessage("마이페이지에서 포트폴리오를 먼저 등록해주세요.");
-      return;
-    }
-
     setErrorMessage("");
 
     try {
-      let portfolioSessionId = portfolioReadySessionId;
-      const readyData = await waitForPortfolioAnalysis(jobId);
-      portfolioSessionId = readyData?.sessionId ?? portfolioSessionId;
-
       setIsSubmitting(true);
 
       const savedPersonaIds: number[] = [];
@@ -204,9 +192,12 @@ export const useMultiInterviewSetup = () => {
           role: template.role,
           major: template.role === "TECH" ? template.major ?? null : null,
           type: TYPE_BY_STYLE[style],
+          tone: TONE_BY_STYLE[style],
           level: LEVEL_BY_DIFFICULTY[difficulty],
           career: template.career,
-          gender: getInterviewerGender(template.voiceIndex),
+          gender: template.gender,
+          imageUrl: template.image,
+          description: template.description,
         };
         const { data: savedPersona, errorMessage: savePersonaError } =
           await savePersona(personaPayload);
@@ -248,7 +239,6 @@ export const useMultiInterviewSetup = () => {
       const representative = selectedSlots[0];
       const interviewSessionId =
         preparedInterviewRecord.sessionId ??
-        portfolioSessionId ??
         createdInterview.sessionId;
       setActiveInterviewSessionId(interviewSessionId);
 
@@ -267,7 +257,7 @@ export const useMultiInterviewSetup = () => {
             level: LEVEL_BY_DIFFICULTY[difficulty],
             career: representative.career,
             gender: representative.gender,
-            jobId,
+            jobId: preparedInterviewRecord.jobId ?? "",
             status:
               createdInterview.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
             currentQuestionIndex: createdInterview.currentQuestionIndex,
@@ -297,7 +287,7 @@ export const useMultiInterviewSetup = () => {
   return {
     candidates: getInterviewerCandidatesForSlot(activeSlot),
     errorMessage,
-    isPortfolioAnalyzing,
+    isPortfolioAnalyzing: false,
     isSubmitting,
     isNextDisabled: !canSubmit,
     onBack: () => navigate(-1),

@@ -4,7 +4,7 @@ export type InterviewDifficultyOption = '쉬움' | '보통' | '어려움';
 
 export type InterviewerPersonalityOption = '친근한' | '현실적인' | '꼼꼼함';
 
-export type InterviewerToneOption = '부드러운' | '직설적인' | '차분한';
+export type InterviewerToneOption = '부드러운' | '직설적인' | '압박하는';
 
 export type InterviewerSpecialtyOption = '프론트엔드' | '백엔드';
 
