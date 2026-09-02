@@ -5,6 +5,7 @@ const ELEVENLABS_TTS_API_URL = "/api/elevenlabs/tts";
 const ELEVENLABS_VOICES_API_URL = "/api/elevenlabs/voices";
 const ELEVENLABS_CONFIGURED_VOICE_ID =
   import.meta.env.VITE_ELEVENLABS_VOICE_ID?.trim();
+const ELEVENLABS_ENV = import.meta.env as Record<string, string | undefined>;
 const ELEVENLABS_VOICE_NAME = "Kelee K - Seoul Narrator";
 const ELEVENLABS_FALLBACK_VOICE_NAME = "Sarah - Mature, Reassuring, Confident";
 const ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";
@@ -13,6 +14,18 @@ const ELEVENLABS_SPEECH_SPEED = 1.1;
 
 const isPlaceholderVoiceId = (voiceId: string | undefined) =>
   !voiceId || voiceId === "Kelee_K_Voice_ID";
+
+const getConfiguredVoiceId = (voiceIndex?: number) => {
+  if (voiceIndex !== undefined) {
+    const voiceId = ELEVENLABS_ENV[`VITE_ELEVENLABS_VOICE_ID${voiceIndex}`]?.trim();
+
+    if (voiceId) {
+      return voiceId;
+    }
+  }
+
+  return ELEVENLABS_CONFIGURED_VOICE_ID;
+};
 
 const getVoiceIdFromAccount = async (
   signal: AbortSignal,
