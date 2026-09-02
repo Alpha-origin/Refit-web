@@ -20,6 +20,7 @@ export interface PreparedInterviewer {
   name: string;
   roleLabel: string;
   image?: string;
+  voiceIndex?: number;
 }
 
 export interface PrepareInterviewQuestion {

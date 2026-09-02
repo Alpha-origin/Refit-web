@@ -10,6 +10,7 @@ export type SlotIndex = 0 | 1 | 2;
 export interface InterviewerTemplate {
   key: string;
   name: string;
+  voiceIndex: 1 | 2 | 3 | 4 | 5;
   role: InterviewerTemplateRole;
   roleLabel: string;
   specialty: string;
