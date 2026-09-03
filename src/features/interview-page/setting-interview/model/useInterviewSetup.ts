@@ -144,7 +144,7 @@ export const useInterviewSetup = () => {
 
     const interviewPayload = {
       personaName: personaPayload.personaName,
-      major: personaPayload.major,
+      major: MAJOR_BY_OPTION[selectedMajor],
       type: personaPayload.type,
       career: personaPayload.career,
       gender: personaPayload.gender,
