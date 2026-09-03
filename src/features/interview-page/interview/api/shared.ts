@@ -6,7 +6,11 @@ import type {
   PersonaType,
 } from "./type";
 
-const PERSONA_TYPES: readonly PersonaType[] = ["FRIENDLY", "NEUTRAL", "STRESS"];
+const PERSONA_TYPES: readonly PersonaType[] = [
+  "FRIENDLY",
+  "REALISTIC",
+  "METICULOUS",
+];
 const INTERVIEW_PROGRESS_STATUSES: readonly InterviewProgressStatus[] = [
   "IN_PROGRESS",
   "COMPLETED",
@@ -84,7 +88,10 @@ export const getInterviewQuestion = (
 
   return {
     questionId,
-    parentId: getNumericValue(questionRecord?.parentId) ?? 0,
+    parentId:
+      getNumericValue(questionRecord?.parentId) ??
+      getNumericValue(questionRecord?.parentID) ??
+      0,
     type: getTrimmedString(questionRecord?.type) ?? "ORIGINAL",
     intention:
       getTrimmedString(

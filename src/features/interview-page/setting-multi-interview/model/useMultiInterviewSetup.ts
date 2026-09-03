@@ -6,7 +6,7 @@ import {
   prepareInterviewRecord,
   savePersona,
   setActiveInterviewSessionId,
-  type InterviewPersonaTone,
+  type InterviewTone,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import { extractErrorMessage } from "@/shared/api/errorMessage";
@@ -29,7 +29,7 @@ type CompletedSlots = [InterviewerTemplate, InterviewerTemplate, InterviewerTemp
 
 const INITIAL_SLOTS: MultiInterviewSelection["slots"] = [null, null, null];
 
-const TONE_BY_STYLE: Record<InterviewStyleOption, InterviewPersonaTone> = {
+const TONE_BY_STYLE: Record<InterviewStyleOption, InterviewTone> = {
   편함: "GENTLE",
   일반: "DIRECT",
   압박: "PRESSURING",
@@ -257,6 +257,7 @@ export const useMultiInterviewSetup = () => {
             level: LEVEL_BY_DIFFICULTY[difficulty],
             career: representative.career,
             gender: representative.gender,
+            tone: TONE_BY_STYLE[style],
             jobId: preparedInterviewRecord.jobId ?? "",
             status:
               createdInterview.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",

@@ -1,79 +1,81 @@
-import {
-  INTERVIEW_SETTING_INTERVIEWER_OPTION_SECTIONS,
-  type InterviewerPersonalityOption,
-  type InterviewerSpecialtyOption,
-  type InterviewerToneOption,
-} from '@/shared/constants/interview-page/setting-interview';
+import { SETTING_INTERVIEWER_SECTION } from '../data';
 import * as S from '../style';
-import type { InterviewerOptionsProps } from './type';
+import type {
+  InterviewerOptionsProps,
+  InterviewerSettingGroupProps,
+} from './type';
 
-const [personalitySection, toneSection, specialtySection] =
-  INTERVIEW_SETTING_INTERVIEWER_OPTION_SECTIONS;
+const InterviewerOptions = ({
+  onSelect,
+  selection,
+}: InterviewerOptionsProps) => {
+  const [personalityGroup, toneGroup, majorGroup] =
+    SETTING_INTERVIEWER_SECTION.groups;
 
-interface InterviewerOptionGroupProps<Option extends string> {
-  onSelect: (value: Option) => void;
-  options: readonly Option[];
-  selectedValue: Option;
-  title: string;
-}
+  return (
+    <S.InterviewerSettingSection
+      aria-labelledby="interviewer-setting-title"
+    >
+      <S.Title id="interviewer-setting-title">
+        {SETTING_INTERVIEWER_SECTION.title}
+      </S.Title>
+      <S.InterviewerSettingPanel>
+        <InterviewerSettingGroup
+          label={personalityGroup.title}
+          onSelect={onSelect.personality}
+          options={personalityGroup.options}
+          selectedValue={selection.personality}
+        />
+        <InterviewerSettingGroup
+          label={toneGroup.title}
+          onSelect={onSelect.tone}
+          options={toneGroup.options}
+          selectedValue={selection.tone}
+        />
+        <InterviewerSettingGroup
+          label={majorGroup.title}
+          onSelect={onSelect.major}
+          options={majorGroup.options}
+          selectedValue={selection.major}
+        />
+      </S.InterviewerSettingPanel>
+    </S.InterviewerSettingSection>
+  );
+};
 
-const InterviewerOptionGroup = <Option extends string>({
+const InterviewerSettingGroup = <Option extends string,>({
+  label,
   onSelect,
   options,
   selectedValue,
-  title,
-}: InterviewerOptionGroupProps<Option>) => (
-  <S.InterviewerOptionSection>
-    <S.InterviewerOptionTitle>{title}</S.InterviewerOptionTitle>
-    <S.InterviewerOptionGroup
-      $columns={options.length}
-      role="radiogroup"
-      aria-label={title}
-    >
-      {options.map((option) => {
-        const isSelected = selectedValue === option;
+}: InterviewerSettingGroupProps<Option>) => {
+  return (
+    <S.InterviewerSettingGroup>
+      <S.InterviewerSettingLabel>{label}</S.InterviewerSettingLabel>
+      <S.InterviewerOptionGrid
+        $columns={options.length === 2 ? 2 : 3}
+        aria-label={label}
+        role="radiogroup"
+      >
+        {options.map((option) => {
+          const isSelected = selectedValue === option;
 
-        return (
-          <S.InterviewerOptionButton
-            key={option}
-            type="button"
-            $selected={isSelected}
-            role="radio"
-            aria-checked={isSelected}
-            onClick={() => onSelect(option)}
-          >
-            {option}
-          </S.InterviewerOptionButton>
-        );
-      })}
-    </S.InterviewerOptionGroup>
-  </S.InterviewerOptionSection>
-);
-
-const InterviewerOptions = ({ onSelect, selection }: InterviewerOptionsProps) => (
-  <S.InterviewerColumn>
-    <S.Title>면접관 선택</S.Title>
-    <S.InterviewerPanel>
-      <InterviewerOptionGroup<InterviewerPersonalityOption>
-        title={personalitySection.title}
-        options={personalitySection.options}
-        selectedValue={selection.personality}
-        onSelect={onSelect.personality}
-      />
-      <InterviewerOptionGroup<InterviewerToneOption>
-        title={toneSection.title}
-        options={toneSection.options}
-        selectedValue={selection.tone}
-        onSelect={onSelect.tone}
-      />
-      <InterviewerOptionGroup<InterviewerSpecialtyOption>
-        title={specialtySection.title}
-        options={specialtySection.options}
-        selectedValue={selection.specialty}
-        onSelect={onSelect.specialty}
-      />
-    </S.InterviewerPanel>
-  </S.InterviewerColumn>
-);
+          return (
+            <S.InterviewerOptionButton
+              key={option}
+              $selected={isSelected}
+              aria-checked={isSelected}
+              onClick={() => onSelect(option)}
+              role="radio"
+              type="button"
+            >
+              {option}
+            </S.InterviewerOptionButton>
+          );
+        })}
+      </S.InterviewerOptionGrid>
+    </S.InterviewerSettingGroup>
+  );
+};
 
 export default InterviewerOptions;

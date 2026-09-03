@@ -6,7 +6,7 @@ import path from 'path';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const elevenLabsApiKey = (
-    env.SUPERTONE_API_KEY ?? env.ELEVENLABS_API_KEY ?? env.VITE_TTS_API_KEY
+    env.VITE_TTS_API_KEY ?? env.ELEVENLABS_API_KEY ?? env.VITE_TTS_API_KEY
   )?.trim();
   const apiUrl = env.VITE_API_URL?.trim();
 

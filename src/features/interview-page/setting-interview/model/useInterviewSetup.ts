@@ -11,39 +11,36 @@ import {
   type InterviewLevel,
   type InterviewPersonaMajor,
   type InterviewPersonaRole,
-  type InterviewPersonaTone,
-  type PersonaType,
+  type InterviewTone,
   type SavePersonaParams,
 } from "@/features/interview-page/interview/api";
 import {
   INTERVIEW_SETTING_DEFAULT_SELECTION,
-  INTERVIEW_SETTING_INTERVIEWERS,
+  type InterviewMajorOption,
   type InterviewDifficultyOption,
   type InterviewerPersonalityOption,
-  type InterviewerSpecialtyOption,
   type InterviewerToneOption,
-  type InterviewerId,
   type InterviewSettingSelectHandlers,
-  type InterviewStyleOption,
 } from "@/shared/constants/interview-page/setting-interview";
-import InterviewerImage1 from "@/shared/img/interview-page/interviewer1.svg?url";
-import InterviewerImage2 from "@/shared/img/interview-page/interviewer2.svg?url";
-import InterviewerImage3 from "@/shared/img/interview-page/interviewer3.svg?url";
-import InterviewerImage4 from "@/shared/img/interview-page/interviewer4.svg?url";
+import InterviewerBackendImage from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerFrontendImage from "@/shared/img/interview-page/interviewer2.svg?url";
 
-const PREPARED_PERSONA_TYPE_BY_STYLE: Record<InterviewStyleOption, PersonaType> = {
-  편함: "FRIENDLY",
-  일반: "NEUTRAL",
-  압박: "STRESS",
+const TONE_BY_OPTION: Record<
+  InterviewerToneOption,
+  InterviewTone
+> = {
+  부드러운: "GENTLE",
+  직설적인: "DIRECT",
+  압박하는: "PRESSURING",
 };
 
-const CREATE_PERSONA_TYPE_BY_STYLE: Record<
-  InterviewStyleOption,
+const TYPE_BY_PERSONALITY: Record<
+  InterviewerPersonalityOption,
   CreateInterviewPersonaType
 > = {
-  편함: "FRIENDLY",
-  일반: "NEUTRAL",
-  압박: "STRESS",
+  친근한: "FRIENDLY",
+  현실적인: "REALISTIC",
+  꼼꼼한: "METICULOUS",
 };
 
 const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
@@ -54,35 +51,32 @@ const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
 
 const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   쉬움: "EASY",
-  보통: "MEDIUM",
+  보통: "NORMAL",
   어려움: "HARD",
 };
 
-const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
-
-const getInterviewerGender = (interviewerId: InterviewerId): InterviewPersonaGender =>
-  interviewerId <= 2 ? "FEMALE" : "MALE";
-
-const TONE_BY_OPTION: Record<InterviewerToneOption, InterviewPersonaTone> = {
-  부드러운: "GENTLE",
-  직설적인: "DIRECT",
-  압박하는: "PRESSURING",
-};
-
-const INTERVIEWER_IMAGE_BY_ID: Record<InterviewerId, string> = {
-  1: InterviewerImage1,
-  2: InterviewerImage2,
-  3: InterviewerImage3,
-  4: InterviewerImage4,
-};
-
-const MAJOR_BY_SPECIALTY: Record<InterviewerSpecialtyOption, InterviewPersonaMajor> = {
+const MAJOR_BY_OPTION: Record<InterviewMajorOption, InterviewPersonaMajor> = {
   프론트엔드: "FRONTEND",
   백엔드: "BACKEND",
 };
 
-const buildUniquePersonaName = (personaName: string) =>
-  `${personaName}-${Date.now().toString(36)}`;
+// 면접관 카드 선택이 사라지면서, 이미지와 소개 문구는 전문 분야에서 파생한다.
+const INTERVIEWER_IMAGE_BY_MAJOR: Record<InterviewMajorOption, string> = {
+  프론트엔드: InterviewerFrontendImage,
+  백엔드: InterviewerBackendImage,
+};
+
+const INTERVIEWER_DESCRIPTION_BY_MAJOR: Record<InterviewMajorOption, string> = {
+  프론트엔드:
+    "사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.",
+  백엔드: "기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.",
+};
+
+const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
+const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
+
+const buildUniquePersonaName = () =>
+  `맞춤 면접관-${Date.now().toString(36)}`;
 
 export const useInterviewSetup = () => {
   const navigate = useNavigate();
@@ -95,20 +89,16 @@ export const useInterviewSetup = () => {
     INTERVIEW_SETTING_DEFAULT_SELECTION.difficulty,
   );
 
-  const [selectedInterviewerId, setSelectedInterviewerId] = useState(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.interviewerId,
-  );
-
-  const [selectedPersonality, setSelectedPersonality] = useState<InterviewerPersonalityOption>(
+  const [selectedPersonality, setSelectedPersonality] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.personality,
   );
 
-  const [selectedTone, setSelectedTone] = useState<InterviewerToneOption>(
+  const [selectedTone, setSelectedTone] = useState(
     INTERVIEW_SETTING_DEFAULT_SELECTION.tone,
   );
 
-  const [selectedSpecialty, setSelectedSpecialty] = useState<InterviewerSpecialtyOption>(
-    INTERVIEW_SETTING_DEFAULT_SELECTION.specialty,
+  const [selectedMajor, setSelectedMajor] = useState(
+    INTERVIEW_SETTING_DEFAULT_SELECTION.major,
   );
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -124,27 +114,17 @@ export const useInterviewSetup = () => {
     setErrorMessage("");
     setIsSubmitting(true);
 
-    const selectedInterviewer = INTERVIEW_SETTING_INTERVIEWERS.find(
-      (interviewer) => interviewer.id === selectedInterviewerId,
-    );
-
-    if (!selectedInterviewer) {
-      setIsSubmitting(false);
-      setErrorMessage("선택한 면접관 정보를 찾을 수 없습니다.");
-      return;
-    }
-
     const personaPayload: SavePersonaParams = {
-      personaName: buildUniquePersonaName(selectedInterviewer.personaName),
+      personaName: buildUniquePersonaName(),
       role: DEFAULT_INTERVIEW_ROLE,
-      major: MAJOR_BY_SPECIALTY[selectedSpecialty],
-      type: CREATE_PERSONA_TYPE_BY_STYLE[selectedStyle],
-      tone: TONE_BY_OPTION[selectedTone],
       level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
+      major: MAJOR_BY_OPTION[selectedMajor],
+      type: TYPE_BY_PERSONALITY[selectedPersonality],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
-      gender: getInterviewerGender(selectedInterviewer.id),
-      imageUrl: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
-      description: selectedInterviewer.description,
+      gender: DEFAULT_INTERVIEW_GENDER,
+      tone: TONE_BY_OPTION[selectedTone],
+      imageUrl: INTERVIEWER_IMAGE_BY_MAJOR[selectedMajor],
+      description: INTERVIEWER_DESCRIPTION_BY_MAJOR[selectedMajor],
     };
 
     console.log("[persona/save] request payload", personaPayload);
@@ -164,7 +144,7 @@ export const useInterviewSetup = () => {
 
     const interviewPayload = {
       personaName: personaPayload.personaName,
-      major: personaPayload.major,
+      major: MAJOR_BY_OPTION[selectedMajor],
       type: personaPayload.type,
       career: personaPayload.career,
       gender: personaPayload.gender,
@@ -200,8 +180,7 @@ export const useInterviewSetup = () => {
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
     const interviewSessionId =
-      preparedInterviewRecord.sessionId ??
-      data.sessionId;
+      preparedInterviewRecord.sessionId ?? data.sessionId;
     const personaId =
       data.personaId !== null && data.personaId > 0
         ? data.personaId
@@ -221,10 +200,11 @@ export const useInterviewSetup = () => {
           role: personaPayload.role,
           major: personaPayload.major,
           type: personaPayload.type,
-          personaType: PREPARED_PERSONA_TYPE_BY_STYLE[selectedStyle],
+          personaType: personaPayload.type,
           level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
           career: personaPayload.career,
           gender: personaPayload.gender,
+          tone: personaPayload.tone,
           jobId: preparedInterviewRecord.jobId ?? "",
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
@@ -233,21 +213,18 @@ export const useInterviewSetup = () => {
           interviewers: [
             {
               personaId,
-              name: selectedInterviewer.personaName,
+              name: personaPayload.personaName,
               roleLabel: "기술 면접관",
-              image: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
-              gender: personaPayload.gender,
-              voiceIndex: selectedInterviewer.id,
+              image: personaPayload.imageUrl,
             },
           ],
         },
         interviewSetting: {
           style: selectedStyle,
           difficulty: selectedDifficulty,
-          interviewerId: selectedInterviewerId,
+          major: selectedMajor,
           personality: selectedPersonality,
           tone: selectedTone,
-          specialty: selectedSpecialty,
         },
       },
     });
@@ -255,12 +232,8 @@ export const useInterviewSetup = () => {
 
   const select: InterviewSettingSelectHandlers = {
     difficulty: setSelectedDifficulty,
-    interviewer: setSelectedInterviewerId,
+    major: setSelectedMajor,
     personality: setSelectedPersonality,
-    specialty: (value) => {
-      setSelectedSpecialty(value);
-      setSelectedInterviewerId(value === "프론트엔드" ? 2 : 1);
-    },
     style: setSelectedStyle,
     tone: setSelectedTone,
   };
@@ -275,9 +248,8 @@ export const useInterviewSetup = () => {
     select,
     selection: {
       difficulty: selectedDifficulty,
-      interviewerId: selectedInterviewerId,
+      major: selectedMajor,
       personality: selectedPersonality,
-      specialty: selectedSpecialty,
       style: selectedStyle,
       tone: selectedTone,
     },

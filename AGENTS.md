@@ -87,7 +87,7 @@ Relevant environment variables:
 - `VITE_AUTH_URL`
 - `VITE_API_URL`
 - `VITE_CHAT_URL`
-- `SUPERTONE_API_KEY` or `VITE_TTS_API_KEY`
+- `VITE_TTS_API_KEY`
 
 Do not hardcode backend hosts, tokens, or API keys. Use the existing axios clients and env variables.
 

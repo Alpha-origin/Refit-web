@@ -38,14 +38,22 @@ const InterviewDashboard = () => {
   const activeInterviewer = interviewers.find(
     (interviewer) => interviewer.personaId === activePersonaId,
   );
+  const isAwaitingResponse = interview.isAwaitingResponse;
+  const questionNumber = String(
+    Math.max(interview.displayQuestionNumber, 1),
+  ).padStart(2, "0");
+  const questionLabel =
+    interview.followUpQuestionNumber === null
+      ? questionNumber
+      : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
-    !interview.isInterviewReady || isQuestionLoading || interview.isSubmitting;
+    !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse;
 
   useEffect(() => {
     if (
       !interview.isInterviewReady ||
       !isTimerRunning ||
-      interview.isWaitingForNextQuestion
+      interview.isAwaitingNextQuestion
     ) {
       return;
     }
@@ -57,18 +65,18 @@ const InterviewDashboard = () => {
     return () => window.clearInterval(intervalId);
   }, [
     interview.isInterviewReady,
-    interview.isWaitingForNextQuestion,
+    interview.isAwaitingNextQuestion,
     isTimerRunning,
   ]);
 
   useEffect(() => {
-    if (!interview.isWaitingForNextQuestion) {
+    if (!interview.isAwaitingNextQuestion) {
       return;
     }
 
     setElapsedSeconds(0);
     setIsTimerRunning(false);
-  }, [interview.isWaitingForNextQuestion]);
+  }, [interview.isAwaitingNextQuestion]);
 
   useEffect(() => {
     setMemo(memoKey ? window.sessionStorage.getItem(memoKey) ?? "" : "");
@@ -89,12 +97,20 @@ const InterviewDashboard = () => {
   };
 
   const handleStartVoice = () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
     setIsTimerRunning(true);
     setIsVoiceAnswering(true);
     interview.onStartVoice();
   };
 
   const handleCompleteVoice = async () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
     try {
       await interview.onCompleteVoice();
     } finally {
@@ -116,8 +132,8 @@ const InterviewDashboard = () => {
               <S.QuestionMetaRow>
                 <S.QuestionTag>
                   {isMultiInterview
-                    ? `Question ${String(Math.max(interview.displayQuestionNumber, 1)).padStart(2, "0")} / ${interview.totalQuestionCount}`
-                    : `Question ${String(Math.max(interview.displayQuestionNumber, 1)).padStart(2, "0")}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
+                    ? `Question ${questionLabel} / ${interview.totalQuestionCount}`
+                    : `Question ${questionLabel}${interview.totalQuestionCount > 0 ? ` · 기본 질문 ${interview.totalQuestionCount}개` : ""}`}
                 </S.QuestionTag>
                 {!isMultiInterview ? (
                   <S.QuestionAudioButton
@@ -154,6 +170,7 @@ const InterviewDashboard = () => {
                   type="button"
                   $active={isVoiceMode}
                   aria-pressed={isVoiceMode}
+                  disabled={isAwaitingResponse}
                   onClick={() => handleModeChange("voice")}
                 >
                   영상/음성 답변
@@ -162,6 +179,7 @@ const InterviewDashboard = () => {
                   type="button"
                   $active={!isVoiceMode}
                   aria-pressed={!isVoiceMode}
+                  disabled={isAwaitingResponse}
                   onClick={() => handleModeChange("text")}
                 >
                   텍스트 답변
@@ -178,6 +196,7 @@ const InterviewDashboard = () => {
                   value={interview.answerText}
                   maxLength={TEXT_ANSWER_MAX_LENGTH}
                   placeholder="이곳에 답변을 입력해주세요. 자신의 경험과 성과를 구체적인 수치와 함께 작성하면 좋은 평가를 받을 수 있습니다."
+                  readOnly={isAwaitingResponse}
                   onChange={interview.onAnswerTextChange}
                 />
               )}
@@ -196,21 +215,36 @@ const InterviewDashboard = () => {
                   ) : null}
                   {isVoiceMode ? (
                     isVoiceAnswering || interview.isVoiceStarted ? (
-                      <S.Button type="button" onClick={() => void handleCompleteVoice()}>
-                        답변 끝내기
+                      <S.Button
+                        type="button"
+                        disabled={isAwaitingResponse}
+                        aria-busy={isAwaitingResponse}
+                        onClick={() => void handleCompleteVoice()}
+                      >
+                        {isAwaitingResponse ? "응답 대기중..." : "답변 끝내기"}
                       </S.Button>
                     ) : (
-                      <S.Button type="button" disabled={isAnswerDisabled} onClick={handleStartVoice}>
-                        음성 답변 시작
+                      <S.Button
+                        type="button"
+                        disabled={isAnswerDisabled}
+                        aria-busy={isAwaitingResponse}
+                        onClick={handleStartVoice}
+                      >
+                        {isAwaitingResponse ? "응답 대기중..." : "음성 답변 시작"}
                       </S.Button>
                     )
                   ) : (
                     <S.Button
                       type="button"
                       disabled={isAnswerDisabled || !interview.answerText.trim()}
+                      aria-busy={isAwaitingResponse}
                       onClick={() => void interview.onSubmitText()}
                     >
-                      {interview.isSubmitting ? "제출 중..." : "제출하기"}
+                      {interview.isSubmitting
+                        ? "제출 중..."
+                        : interview.isAwaitingNextQuestion
+                          ? "응답 대기중..."
+                          : "제출하기"}
                     </S.Button>
                   )}
                 </S.Actions>
@@ -245,11 +279,11 @@ const InterviewDashboard = () => {
                     {isMultiInterview ? (
                       <S.InterviewerTags>
                         <S.InterviewerTag>
-                          {interview.preparedInterview?.personaType === "STRESS"
-                            ? "압박"
-                            : interview.preparedInterview?.personaType === "NEUTRAL"
-                              ? "일반"
-                              : "착함"}
+                          {interview.preparedInterview?.personaType === "METICULOUS"
+                            ? "꼼꼼한"
+                            : interview.preparedInterview?.personaType === "REALISTIC"
+                              ? "현실적인"
+                              : "친근한"}
                         </S.InterviewerTag>
                         <S.InterviewerTag>
                           {interview.preparedInterview?.level === "HARD"
@@ -278,7 +312,7 @@ const InterviewDashboard = () => {
           </S.RightColumn>
         </S.MainGrid>
 
-        {interview.isWaitingForNextQuestion ? (
+        {interview.isAwaitingNextQuestion ? (
           <S.LoadingOverlay role="status" aria-live="polite">
             <S.LoadingModal>
               <S.LoadingSpinner aria-hidden="true" />

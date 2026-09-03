@@ -384,6 +384,11 @@ export const ModeButton = styled.button<ModeButtonProps>`
   &:hover {
     background: ${({ $active }) => ($active ? "#ffffff" : "#e4e9f1")};
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `;
 
 export const ActionRow = styled.div`
@@ -604,6 +609,11 @@ export const TextModeButton = styled.button<ModeButtonProps>`
   font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `;
 
 export const TextSubmitButton = styled.button`
@@ -617,6 +627,14 @@ export const TextSubmitButton = styled.button`
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 0.35rem 0.75rem rgba(37, 126, 232, 0.16);
+  transition: background-color 0.2s ease;
+
+  &:disabled {
+    background: #b9c8dc;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.9;
+  }
 
   @media (max-width: 34rem) {
     width: 100%;

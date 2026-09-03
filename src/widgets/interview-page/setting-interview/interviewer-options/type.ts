@@ -6,10 +6,17 @@ import type {
 export interface InterviewerOptionsProps {
   onSelect: Pick<
     InterviewSettingSelectHandlers,
-    'personality' | 'specialty' | 'tone'
+    'major' | 'personality' | 'tone'
   >;
   selection: Pick<
     InterviewSettingSelection,
-    'personality' | 'specialty' | 'tone'
+    'major' | 'personality' | 'tone'
   >;
+}
+
+export interface InterviewerSettingGroupProps<Option extends string> {
+  label: string;
+  onSelect: (value: Option) => void;
+  options: readonly Option[];
+  selectedValue: Option;
 }
