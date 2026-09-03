@@ -50,7 +50,7 @@ const CAREER_BY_DIFFICULTY: Record<InterviewDifficultyOption, number> = {
 
 const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   쉬움: "EASY",
-  보통: "MEDIUM",
+  보통: "NORMAL",
   어려움: "HARD",
 };
 

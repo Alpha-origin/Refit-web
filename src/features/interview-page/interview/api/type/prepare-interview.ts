@@ -8,7 +8,7 @@ import type {
 } from "./create-interview";
 
 export type PersonaType = InterviewPersonality;
-export type InterviewLevel = "EASY" | "MEDIUM" | "NORMAL" | "HARD";
+export type InterviewLevel = "EASY" | "NORMAL" | "HARD";
 export type InterviewProgressStatus =
   | "IN_PROGRESS"
   | "COMPLETED"
