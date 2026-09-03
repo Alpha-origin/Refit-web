@@ -315,8 +315,11 @@ export const useInterviewSession = (
 
     autoPlayedQuestionKeyRef.current = nextQuestionKey;
     questionStartedAtRef.current = Date.now();
+    // 새 질문(꼬리질문 포함)이 도착했다면 HTTP·소켓 경로와 무관하게 응답 대기를 끝낸다.
+    clearAwaitingResponseTimeout();
+    setIsAwaitingNextQuestion(false);
     void questionTts.onPlay();
-  }, [currentQuestion, questionTts]);
+  }, [clearAwaitingResponseTimeout, currentQuestion, questionTts]);
 
   const syncCurrentQuestion = useCallback(
     (nextQuestion: CurrentInterviewQuestion) => {

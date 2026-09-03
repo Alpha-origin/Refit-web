@@ -11,6 +11,7 @@ import MicIcon from "@/shared/img/interview-page/mike.svg?url";
 import Loading from "@/shared/components/loading";
 import InterviewCameraView from "@/widgets/interview-page/interview/camera-view";
 import InterviewContentView from "@/widgets/interview-page/interview/interview-content";
+import InterviewDashboard from "@/widgets/interview-page/interview/interview-dashboard";
 import * as S from "@/widgets/interview-page/interview/style";
 
 const getPreparedInterviewFromState = (state: unknown) => {
@@ -50,6 +51,7 @@ const InterviewPageContent = () => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isVoiceAnswering, setIsVoiceAnswering] = useState(false);
+  const isMultiInterview = interviewSession.preparedInterview?.mode === "MULTI";
   const isVoiceMode = interviewSession.mode === "voice";
   const isTextMode = interviewSession.mode === "text";
   const isVoiceActionStarted = isVoiceAnswering || interviewSession.isVoiceStarted;
@@ -90,6 +92,10 @@ const InterviewPageContent = () => {
 
   if (interviewSession.isPreparingInterview) {
     return <Loading message="포트폴리오 분석 및 면접 준비 중입니다..." />;
+  }
+
+  if (isMultiInterview) {
+    return <InterviewDashboard />;
   }
 
   const handleStartVoice = () => {

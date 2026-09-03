@@ -32,8 +32,16 @@ const InterviewDashboard = () => {
   const activeInterviewer = interviewers.find(
     (interviewer) => interviewer.personaId === activePersonaId,
   );
+  const isAwaitingResponse = interview.isAwaitingResponse;
+  const questionNumber = String(
+    Math.max(interview.displayQuestionNumber, 1),
+  ).padStart(2, "0");
+  const questionLabel =
+    interview.followUpQuestionNumber === null
+      ? questionNumber
+      : `${questionNumber}-${interview.followUpQuestionNumber}`;
   const isAnswerDisabled =
-    !interview.isInterviewReady || isQuestionLoading || interview.isSubmitting;
+    !interview.isInterviewReady || isQuestionLoading || isAwaitingResponse;
 
   useEffect(() => {
     if (!interview.isInterviewReady) {
@@ -66,11 +74,19 @@ const InterviewDashboard = () => {
   };
 
   const handleStartVoice = () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
     setIsVoiceAnswering(true);
     interview.onStartVoice();
   };
 
   const handleCompleteVoice = async () => {
+    if (isAwaitingResponse) {
+      return;
+    }
+
     try {
       await interview.onCompleteVoice();
     } finally {
@@ -90,7 +106,7 @@ const InterviewDashboard = () => {
           <S.LeftColumn>
             <S.QuestionPanel aria-live="polite">
               <S.QuestionTag>
-                Question {String(Math.max(interview.displayQuestionNumber, 1)).padStart(2, "0")}
+                Question {questionLabel}
                 {interview.totalQuestionCount > 0
                   ? ` · 기본 질문 ${interview.totalQuestionCount}개`
                   : ""}
@@ -111,6 +127,7 @@ const InterviewDashboard = () => {
                   type="button"
                   $active={isVoiceMode}
                   aria-pressed={isVoiceMode}
+                  disabled={isAwaitingResponse}
                   onClick={() => handleModeChange("voice")}
                 >
                   영상/음성 답변
@@ -119,6 +136,7 @@ const InterviewDashboard = () => {
                   type="button"
                   $active={!isVoiceMode}
                   aria-pressed={!isVoiceMode}
+                  disabled={isAwaitingResponse}
                   onClick={() => handleModeChange("text")}
                 >
                   텍스트 답변
@@ -134,6 +152,7 @@ const InterviewDashboard = () => {
                   value={interview.answerText}
                   maxLength={TEXT_ANSWER_MAX_LENGTH}
                   placeholder="이곳에 답변을 입력해주세요. 자신의 경험과 성과를 구체적인 수치와 함께 작성하면 좋은 평가를 받을 수 있습니다."
+                  readOnly={isAwaitingResponse}
                   onChange={interview.onAnswerTextChange}
                 />
               )}
@@ -150,21 +169,36 @@ const InterviewDashboard = () => {
                   </S.Button>
                   {isVoiceMode ? (
                     isVoiceAnswering || interview.isVoiceStarted ? (
-                      <S.Button type="button" onClick={() => void handleCompleteVoice()}>
-                        답변 끝내기
+                      <S.Button
+                        type="button"
+                        disabled={isAwaitingResponse}
+                        aria-busy={isAwaitingResponse}
+                        onClick={() => void handleCompleteVoice()}
+                      >
+                        {isAwaitingResponse ? "응답 대기중..." : "답변 끝내기"}
                       </S.Button>
                     ) : (
-                      <S.Button type="button" disabled={isAnswerDisabled} onClick={handleStartVoice}>
-                        음성 답변 시작
+                      <S.Button
+                        type="button"
+                        disabled={isAnswerDisabled}
+                        aria-busy={isAwaitingResponse}
+                        onClick={handleStartVoice}
+                      >
+                        {isAwaitingResponse ? "응답 대기중..." : "음성 답변 시작"}
                       </S.Button>
                     )
                   ) : (
                     <S.Button
                       type="button"
                       disabled={isAnswerDisabled || !interview.answerText.trim()}
+                      aria-busy={isAwaitingResponse}
                       onClick={() => void interview.onSubmitText()}
                     >
-                      {interview.isSubmitting ? "제출 중..." : "제출하기"}
+                      {interview.isSubmitting
+                        ? "제출 중..."
+                        : interview.isAwaitingNextQuestion
+                          ? "응답 대기중..."
+                          : "제출하기"}
                     </S.Button>
                   )}
                 </S.Actions>
