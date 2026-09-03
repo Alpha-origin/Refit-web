@@ -20,6 +20,8 @@ const MainLayout = () => {
         </S.OutletArea>
       </S.Content>
     </S.Page>
+    //env수정
+    //깃허브 액션 수정
   );
 };
 
