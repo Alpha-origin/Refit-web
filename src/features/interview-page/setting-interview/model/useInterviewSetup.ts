@@ -127,8 +127,6 @@ export const useInterviewSetup = () => {
       description: INTERVIEWER_DESCRIPTION_BY_MAJOR[selectedMajor],
     };
 
-    console.log("[persona/save] request payload", personaPayload);
-
     const { data: savedPersona, errorMessage: savePersonaErrorMessage } =
       await savePersona(personaPayload);
 
@@ -140,8 +138,6 @@ export const useInterviewSetup = () => {
       return;
     }
 
-    console.log("[persona/save] response data", savedPersona);
-
     const interviewPayload = {
       personaName: personaPayload.personaName,
       major: MAJOR_BY_OPTION[selectedMajor],
@@ -151,8 +147,6 @@ export const useInterviewSetup = () => {
     };
     //repit-dp
 
-    console.log("[interviews/create] request payload", interviewPayload);
-
     const { data, errorMessage: createErrorMessage } =
       await createInterview(interviewPayload);
 
@@ -161,9 +155,6 @@ export const useInterviewSetup = () => {
       setErrorMessage(createErrorMessage ?? "면접 시작에 실패했습니다.");
       return;
     }
-
-    console.log("[interviews/create] response data", data);
-    console.log("[interviews/create] server sessionId", data.sessionId);
 
     const {
       data: preparedInterviewRecord,
@@ -177,8 +168,6 @@ export const useInterviewSetup = () => {
       );
       return;
     }
-
-    console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
     const interviewSessionId =
       preparedInterviewRecord.sessionId ?? data.sessionId;

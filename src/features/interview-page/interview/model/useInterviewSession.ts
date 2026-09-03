@@ -243,7 +243,6 @@ export const useInterviewSession = (
   const {
     currentQuestion,
     displayQuestionNumber,
-    interviewStatus,
     isChatSessionReady,
     totalQuestionCount,
   } = session;
@@ -323,7 +322,6 @@ export const useInterviewSession = (
     awaitingResponseTimeoutRef.current = window.setTimeout(() => {
       awaitingResponseTimeoutRef.current = null;
       setIsAwaitingNextQuestion(false);
-      console.warn("[interview] timed out waiting for the next question");
     }, AWAITING_RESPONSE_TIMEOUT_MS);
   }, [clearAwaitingResponseTimeout]);
 
@@ -410,14 +408,7 @@ export const useInterviewSession = (
       isSessionClosedRef.current = true;
       clearActiveInterviewSessionId();
       if (reason === "quit") {
-        const closeResult = await quitInterview(activeSessionId);
-
-        if (closeResult.errorMessage) {
-          console.error("[interview] quit request failed", {
-            sessionId: activeSessionId,
-            message: closeResult.errorMessage,
-          });
-        }
+        await quitInterview(activeSessionId);
       }
 
       disconnectInterviewSocket(activeSessionId);
@@ -530,14 +521,6 @@ export const useInterviewSession = (
 
       const retryAfterMs = data?.retryAfterMs ?? INTERVIEW_PREPARATION_POLL_INTERVAL_MS;
 
-      console.log("[interview] waiting for preparation", {
-        interviewId: preparedInterview.interviewId,
-        jobId: data?.jobId,
-        status: data?.status,
-        chatDelivered: data?.chatDelivered,
-        retryAfterMs,
-      });
-
       timeoutId = window.setTimeout(() => {
         void waitForChatSession();
       }, retryAfterMs);
@@ -593,18 +576,10 @@ export const useInterviewSession = (
 
   const handleStartVoice = () => {
     if (!isChatSessionReady) {
-      console.info("[interview] start voice blocked until chat delivery completes");
       return;
     }
 
     if (isSubmitting || isAwaitingNextQuestion || !canSubmitAnswer) {
-      console.warn("[interview] start voice blocked", {
-        canSubmitAnswer,
-        currentQuestion,
-        interviewStatus,
-        isAwaitingNextQuestion,
-        isSubmitting,
-      });
       return;
     }
 
@@ -634,7 +609,6 @@ export const useInterviewSession = (
       if (!activeSessionId) {
         clearAwaitingResponseTimeout();
         setIsAwaitingNextQuestion(false);
-        console.warn("[interview] missing sessionId when submitting answer");
         return;
       }
 

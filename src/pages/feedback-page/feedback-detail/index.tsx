@@ -41,8 +41,7 @@ const FeedbackDetailPage = () => {
       await exportElementToPdf(panelRef.current, {
         fileName: `repit-feedback-detail-${id ?? "unknown"}.pdf`,
       });
-    } catch (error) {
-      console.error(error);
+    } catch {
       window.alert("PDF 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setIsDownloadingPdf(false);

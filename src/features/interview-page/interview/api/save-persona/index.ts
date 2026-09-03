@@ -55,8 +55,6 @@ const normalizeSavedPersona = (
 
 export const savePersona = async (params: SavePersonaParams) => {
   try {
-    console.log("[persona/save] POST request payload", params);
-
     const response = await apiInstance.post(SAVE_PERSONA_URL, params);
     const responseRecord = getRecord(response.data);
 

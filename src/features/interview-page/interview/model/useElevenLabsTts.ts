@@ -85,9 +85,6 @@ const getVoiceIdFromAccount = async (
       : null;
 
   if (typeof fallbackVoiceId === "string" && fallbackVoiceId.trim()) {
-    console.warn(
-      `${ELEVENLABS_VOICE_NAME}를 찾지 못해 ${ELEVENLABS_FALLBACK_VOICE_NAME} 음성을 사용합니다.`,
-    );
     return fallbackVoiceId.trim();
   }
 
@@ -282,9 +279,6 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
         );
 
         if (fallbackVoiceId !== resolvedVoiceIdRef.current) {
-          console.warn(
-            `${ELEVENLABS_VOICE_NAME}는 현재 요금제에서 사용할 수 없어 ${ELEVENLABS_FALLBACK_VOICE_NAME} 음성으로 재생합니다.`,
-          );
           resolvedVoiceIdRef.current = fallbackVoiceId;
           response = await requestSpeech(
             fallbackVoiceId,
@@ -298,9 +292,6 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
         if (response.status === 401) {
           setErrorMessage(
             "ElevenLabs 인증에 실패했습니다. API 키와 권한을 확인해주세요.",
-          );
-          console.warn(
-            "ElevenLabs API 키를 인증할 수 없어 브라우저 음성으로 재생합니다.",
           );
           await playWithBrowserSpeech(text, controller.signal);
           return;
@@ -336,7 +327,6 @@ export const useElevenLabsTts = (text: string, voiceIndex?: number) => {
       if (error instanceof Error && !errorMessage) {
         setErrorMessage(error.message);
       }
-      console.error("Failed to play ElevenLabs TTS.", error);
     } finally {
       abortControllerRef.current = null;
     }

@@ -159,17 +159,6 @@ export const getFeedback = async (interviewId: number) => {
   }
 
   const authorizationHeader = await ensureAccessToken();
-  const requestUrl = `${GET_FEEDBACK_URL}?interviewId=${encodeURIComponent(
-    interviewId,
-  )}`;
-
-  console.log("[feedbacks] GET request", {
-    method: "GET",
-    url: requestUrl,
-    interviewId,
-    hasAuthorization: Boolean(authorizationHeader),
-  });
-
   const response = await apiInstance.get<
     FeedbackData | FeedbackApiResponse
   >(GET_FEEDBACK_URL, {

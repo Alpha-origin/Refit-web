@@ -109,7 +109,6 @@ export const useSupertoneTts = (text: string) => {
       releaseAudio();
       clearAudioUrl();
       setStatus("idle");
-      console.error("Failed to play Supertone TTS.", error);
     } finally {
       abortControllerRef.current = null;
     }

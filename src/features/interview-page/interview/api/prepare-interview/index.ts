@@ -78,13 +78,6 @@ export const waitForInterviewReady = async (
   try {
     const authorizationHeader = await ensureAccessToken();
 
-    console.log("[AI SSE] GET subscribe request", {
-      method: "GET",
-      jobId,
-      url: subscribeUrl.toString(),
-      hasAuthorization: Boolean(authorizationHeader),
-    });
-
     const response = await fetch(subscribeUrl, {
       method: "GET",
       headers: {
@@ -103,11 +96,6 @@ export const waitForInterviewReady = async (
     if (!response.body) {
       throw new Error("AI SSE response stream is unavailable.");
     }
-
-    console.log("[AI SSE] connected", {
-      jobId,
-      contentType: response.headers.get("content-type"),
-    });
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -131,12 +119,6 @@ export const waitForInterviewReady = async (
         if (!data) {
           continue;
         }
-
-        console.log("[AI SSE] event received", {
-          jobId,
-          eventName,
-          data,
-        });
 
         if (eventName === "interview-ready") {
           const payload = getSsePayload(data);
@@ -186,14 +168,9 @@ export const waitForInterviewReady = async (
       error instanceof DOMException && error.name === "AbortError"
         ? "포트폴리오 분석 서버 연결 시간이 초과되었습니다."
         : error instanceof Error
-          ? error.message
-          : "포트폴리오 분석 상태를 확인하지 못했습니다.";
+        ? error.message
+        : "포트폴리오 분석 상태를 확인하지 못했습니다.";
 
-    console.error("[AI SSE] connection error", {
-      error,
-      jobId,
-      message: errorMessage,
-    });
     throw new Error(errorMessage);
   } finally {
     window.clearTimeout(timeoutId);

@@ -164,8 +164,6 @@ export const useVoiceAnswer = () => {
       stopResolveRef.current = null;
     };
     recognition.onerror = (event) => {
-      console.error("[voice] speech recognition error", event.error);
-
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         setIsMicrophoneAvailable(false);
       }
@@ -227,9 +225,6 @@ export const useVoiceAnswer = () => {
     const recognition = recognitionRef.current;
 
     if (!recognition) {
-      console.warn("[voice] speech recognition is not ready", {
-        browserSupportsSpeechRecognition,
-      });
       setIsVoiceStarted(false);
       return;
     }
@@ -242,8 +237,7 @@ export const useVoiceAnswer = () => {
     try {
       recognition.start();
       setIsVoiceStarted(true);
-    } catch (error) {
-      console.error("[voice] failed to start speech recognition", error);
+    } catch {
       setIsVoiceStarted(false);
     }
   };

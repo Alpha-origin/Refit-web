@@ -29,10 +29,6 @@ export const useTailoredQuestionsPolling = (interviewId?: number) => {
         setTailoredQuestions(data);
         setTailorErrorMessage(null);
         setLastTailorPolledAt(new Date());
-        console.log("[questions/tailor] response", {
-          interviewId,
-          data,
-        });
       } catch (error) {
         if (!isActive) {
           return;
@@ -43,10 +39,6 @@ export const useTailoredQuestionsPolling = (interviewId?: number) => {
           "맞춤 질문 데이터를 불러오지 못했습니다.",
         );
         setTailorErrorMessage(message);
-        console.error("[questions/tailor] request error", {
-          interviewId,
-          message,
-        });
       }
     };
 
