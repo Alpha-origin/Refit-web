@@ -36,6 +36,13 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_CHAT_URL: ${{ secrets.VITE_CHAT_URL }}
           VITE_TTS_API_KEY: ${{ secrets.VITE_TTS_API_KEY }}
+
+          VITE_ELEVENLABS_VOICE_ID1: ${{ secrets.VITE_ELEVENLABS_VOICE_ID1 }}
+          VITE_ELEVENLABS_VOICE_ID2: ${{ secrets.VITE_ELEVENLABS_VOICE_ID2 }}
+          VITE_ELEVENLABS_VOICE_ID3: ${{ secrets.VITE_ELEVENLABS_VOICE_ID3 }}
+          VITE_ELEVENLABS_VOICE_ID4: ${{ secrets.VITE_ELEVENLABS_VOICE_ID4 }}
+          VITE_ELEVENLABS_VOICE_ID5: ${{ secrets.VITE_ELEVENLABS_VOICE_ID5 }}
+
         run: npm run build
 
       - name: Configure AWS credentials
