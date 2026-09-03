@@ -58,8 +58,10 @@ const LEVEL_BY_DIFFICULTY: Record<InterviewDifficultyOption, InterviewLevel> = {
   어려움: "HARD",
 };
 
-const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
+
+const getInterviewerGender = (interviewerId: InterviewerId): InterviewPersonaGender =>
+  interviewerId <= 2 ? "FEMALE" : "MALE";
 
 const TONE_BY_OPTION: Record<InterviewerToneOption, InterviewPersonaTone> = {
   부드러운: "GENTLE",
@@ -140,7 +142,7 @@ export const useInterviewSetup = () => {
       tone: TONE_BY_OPTION[selectedTone],
       level: LEVEL_BY_DIFFICULTY[selectedDifficulty],
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
-      gender: DEFAULT_INTERVIEW_GENDER,
+      gender: getInterviewerGender(selectedInterviewer.id),
       imageUrl: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
       description: selectedInterviewer.description,
     };
@@ -234,6 +236,8 @@ export const useInterviewSetup = () => {
               name: selectedInterviewer.personaName,
               roleLabel: "기술 면접관",
               image: INTERVIEWER_IMAGE_BY_ID[selectedInterviewer.id],
+              gender: personaPayload.gender,
+              voiceIndex: selectedInterviewer.id,
             },
           ],
         },
