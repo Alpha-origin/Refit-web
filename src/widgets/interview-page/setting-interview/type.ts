@@ -9,6 +9,10 @@ export interface ActionButtonProps {
   $disabled?: boolean;
 }
 
+export interface InterviewerOptionGridProps {
+  $columns: 2 | 3;
+}
+
 export interface StyleIconProps {
   $variant: InterviewSettingStyleIcon;
 }

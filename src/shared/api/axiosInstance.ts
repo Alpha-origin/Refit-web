@@ -137,6 +137,20 @@ const addAccessTokenSyncInterceptor = (instance: AxiosInstance) => {
   });
 };
 
+// 세션 없이 호출되는 엔드포인트. 여기서 온 401은 만료가 아니라 인증 실패이므로
+// 재발급을 시도하거나 로그인 페이지로 되돌리면 안 된다.
+const SESSIONLESS_AUTH_PATHS = [
+  "/api/v1/auth/login",
+  "/api/v1/auth/signup",
+  "/api/v1/auth/refresh",
+];
+
+const isSessionlessAuthRequest = (config?: RetryableRequestConfig) => {
+  const requestUrl = config?.url ?? "";
+
+  return SESSIONLESS_AUTH_PATHS.some((path) => requestUrl.includes(path));
+};
+
 const addRefreshInterceptor = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
     (response) => response,
@@ -144,14 +158,13 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
       const originalRequest = error.config as
         | RetryableRequestConfig
         | undefined;
-      const isRefreshRequest =
-        originalRequest?.url?.includes("/api/v1/auth/refresh") ?? false;
+      const isSessionlessRequest = isSessionlessAuthRequest(originalRequest);
 
       if (
         error.response?.status === 401 &&
         originalRequest &&
         !originalRequest._retry &&
-        !isRefreshRequest
+        !isSessionlessRequest
       ) {
         originalRequest._retry = true;
         const refreshed = await tryRefreshSession();
@@ -166,7 +179,7 @@ const addRefreshInterceptor = (instance: AxiosInstance) => {
         }
       }
 
-      if (error.response?.status === 401) {
+      if (error.response?.status === 401 && !isSessionlessRequest) {
         clearAccessToken();
         goToLoginPage();
       }

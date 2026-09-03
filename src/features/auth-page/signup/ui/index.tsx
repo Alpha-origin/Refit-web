@@ -1,17 +1,25 @@
-import SignUpPanel from '@/widgets/auth-page/signup-page';
 import { useNavigate } from 'react-router-dom';
+
 import { useSignUpForm } from '@/features/auth-page/signup/model/useSignUpForm';
-import Loading from '@/shared/components/loading'; 
+import * as S from '@/pages/auth-page/style';
+import Loading from '@/shared/components/loading';
+import SignUpPanel from '@/widgets/auth-page/signup-page';
 
 const SignUpForm = () => {
   const navigate = useNavigate();
   const form = useSignUpForm(() => navigate('/login'));
 
-  const { isLoading, ...rest } = form as typeof form & { isLoading: boolean };
+  return (
+    <>
+      {form.isSubmitting && (
+        <S.FullOverlay role="status" aria-live="polite">
+          <Loading />
+        </S.FullOverlay>
+      )}
 
-  if (isLoading) return <Loading />;
-
-  return <SignUpPanel {...rest} />;
+      <SignUpPanel {...form} />
+    </>
+  );
 };
 
 export default SignUpForm;
