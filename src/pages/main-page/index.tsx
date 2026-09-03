@@ -11,5 +11,5 @@ const MainPage = () => {
     </S.Page>
   );
 };
-
+//end 파일 셋팅추가
 export default MainPage;
