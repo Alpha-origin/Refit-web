@@ -84,23 +84,11 @@ export const prepareInterviewRecord = async (interviewId: number) => {
   }
 
   try {
-    console.log("[interviews/prepare] POST request", {
-      method: "POST",
-      url: requestUrl,
-      interviewId,
-      body: PREPARE_INTERVIEW_RECORD_BODY,
-    });
-
     const response = await apiInstance.post(
       requestUrl,
       PREPARE_INTERVIEW_RECORD_BODY,
     );
     const responseInterviewId = getInterviewId(response.data);
-
-    console.log("[interviews/prepare] response", {
-      interviewId: responseInterviewId,
-      data: response.data,
-    });
 
     if (responseInterviewId === null || responseInterviewId <= 0) {
       return {
@@ -122,10 +110,6 @@ export const prepareInterviewRecord = async (interviewId: number) => {
       error,
       "면접 준비 요청에 실패했습니다.",
     );
-
-    console.error("[interviews/prepare] error", {
-      message: errorMessage,
-    });
 
     return {
       data: null,

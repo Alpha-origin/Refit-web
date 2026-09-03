@@ -97,16 +97,6 @@ export const normalizeTailoredQuestions = (
   }, []);
 
 export const getTailoredQuestions = async (interviewId: number) => {
-  const requestUrl = `${TAILOR_QUESTIONS_URL}?interviewId=${encodeURIComponent(
-    interviewId,
-  )}`;
-
-  console.log("[questions/tailor] GET request", {
-    method: "GET",
-    url: requestUrl,
-    interviewId,
-  });
-
   const response = await apiInstance.get(TAILOR_QUESTIONS_URL, {
     params: { interviewId },
   });
