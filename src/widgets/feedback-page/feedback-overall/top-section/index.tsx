@@ -1,71 +1,11 @@
 import * as S from "../style";
-import type {
-  FeedbackOverallBarItem,
-  FeedbackOverallComparisonCard,
-  FeedbackOverallTopSectionProps,
-} from "../type";
+import type { FeedbackOverallTopSectionProps } from "../type";
 import { useNavigate, useParams } from "react-router-dom";
-
-interface ChartProps {
-  bars: readonly FeedbackOverallBarItem[];
-}
-
-const AverageScoreChart = ({ bars }: ChartProps) => {
-  return (
-    <S.BarChart>
-      {bars.map((bar) => (
-        <S.BarColumn key={bar.label}>
-          <S.BarTrack>
-            <S.BarFill $score={bar.score} $tone={bar.tone}>
-              <S.BarValue $tone={bar.tone}>{bar.score}점</S.BarValue>
-            </S.BarFill>
-          </S.BarTrack>
-          <S.BarLabel>{bar.label}</S.BarLabel>
-        </S.BarColumn>
-      ))}
-    </S.BarChart>
-  );
-};
-
-const ComparisonScoreChart = ({ bars }: ChartProps) => {
-  return (
-    <S.ComparisonBarChart>
-      {bars.map((bar) => (
-        <S.ComparisonBarColumn key={bar.label}>
-          <S.BarTrack>
-            <S.BarFill $score={bar.score} $tone={bar.tone}>
-              <S.BarValue $tone={bar.tone}>{bar.score}점</S.BarValue>
-            </S.BarFill>
-          </S.BarTrack>
-          <S.BarLabel>{bar.label}</S.BarLabel>
-        </S.ComparisonBarColumn>
-      ))}
-    </S.ComparisonBarChart>
-  );
-};
-
-interface ComparisonCardProps {
-  card: FeedbackOverallComparisonCard;
-}
-
-const ComparisonCard = ({ card }: ComparisonCardProps) => {
-  return (
-    <S.ComparisonCard>
-      <S.ComparisonHeader>
-        <S.CardHeading>{card.title}</S.CardHeading>
-        {card.highlightText && (
-          <S.HighlightText>{card.highlightText}</S.HighlightText>
-        )}
-      </S.ComparisonHeader>
-      <ComparisonScoreChart bars={card.bars} />
-    </S.ComparisonCard>
-  );
-};
 
 const FeedbackOverallTopSection = ({
   content,
 }: FeedbackOverallTopSectionProps) => {
-  const { averageComparison, comparisonCards, summary, tabs } = content;
+  const { averageComparison, summary, tabs } = content;
   const { activeTab, detailLabel, overallLabel } = tabs;
   const navigate = useNavigate();
   const { id } = useParams();
@@ -73,6 +13,7 @@ const FeedbackOverallTopSection = ({
 
   return (
     <S.SectionBlock>
+      <S.PageHeading>종합 피드백</S.PageHeading>
       <S.TabGroup>
         <S.TabButton
           $active={activeTab === "overall"}
@@ -90,32 +31,35 @@ const FeedbackOverallTopSection = ({
         </S.TabButton>
       </S.TabGroup>
 
-      <S.SectionShell>
-        <S.TopGrid>
-          <S.LeftColumn>
-            <S.ScoreCard>
-              <S.SectionLabel>{summary.title}</S.SectionLabel>
+      <S.TopGrid>
+        <S.ScoreCard>
+          <S.ScoreRing $score={summary.score}>
+            <S.ScoreRingInner>
+              <S.ScoreRingLabel>{summary.title}</S.ScoreRingLabel>
               <S.MainScore>{summary.score}점</S.MainScore>
-              <S.DescriptionBlock>
-                {summary.description.map((line) => (
-                  <S.DescriptionLine key={line}>{line}</S.DescriptionLine>
-                ))}
-              </S.DescriptionBlock>
-            </S.ScoreCard>
-
-            <S.ChartCard>
-              <S.CardHeading>{averageComparison.title}</S.CardHeading>
-              <AverageScoreChart bars={averageComparison.bars} />
-            </S.ChartCard>
-          </S.LeftColumn>
-
-          <S.ComparisonPanel>
-            {comparisonCards.map((card) => (
-              <ComparisonCard key={card.title} card={card} />
+            </S.ScoreRingInner>
+          </S.ScoreRing>
+          <S.DescriptionBlock>
+            {summary.description.map((line) => (
+              <S.DescriptionLine key={line}>{line}</S.DescriptionLine>
             ))}
-          </S.ComparisonPanel>
-        </S.TopGrid>
-      </S.SectionShell>
+          </S.DescriptionBlock>
+        </S.ScoreCard>
+
+        <S.MetricsCard>
+          {averageComparison.bars.map((bar) => (
+            <S.MetricRow key={bar.label}>
+              <S.MetricHeader>
+                <S.MetricLabel>{bar.label}</S.MetricLabel>
+                <S.MetricValue>{bar.score}점</S.MetricValue>
+              </S.MetricHeader>
+              <S.ProgressTrack>
+                <S.ProgressFill $score={bar.score} $tone={bar.tone} />
+              </S.ProgressTrack>
+            </S.MetricRow>
+          ))}
+        </S.MetricsCard>
+      </S.TopGrid>
     </S.SectionBlock>
   );
 };

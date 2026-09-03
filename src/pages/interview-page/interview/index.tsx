@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import type { PreparedInterviewData } from "@/features/interview-page/interview/api";
@@ -37,10 +37,17 @@ const formatElapsedTime = (elapsedSeconds: number) => {
 
 const InterviewPage = () => {
   const location = useLocation();
-  const preparedInterview = getPreparedInterviewFromState(location.state);
+  const preparedInterview = useMemo(
+    () => getPreparedInterviewFromState(location.state),
+    [location.state],
+  );
+  const ttsProvider = "elevenlabs" as const;
 
   return (
-    <InterviewSessionProvider preparedInterview={preparedInterview}>
+    <InterviewSessionProvider
+      preparedInterview={preparedInterview}
+      ttsProvider={ttsProvider}
+    >
       <InterviewPageContent />
     </InterviewSessionProvider>
   );

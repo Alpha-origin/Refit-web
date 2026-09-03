@@ -75,7 +75,7 @@ export const StatusBadge = styled.span`
 export const MetaGrid = styled.div`
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8rem;
 
   @media (max-width: 64rem) {

@@ -23,141 +23,116 @@ export const LEVEL_BY_DIFFICULTY = {
 
 export const MULTI_INTERVIEWER_TEMPLATES = [
   {
-    key: "tech-backend-architect",
+    key: "interviewer-kim",
     name: "김도윤",
+    voiceIndex: 1,
     role: "TECH",
     roleLabel: "기술 면접관",
     specialty: "백엔드 아키텍처",
     major: "BACKEND",
     career: 9,
-    gender: "MALE",
+    gender: "FEMALE",
     image: InterviewerImage1,
-    tags: ["시스템 설계", "확장성", "문제 해결"],
-    description: "서비스 구조와 기술적 의사결정 과정을 깊이 있게 확인합니다.",
+    tags: ["논리적 사고", "문제 해결"],
+    description: "핵심 내용을 구조적으로 정리하고 깊이 있게 확인합니다.",
   },
   {
-    key: "tech-frontend-lead",
+    key: "interviewer-lee",
     name: "이서준",
+    voiceIndex: 2,
     role: "TECH",
     roleLabel: "기술 면접관",
     specialty: "프론트엔드 리드",
     major: "FRONTEND",
     career: 8,
-    gender: "MALE",
+    gender: "FEMALE",
     image: InterviewerImage2,
-    tags: ["웹 성능", "UI 구조", "협업"],
-    description: "사용자 경험을 고려한 구현력과 협업 방식을 평가합니다.",
+    tags: ["협업", "실행력"],
+    description: "경험을 바탕으로 구체적인 판단과 실행 과정을 확인합니다.",
   },
   {
-    key: "tech-platform-engineer",
+    key: "interviewer-park",
     name: "박지민",
+    voiceIndex: 3,
     role: "TECH",
     roleLabel: "기술 면접관",
     specialty: "플랫폼 엔지니어링",
     major: "BACKEND",
     career: 6,
-    gender: "FEMALE",
+    gender: "MALE",
     image: InterviewerImage3,
-    tags: ["데이터", "장애 대응", "자동화"],
-    description: "현실적인 문제 해결력과 운영 관점의 사고를 살펴봅니다.",
+    tags: ["분석력", "성장"],
+    description: "현실적인 상황에서의 문제 해결 방식과 성장 가능성을 살펴봅니다.",
   },
   {
-    key: "hr-people-partner",
+    key: "interviewer-choi",
     name: "최유진",
-    role: "HR",
-    roleLabel: "인사 면접관",
-    specialty: "조직 문화와 협업",
+    voiceIndex: 4,
+    role: "TECH",
+    roleLabel: "기술 면접관",
+    specialty: "프론트엔드 개발",
+    major: "FRONTEND",
     career: 8,
-    gender: "FEMALE",
+    gender: "MALE",
     image: InterviewerImage4,
-    tags: ["조직 적합성", "소통", "성장"],
-    description: "지원자의 가치관과 팀 안에서의 협업 방식을 확인합니다.",
+    tags: ["소통", "조직 적합성"],
+    description: "지원자의 강점과 협업 방식을 다양한 관점에서 확인합니다.",
   },
   {
-    key: "hr-talent-manager",
+    key: "interviewer-han",
     name: "한민석",
-    role: "HR",
-    roleLabel: "인사 면접관",
-    specialty: "인재 성장",
+    voiceIndex: 5,
+    role: "TECH",
+    roleLabel: "기술 면접관",
+    specialty: "데이터 엔지니어링",
+    major: "BACKEND",
     career: 5,
     gender: "MALE",
     image: InterviewerImage2,
-    tags: ["동기", "피드백", "적응력"],
-    description: "직무 동기와 장기적인 성장 가능성을 중심으로 질문합니다.",
-  },
-  {
-    key: "ceo-founder",
-    name: "윤하늘",
-    role: "CEO",
-    roleLabel: "대표 면접관",
-    specialty: "사업 전략",
-    career: 12,
-    gender: "FEMALE",
-    image: InterviewerImage3,
-    tags: ["비전", "주도성", "임팩트"],
-    description: "회사의 방향성과 문제 해결에 기여할 수 있는지를 봅니다.",
-  },
-  {
-    key: "ceo-business-leader",
-    name: "정현우",
-    role: "CEO",
-    roleLabel: "대표 면접관",
-    specialty: "비즈니스 리더십",
-    career: 14,
-    gender: "MALE",
-    image: InterviewerImage1,
-    tags: ["의사결정", "책임감", "실행력"],
-    description: "우선순위 판단과 주도적으로 끝까지 실행하는 힘을 평가합니다.",
-  },
-  {
-    key: "pm-product-strategist",
-    name: "서지훈",
-    role: "PM",
-    roleLabel: "PM 면접관",
-    specialty: "프로덕트 전략",
-    career: 7,
-    gender: "MALE",
-    image: InterviewerImage2,
-    tags: ["문제 정의", "지표", "우선순위"],
-    description: "사용자 문제를 정의하고 제품으로 풀어내는 방식을 질문합니다.",
-  },
-  {
-    key: "pm-growth-lead",
-    name: "문가은",
-    role: "PM",
-    roleLabel: "PM 면접관",
-    specialty: "그로스와 실험",
-    career: 6,
-    gender: "FEMALE",
-    image: InterviewerImage4,
-    tags: ["가설", "실험", "데이터"],
-    description: "데이터를 바탕으로 학습하고 개선한 경험을 살펴봅니다.",
-  },
-  {
-    key: "design-product-designer",
-    name: "배수아",
-    role: "DESIGN",
-    roleLabel: "디자인 면접관",
-    specialty: "프로덕트 디자인",
-    career: 7,
-    gender: "FEMALE",
-    image: InterviewerImage3,
-    tags: ["UX", "사용성", "시각화"],
-    description: "사용자 맥락을 이해하고 설득력 있게 설계하는지를 확인합니다.",
-  },
-  {
-    key: "design-brand-designer",
-    name: "오지후",
-    role: "DESIGN",
-    roleLabel: "디자인 면접관",
-    specialty: "브랜드 경험",
-    career: 5,
-    gender: "MALE",
-    image: InterviewerImage1,
-    tags: ["브랜드", "일관성", "협업"],
-    description: "제품 경험 안에서 브랜드를 해석하고 협업한 경험을 묻습니다.",
+    tags: ["동기", "적응력"],
+    description: "지원자의 동기와 문제를 끝까지 해결하는 태도를 확인합니다.",
   },
 ] as const satisfies readonly InterviewerTemplate[];
+
+export const getInterviewerGender = (
+  voiceIndex: InterviewerTemplate["voiceIndex"],
+) => (voiceIndex <= 2 ? "FEMALE" : "MALE");
+
+interface InterviewerRoleConfig {
+  role: InterviewerTemplateRole;
+  roleLabel: string;
+  specialty: string;
+  major?: "BACKEND" | "FRONTEND";
+}
+
+const MULTI_INTERVIEW_ROLE_CONFIGS: readonly (readonly InterviewerRoleConfig[])[] = [
+  [
+    { role: "TECH", roleLabel: "기술 면접관", specialty: "백엔드 아키텍처", major: "BACKEND" },
+    { role: "TECH", roleLabel: "기술 면접관", specialty: "프론트엔드 리드", major: "FRONTEND" },
+    { role: "TECH", roleLabel: "기술 면접관", specialty: "플랫폼 엔지니어링", major: "BACKEND" },
+    { role: "TECH", roleLabel: "기술 면접관", specialty: "프론트엔드 개발", major: "FRONTEND" },
+    { role: "TECH", roleLabel: "기술 면접관", specialty: "데이터 엔지니어링", major: "BACKEND" },
+  ],
+  [
+    { role: "HR", roleLabel: "인사 면접관", specialty: "조직 문화와 협업" },
+    { role: "PM", roleLabel: "PM 면접관", specialty: "프로덕트 전략" },
+    { role: "DESIGN", roleLabel: "디자인 면접관", specialty: "프로덕트 경험" },
+    { role: "HR", roleLabel: "인사 면접관", specialty: "인재 성장" },
+    { role: "PM", roleLabel: "PM 면접관", specialty: "그로스와 실험" },
+  ],
+  [
+    { role: "CEO", roleLabel: "대표 면접관", specialty: "사업 전략" },
+    { role: "CEO", roleLabel: "대표 면접관", specialty: "비즈니스 리더십" },
+    { role: "HR", roleLabel: "인사 면접관", specialty: "조직 적합성" },
+    { role: "DESIGN", roleLabel: "디자인 면접관", specialty: "브랜드 경험" },
+    { role: "PM", roleLabel: "PM 면접관", specialty: "제품 의사결정" },
+  ],
+];
+
+export const getInterviewerRoleConfigForSlot = (
+  slot: SlotIndex,
+  interviewerIndex: number,
+) => MULTI_INTERVIEW_ROLE_CONFIGS[slot][interviewerIndex];
 
 export const MULTI_INTERVIEW_SLOT_LABELS = [
   "기술",
@@ -166,13 +141,20 @@ export const MULTI_INTERVIEW_SLOT_LABELS = [
 ] as const;
 
 export const getInterviewerCandidatesForSlot = (slot: SlotIndex) =>
-  MULTI_INTERVIEWER_TEMPLATES.filter((interviewer) =>
-    slot === 0 ? interviewer.role === "TECH" : interviewer.role !== "TECH",
-  );
+  MULTI_INTERVIEWER_TEMPLATES.map((interviewer, index) => ({
+    ...interviewer,
+    ...getInterviewerRoleConfigForSlot(slot, index),
+  }));
 
-export const getRoleLabel = (role: InterviewerTemplateRole) =>
-  MULTI_INTERVIEWER_TEMPLATES.find((interviewer) => interviewer.role === role)
-    ?.roleLabel ?? role;
+const ROLE_LABELS: Record<InterviewerTemplateRole, string> = {
+  TECH: "기술 면접관",
+  HR: "인사 면접관",
+  CEO: "대표 면접관",
+  PM: "PM 면접관",
+  DESIGN: "디자인 면접관",
+};
+
+export const getRoleLabel = (role: InterviewerTemplateRole) => ROLE_LABELS[role];
 
 export type {
   InterviewerTemplate,

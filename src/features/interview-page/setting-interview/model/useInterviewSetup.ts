@@ -22,7 +22,8 @@ import {
   type InterviewerToneOption,
   type InterviewSettingSelectHandlers,
 } from "@/shared/constants/interview-page/setting-interview";
-import { getInterviewJobId } from "@/shared/storage/interviewJobId";
+import InterviewerBackendImage from "@/shared/img/interview-page/interviewer1.svg?url";
+import InterviewerFrontendImage from "@/shared/img/interview-page/interviewer2.svg?url";
 
 const TONE_BY_OPTION: Record<
   InterviewerToneOption,
@@ -59,7 +60,19 @@ const MAJOR_BY_OPTION: Record<InterviewMajorOption, InterviewPersonaMajor> = {
   백엔드: "BACKEND",
 };
 
-const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "MALE";
+// 면접관 카드 선택이 사라지면서, 이미지와 소개 문구는 전문 분야에서 파생한다.
+const INTERVIEWER_IMAGE_BY_MAJOR: Record<InterviewMajorOption, string> = {
+  프론트엔드: InterviewerFrontendImage,
+  백엔드: InterviewerBackendImage,
+};
+
+const INTERVIEWER_DESCRIPTION_BY_MAJOR: Record<InterviewMajorOption, string> = {
+  프론트엔드:
+    "사용자 중심의 사고방식과 시각적 커뮤니케이션 능력을 심층 질문합니다.",
+  백엔드: "기술적 역량과 아키텍처 설계 능력을 중점적으로 파악합니다.",
+};
+
+const DEFAULT_INTERVIEW_GENDER: InterviewPersonaGender = "FEMALE";
 const DEFAULT_INTERVIEW_ROLE: InterviewPersonaRole = "TECH";
 
 const buildUniquePersonaName = () =>
@@ -101,14 +114,6 @@ export const useInterviewSetup = () => {
     setErrorMessage("");
     setIsSubmitting(true);
 
-    const jobId = getInterviewJobId();
-
-    if (!jobId) {
-      setIsSubmitting(false);
-      setErrorMessage("마이페이지에서 포트폴리오를 먼저 등록해주세요.");
-      return;
-    }
-
     const personaPayload: SavePersonaParams = {
       personaName: buildUniquePersonaName(),
       role: DEFAULT_INTERVIEW_ROLE,
@@ -118,6 +123,8 @@ export const useInterviewSetup = () => {
       career: CAREER_BY_DIFFICULTY[selectedDifficulty],
       gender: DEFAULT_INTERVIEW_GENDER,
       tone: TONE_BY_OPTION[selectedTone],
+      imageUrl: INTERVIEWER_IMAGE_BY_MAJOR[selectedMajor],
+      description: INTERVIEWER_DESCRIPTION_BY_MAJOR[selectedMajor],
     };
 
     console.log("[persona/save] request payload", personaPayload);
@@ -172,18 +179,20 @@ export const useInterviewSetup = () => {
 
     console.log("[interviews/prepare] response data", preparedInterviewRecord);
 
+    const interviewSessionId =
+      preparedInterviewRecord.sessionId ?? data.sessionId;
     const personaId =
       data.personaId !== null && data.personaId > 0
         ? data.personaId
         : savedPersona.personaId;
-    setActiveInterviewSessionId(data.sessionId);
+    setActiveInterviewSessionId(interviewSessionId);
 
     setIsSubmitting(false);
 
     navigate(`/main/interview/${data.interviewId}`, {
       state: {
         preparedInterview: {
-          sessionId: data.sessionId,
+          sessionId: interviewSessionId,
           interviewId: preparedInterviewRecord.interviewId,
           userId: data.userId,
           personaId,
@@ -196,7 +205,7 @@ export const useInterviewSetup = () => {
           career: personaPayload.career,
           gender: personaPayload.gender,
           tone: personaPayload.tone,
-          jobId,
+          jobId: preparedInterviewRecord.jobId ?? "",
           status: data.status === "COMPLETED" ? "COMPLETED" : "IN_PROGRESS",
           currentQuestionIndex: data.currentQuestionIndex,
           questions: [],
@@ -206,6 +215,7 @@ export const useInterviewSetup = () => {
               personaId,
               name: personaPayload.personaName,
               roleLabel: "기술 면접관",
+              image: personaPayload.imageUrl,
             },
           ],
         },
@@ -231,6 +241,7 @@ export const useInterviewSetup = () => {
   return {
     errorMessage,
     isNextDisabled: isSubmitting,
+    isPortfolioAnalyzing: false,
     isSubmitting,
     onBack: handleBack,
     onNext: handleNext,

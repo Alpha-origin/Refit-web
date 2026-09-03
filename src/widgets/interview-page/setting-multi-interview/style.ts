@@ -10,6 +10,10 @@ interface CandidateCardProps {
   $selected: boolean;
 }
 
+interface ActionButtonProps {
+  $analyzing?: boolean;
+}
+
 const focusRing = css`
   &:focus-visible {
     outline: 0.15rem solid rgba(37, 126, 232, 0.48);
@@ -23,30 +27,98 @@ const spin = keyframes`
   }
 `;
 
+const loadingDots = keyframes`
+  0%, 20% {
+    content: '.';
+  }
+
+  40%, 60% {
+    content: '..';
+  }
+
+  80%, 100% {
+    content: '...';
+  }
+`;
+
 export const Container = styled.div`
   width: 100%;
+  height: auto;
   min-height: 100%;
-  padding: clamp(1rem, 3.2vh, 2rem) clamp(1rem, 5vw, 5rem) 1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: clamp(1.65rem, 4.2vh, 2.15rem) clamp(1.25rem, 6.8vw, 6.5rem)
+    clamp(1.25rem, 3vh, 1.55rem);
   box-sizing: border-box;
+
+  @media (max-width: 52rem) {
+    align-items: flex-start;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  @media (max-height: 44rem) {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
 `;
 
 export const Content = styled.div`
-  width: min(100%, 76rem);
+  width: min(100%, 82rem);
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.8rem, 1.8vh, 1.25rem);
+  gap: clamp(0.7rem, 1.8vh, 1.35rem);
   margin: 0 auto;
 `;
 
 export const MainGrid = styled.div`
+  --interviewer-card-height: clamp(16rem, 30vh, 18rem);
+  --setting-group-height: clamp(14rem, 30vh, 16rem);
+  --interviewer-image-height: clamp(7.5rem, 18vh, 10rem);
+  --setting-column-gap: clamp(1.5rem, 4vh, 2.75rem);
+  --style-option-gap: clamp(0.65rem, 1.3vh, 0.85rem);
+
   display: grid;
-  grid-template-columns: minmax(14.5rem, 18rem) minmax(0, 1fr);
-  gap: clamp(1.25rem, 3vw, 2.5rem);
-  align-items: start;
+  grid-template-columns: minmax(21rem, 28rem) minmax(0, 1fr);
+  gap: clamp(1.7rem, 2.8vw, 2.75rem);
+  align-items: stretch;
+
+  @media (max-width: 64rem) {
+    --interviewer-card-height: clamp(13.5rem, 28vh, 16rem);
+    --setting-group-height: clamp(12.25rem, 27vh, 14rem);
+    --interviewer-image-height: clamp(6.5rem, 16vh, 8.5rem);
+
+    grid-template-columns: minmax(18.5rem, 23rem) minmax(0, 1fr);
+    gap: 1.35rem;
+  }
+
+  @media (max-height: 52rem) {
+    --interviewer-card-height: clamp(12rem, 26vh, 13.5rem);
+    --setting-group-height: clamp(11.25rem, 25vh, 13rem);
+    --interviewer-image-height: clamp(5.75rem, 14vh, 7rem);
+    --setting-column-gap: clamp(1.25rem, 3.4vh, 2rem);
+    --style-option-gap: 0.45rem;
+  }
+
+  @media (max-height: 44rem) {
+    --interviewer-card-height: clamp(10.25rem, 25vh, 11.5rem);
+    --setting-group-height: clamp(10.25rem, 24vh, 11.5rem);
+    --interviewer-image-height: clamp(5rem, 12vh, 5.5rem);
+    --setting-column-gap: 0.75rem;
+    --style-option-gap: 0.4rem;
+  }
 
   @media (max-width: 52rem) {
+    --interviewer-card-height: 14.5rem;
+    --setting-group-height: 13rem;
+    --interviewer-image-height: 7.5rem;
+    --setting-column-gap: 1.5rem;
+
     grid-template-columns: 1fr;
+    align-items: start;
   }
 `;
 
@@ -161,25 +233,30 @@ export const SlotPrompt = styled.span`
 
 export const CandidateScroller = styled.div`
   display: grid;
-  grid-auto-columns: minmax(10.75rem, 12.5rem);
-  grid-auto-flow: column;
-  gap: 0.7rem;
-  overflow-x: auto;
-  padding: 0.1rem 0.1rem 0.8rem;
-  scroll-snap-type: x proximity;
-  scrollbar-color: #abb4c2 transparent;
-  scrollbar-width: thin;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  overflow: hidden;
+  padding: 0;
+
+  @media (max-width: 52rem) {
+    grid-template-columns: repeat(5, minmax(10rem, 1fr));
+    overflow-x: auto;
+  }
 `;
 
 export const CandidateCard = styled.button<CandidateCardProps>`
-  min-height: 15.25rem;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  min-height: var(--interviewer-card-height);
   overflow: hidden;
   padding: 0;
   border: 0.1rem solid
     ${({ $selected, $disabled }) =>
-      $selected ? "#3388f7" : $disabled ? "#e1e5eb" : "#cfd7e4"};
+      $selected ? "#aeb7c6" : $disabled ? "#e1e5eb" : "#cfd7e4"};
   border-radius: 0.5rem;
-  background: ${({ $disabled }) => ($disabled ? "#f8f9fb" : "#ffffff")};
+  background: ${({ $selected, $disabled }) =>
+    $selected ? "#e5e7eb" : $disabled ? "#f8f9fb" : "#ffffff"};
   color: #171717;
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   opacity: ${({ $disabled }) => ($disabled ? 0.56 : 1)};
@@ -196,14 +273,29 @@ export const CandidateCard = styled.button<CandidateCardProps>`
   ${focusRing}
 `;
 
-export const CandidateImage = styled.img`
+export const CandidateImageFrame = styled.div`
+  position: relative;
   width: 100%;
-  height: 6.3rem;
+  height: var(--interviewer-image-height);
+  overflow: hidden;
+  margin: 0;
+  flex: 0 0 auto;
+  background: #d8d3ce;
+`;
+
+export const CandidateImage = styled.img`
+  position: absolute;
+  top: -15%;
+  left: 0;
+  width: 100%;
+  height: 130%;
   display: block;
   object-fit: cover;
 `;
 
 export const CandidateBody = styled.div`
+  min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.42rem;
@@ -273,12 +365,14 @@ export const ActionRow = styled.div`
   }
 `;
 
-const actionButton = styled.button`
-  width: min(100%, 9.5rem);
-  height: 3rem;
+const actionButton = styled.button<ActionButtonProps>`
+  width: ${({ $analyzing }) =>
+    $analyzing ? 'min(100%, 8rem)' : 'min(100%, 9.5rem)'};
+  height: ${({ $analyzing }) => ($analyzing ? '2.7rem' : '3rem')};
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: ${({ $analyzing }) => ($analyzing ? '0.85rem' : '1rem')};
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
   ${focusRing}
 
@@ -298,6 +392,17 @@ export const NextButton = styled(actionButton)`
   background: ${({ disabled }) => (disabled ? "#b9c7db" : "#257ee8")};
   color: #ffffff;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+`;
+
+export const LoadingDots = styled.span`
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+
+  &::after {
+    content: '.';
+    animation: ${loadingDots} 1.2s steps(1, end) infinite;
+  }
 `;
 
 export const LoadingOverlay = styled.div`

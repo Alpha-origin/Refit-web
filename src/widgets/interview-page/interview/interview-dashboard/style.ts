@@ -1,22 +1,35 @@
 import styled from "styled-components";
 
-export const Page = styled.section`
+interface MultiLayoutProps {
+  $multi: boolean;
+}
+
+interface MultiCardProps {
+  $multi: boolean;
+}
+
+export const Page = styled.section<MultiLayoutProps>`
   width: 100%;
   min-height: 0;
   height: 100%;
   overflow: auto;
   padding: clamp(1rem, 2.4vw, 2.2rem);
   box-sizing: border-box;
-  background: linear-gradient(135deg, #f7f9ff 0%, #eef4ff 100%);
+  background: transparent;
+
+  ${({ $multi }) => ($multi ? "padding: clamp(1rem, 2.1vw, 2rem);" : "")}
 `;
 
-export const Content = styled.div`
+export const Content = styled.div<MultiLayoutProps>`
+  position: relative;
   width: min(100%, 74rem);
   min-height: 100%;
   margin: 0 auto;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.65rem;
+
+  ${({ $multi }) => ($multi ? "width: min(100%, 80rem);" : "")}
 `;
 
 export const Timer = styled.div`
@@ -40,33 +53,112 @@ export const TimerDot = styled.span`
   background: #e15858;
 `;
 
-export const MainGrid = styled.main`
+export const LoadingOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: rgba(239, 244, 252, 0.52);
+  backdrop-filter: blur(0.12rem);
+`;
+
+export const LoadingModal = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 1rem;
+  border: 0.0625rem solid #d8e0ed;
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0.35rem 1.2rem rgba(55, 82, 125, 0.14);
+`;
+
+export const LoadingSpinner = styled.span`
+  width: 1rem;
+  height: 1rem;
+  border: 0.15rem solid #cfe0f8;
+  border-top-color: #2179ed;
+  border-radius: 50%;
+  animation: interview-loading-spin 0.75s linear infinite;
+
+  @keyframes interview-loading-spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
+export const LoadingMessage = styled.span`
+  color: #4e5968;
+  font-size: 0.86rem;
+  font-weight: 700;
+`;
+
+export const MainGrid = styled.main<MultiLayoutProps>`
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.95fr);
+  grid-template-rows: minmax(11rem, 0.72fr) minmax(23rem, 1.28fr);
   gap: clamp(0.85rem, 1.5vw, 1.2rem);
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          --multi-top-row-height: clamp(13rem, 30vh, 15rem);
+          grid-template-columns: minmax(0, 1.65fr) minmax(24rem, 0.95fr);
+          grid-template-rows: none;
+          align-items: start;
+        `
+      : ""}
 
   @media (max-width: 58rem) {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
   }
 `;
 
-export const LeftColumn = styled.div`
+export const LeftColumn = styled.div<MultiLayoutProps>`
   min-width: 0;
+  grid-row: 1 / -1;
   display: grid;
-  grid-template-rows: minmax(11rem, 0.72fr) minmax(23rem, 1.28fr);
-  gap: 0.85rem;
+  grid-template-rows: subgrid;
 
   @media (max-width: 58rem) {
+    grid-row: auto;
     grid-template-rows: auto auto;
+    gap: 0.85rem;
   }
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          grid-row: auto;
+          grid-template-rows: var(--multi-top-row-height) minmax(18.5rem, 1fr);
+          gap: 0.8rem;
+        `
+      : ""}
 `;
 
-export const RightColumn = styled.aside`
+export const RightColumn = styled.aside<MultiLayoutProps>`
   min-width: 0;
   display: grid;
-  grid-template-rows: auto minmax(16rem, 1fr);
-  gap: 0.85rem;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+
+  @media (max-width: 58rem) {
+    grid-row: auto;
+    grid-template-rows: auto minmax(16rem, 1fr);
+    gap: 0.85rem;
+  }
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          grid-row: auto;
+          grid-template-rows: var(--multi-top-row-height) minmax(19rem, 1fr);
+          gap: 0.8rem;
+        `
+      : ""}
 `;
 
 const panel = `
@@ -76,7 +168,7 @@ const panel = `
   box-shadow: 0 0.35rem 1.2rem rgba(55, 82, 125, 0.08);
 `;
 
-export const QuestionPanel = styled.article`
+export const QuestionPanel = styled.article<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   padding: clamp(1.5rem, 3.5vw, 3rem);
@@ -84,6 +176,23 @@ export const QuestionPanel = styled.article`
   flex-direction: column;
   justify-content: center;
   gap: 1rem;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          height: var(--multi-top-row-height);
+          box-sizing: border-box;
+          padding: 1.45rem 2.5rem;
+          gap: 0.7rem;
+        `
+      : ""}
+`;
+
+export const QuestionMetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 `;
 
 export const QuestionTag = styled.span`
@@ -92,31 +201,70 @@ export const QuestionTag = styled.span`
   border: 0.0625rem solid #93c0ff;
   border-radius: 999rem;
   color: #1874e8;
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   font-weight: 800;
+`;
+
+export const QuestionAudioButton = styled.button`
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.65rem;
+  border: 0.0625rem solid #9ac5ff;
+  border-radius: 999rem;
+  background: #f5f9ff;
+  color: #2179ed;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.58;
+  }
+
+  &:hover:not(:disabled) {
+    background: #eaf3ff;
+  }
 `;
 
 export const QuestionSpeaker = styled.span`
   color: #4f6b91;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 700;
 `;
 
-export const QuestionText = styled.h1`
+export const QuestionText = styled.h1<MultiLayoutProps>`
   margin: 0;
   color: #151a23;
-  font-size: clamp(1.18rem, 2vw, 1.55rem);
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
   font-weight: 650;
-  line-height: 1.55;
+  line-height: 1.48;
   word-break: keep-all;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          font-size: clamp(0.92rem, 1.1vw, 1.2rem);
+          line-height: 1.48;
+        `
+      : ""}
 `;
 
-export const AnswerPanel = styled.section`
+export const QuestionAudioError = styled.span`
+  color: #c24141;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+`;
+
+export const AnswerPanel = styled.section<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   overflow: hidden;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+
+  ${({ $multi }) => ($multi ? "min-height: 18.5rem;" : "")}
 `;
 
 export const AnswerTabs = styled.div`
@@ -138,7 +286,7 @@ export const Tab = styled.button<{ $active: boolean }>`
   &:last-child { border-right: 0; }
 `;
 
-export const TextArea = styled.textarea`
+export const TextArea = styled.textarea<MultiLayoutProps>`
   width: 100%;
   min-height: 0;
   resize: none;
@@ -151,6 +299,16 @@ export const TextArea = styled.textarea`
   line-height: 1.6;
 
   &::placeholder { color: #a0a8b4; }
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          padding: 3rem 2rem;
+          font-size: 0.86rem;
+          line-height: 1.55;
+          text-align: center;
+        `
+      : ""}
 `;
 
 export const VideoArea = styled.div`
@@ -216,33 +374,60 @@ export const Button = styled.button<{ $secondary?: boolean }>`
   &:disabled { opacity: 0.55; cursor: not-allowed; }
 `;
 
-export const Interviewers = styled.section`
+export const Interviewers = styled.section<MultiLayoutProps>`
   ${panel}
+  min-height: 0;
   padding: 0.65rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
   gap: 0.55rem;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          height: var(--multi-top-row-height);
+          min-height: 0;
+          box-sizing: border-box;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.6rem;
+        `
+      : ""}
 `;
 
-export const InterviewerCard = styled.article<{ $active: boolean }>`
+export const InterviewerCard = styled.article<{ $active: boolean } & MultiCardProps>`
   min-width: 0;
+  min-height: 0;
   padding: 0.65rem;
   border: 0.0625rem solid ${({ $active }) => ($active ? "#4d98ff" : "#dce2ea")};
   border-radius: 0.6rem;
   background: ${({ $active }) => ($active ? "#f4f9ff" : "#fff")};
+  display: flex;
+  flex-direction: column;
+
+  ${({ $multi }) => ($multi ? "padding: 0.55rem;" : "")}
 `;
 
-export const InterviewerImage = styled.img`
+export const InterviewerImage = styled.img<MultiLayoutProps>`
   width: 100%;
-  aspect-ratio: 1 / 0.82;
+  min-height: 0;
+  flex: 1 1 auto;
   border-radius: 0.36rem;
   object-fit: cover;
   background: #e9edf4;
+
+  ${({ $multi }) =>
+    $multi
+      ? `
+          flex: 0 0 auto;
+          height: 7.4rem;
+        `
+      : ""}
 `;
 
 export const InterviewerFallback = styled.div`
   width: 100%;
-  aspect-ratio: 1 / 0.82;
+  min-height: 0;
+  flex: 1 1 auto;
   border-radius: 0.36rem;
   display: grid;
   place-items: center;
@@ -257,7 +442,7 @@ export const InterviewerName = styled.strong`
   margin-top: 0.55rem;
   overflow: hidden;
   color: #1f2937;
-  font-size: 0.83rem;
+  font-size: 0.76rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
@@ -266,8 +451,23 @@ export const InterviewerRole = styled.span`
   display: block;
   margin-top: 0.25rem;
   color: #5e779c;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
+`;
+
+export const InterviewerTags = styled.div`
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+`;
+
+export const InterviewerTag = styled.span`
+  padding: 0.12rem 0.35rem;
+  border: 0.0625rem solid #9ac5ff;
+  border-radius: 0.15rem;
+  color: #2179ed;
+  font-size: 0.6rem;
+  line-height: 1.2;
 `;
 
 export const ActiveBadge = styled.span`
@@ -282,13 +482,15 @@ export const ActiveBadge = styled.span`
   font-weight: 800;
 `;
 
-export const MemoPanel = styled.section`
+export const MemoPanel = styled.section<MultiLayoutProps>`
   ${panel}
   min-height: 0;
   padding: 0.8rem;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.55rem;
+
+  ${({ $multi }) => ($multi ? "min-height: 19rem;" : "")}
 `;
 
 export const MemoLabel = styled.label`

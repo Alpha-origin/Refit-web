@@ -26,6 +26,7 @@ const SettingInterviewPage = () => {
         <SettingActions
           isBusy={setup.isSubmitting}
           isNextDisabled={setup.isNextDisabled}
+          isPortfolioAnalyzing={setup.isPortfolioAnalyzing}
           onBack={setup.onBack}
           onNext={setup.onNext}
         />

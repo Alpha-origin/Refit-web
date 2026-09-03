@@ -22,6 +22,8 @@ export interface PreparedInterviewer {
   name: string;
   roleLabel: string;
   image?: string;
+  gender?: InterviewPersonaGender;
+  voiceIndex?: number;
 }
 
 export interface PrepareInterviewQuestion {

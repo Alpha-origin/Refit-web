@@ -3,7 +3,6 @@ import {
   apiInstance,
   ensureAccessToken,
 } from "@/shared/api/axiosInstance";
-import { setInterviewJobId } from "@/shared/storage/interviewJobId";
 
 export interface MyPageUser {
   id: number;
@@ -86,7 +85,7 @@ export const uploadMyPageMetaData = async ({
   });
   formData.append("jobRole", jobRole);
 
-  const response = await apiInstance.post<MetaDataUploadResponse>(
+  await apiInstance.post<MetaDataUploadResponse>(
     META_DATA_UPLOAD_URL,
     formData,
     {
@@ -95,15 +94,6 @@ export const uploadMyPageMetaData = async ({
       },
     },
   );
-  const payload = response.data;
-  const uploadResult = payload.data ?? payload;
-  const jobId = (uploadResult.job_id ?? uploadResult.jobId)?.trim();
-
-  if (!jobId) {
-    throw new Error("포트폴리오 분석 작업 ID를 받지 못했습니다.");
-  }
-
-  setInterviewJobId(jobId);
 
   return {
     gitUrls,

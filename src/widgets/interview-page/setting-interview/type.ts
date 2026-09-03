@@ -5,6 +5,7 @@ export interface SelectedProps {
 }
 
 export interface ActionButtonProps {
+  $analyzing?: boolean;
   $disabled?: boolean;
 }
 

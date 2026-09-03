@@ -29,12 +29,16 @@ const KeywordCloud = ({ items }: KeywordCloudProps) => {
 
 const FeedbackOverallBottomSection = ({
   content,
+  isDownloadingPdf = false,
+  onDownloadPdf,
 }: FeedbackOverallBottomSectionProps) => {
   const { keywords, questionFit, reliability } = content;
 
   return (
     <S.BottomSectionShell>
       <S.BottomGrid>
+        <KeywordCloud items={keywords.items} />
+
         <S.BottomLeftColumn>
           <S.ReliabilityCard>
             <S.TextCardTitle>{reliability.title}</S.TextCardTitle>
@@ -48,9 +52,17 @@ const FeedbackOverallBottomSection = ({
             <S.TextCardTitle>{questionFit.title}</S.TextCardTitle>
             <S.TextCardBody>{questionFit.content}</S.TextCardBody>
           </S.QuestionCard>
-        </S.BottomLeftColumn>
 
-        <KeywordCloud items={keywords.items} />
+          {onDownloadPdf ? (
+            <S.PdfButton
+              type="button"
+              disabled={isDownloadingPdf}
+              onClick={onDownloadPdf}
+            >
+              {isDownloadingPdf ? "PDF 저장 중..." : content.pdfActionLabel}
+            </S.PdfButton>
+          ) : null}
+        </S.BottomLeftColumn>
       </S.BottomGrid>
     </S.BottomSectionShell>
   );

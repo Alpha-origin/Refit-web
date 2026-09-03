@@ -35,7 +35,9 @@ const MultiInterviewerCatalog = ({
             type="button"
             onClick={() => onSelect(candidate)}
           >
-            <S.CandidateImage src={candidate.image} alt="" />
+            <S.CandidateImageFrame>
+              <S.CandidateImage src={candidate.image} alt="" />
+            </S.CandidateImageFrame>
             <S.CandidateBody>
               <S.CandidateName>{candidate.name}</S.CandidateName>
               <S.RoleBadge>{candidate.roleLabel}</S.RoleBadge>
